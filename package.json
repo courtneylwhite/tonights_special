@@ -1,0 +1,21 @@
+{
+  "name": "app",
+  "private": true,
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "postcss": "^8.4.35",
+    "autoprefixer": "^10.4.17",
+    "tailwindcss": "^3.4.1"
+  },
+  "scripts": {
+    "build": "esbuild app/javascript/*.* --bundle --sourcemap --outdir=app/assets/builds --public-path=assets --loader:.js=jsx --loader:.jsx=jsx",
+    "build:css": "./node_modules/.bin/tailwindcss -i ./app/assets/stylesheets/application.tailwind.css -o ./app/assets/builds/application.css --minify"
+  },
+  "dependencies": {
+    "@babel/preset-react": "^7.23.3",
+    "@hotwired/stimulus": "^3.2.2",
+    "@hotwired/turbo-rails": "^8.0.0-beta.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
