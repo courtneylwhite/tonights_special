@@ -2,7 +2,7 @@ import "@hotwired/turbo-rails"
 import { Application } from "@hotwired/stimulus"
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import Hello from './components/Hello'
+import AnimatedTitle from "./components/AnimatedTitle";
 
 // Stimulus setup
 const application = Application.start()
@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const root = createRoot(component)
 
         switch (name) {
-            case 'Hello':
-                root.render(<Hello {...props} />)
+            case 'AnimatedTitle':
+                root.render(<AnimatedTitle {...props} />)
                 break
             default:
                 console.warn(`Unknown component: ${name}`)
