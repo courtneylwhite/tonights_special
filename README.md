@@ -18,7 +18,7 @@ The core features of this app will allow a user to
 
 This app has one user in mind &ndash; me
 
-I have made this repository public as a way to display my work but this is not an open source project nor is it meant to be available for public use. This is an engineering project I am creating to solve my specific need.
+I have made this repository public as a way to display my work but this is not an open source project nor is it meant to be available for public use. This is an engineering project I am creating to solve my own specific need.
 
 ## Key Features
 
