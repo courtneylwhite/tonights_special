@@ -33,7 +33,6 @@ I have made this repository public as a way to display my work but this is not a
 
 - Ruby 3.4.1
 - Rails 8
-- React
 - Yarn
 - Node.js
 - PostgreSQL
