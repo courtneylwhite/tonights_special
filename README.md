@@ -4,7 +4,7 @@
 
 Tonight's Special is a personal application designed to assist in answering the age old question of "What's for dinner". 
 
-Every day my husband wakes up at 5:30 am and and by 11:00 am he is in my office coaxing me into a conversation to determine what's for dinner.
+Every day my husband wakes up at 5:30 am and by 11:00 am he is in my office coaxing me into a conversation to determine what's for dinner.
 This takes some mental gymnastics on my part to parse the current groceries we have, what recipes we could make from that, if we need to do a grocery run... 
 _Did I use the rest of the parmesan when I made meatballs last week? Better get some more to be safe (repeat 4 more times)_
 
