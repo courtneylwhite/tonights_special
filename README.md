@@ -61,9 +61,13 @@ The app intelligently categorizes groceries into common store sections:
 
 ## Planned Features
 
-- [ ] Barcode scanning for grocery intake
+- [ ] Ingredient conversions
+- [ ] Recipe suggestions based on pantry groceries
+- [ ] Groceries suggestions based on pantry inventory
 - [ ] Pantry inventory tracking
-- [ ] Custom store section configuration
+- [ ] Recipe categorizing
+- [ ] Recipe notes
+- [ ] Barcode scanning for grocery intake
 
 As this is a personal project, contributions are not currently accepted.
 
