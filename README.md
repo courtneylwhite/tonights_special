@@ -1,24 +1,83 @@
-# README
+# Tonight's Special 🍽️🛒
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Overview
 
-Things you may want to cover:
+Tonight's Special is a smart grocery and recipe management application designed to simplify meal planning and grocery shopping. The app helps you track your current groceries, match them against your recipes, and create efficient shopping lists organized by grocery store sections.
 
-* Ruby version
+## Key Features
 
-* System dependencies
+- 🥬 Grocery Inventory Tracking
+- 📖 Recipe Management
+- 🔍 Ingredient Matching
+- 🛒 Smart Grocery List Generation
+    - Organized by store sections (Produce, Dairy, Meat, Pantry, etc.)
+- 🍳 Recipe Feasibility Indicator
 
-* Configuration
+## Prerequisites
 
-* Database creation
+- Ruby 3.4.1
+- Rails 8
+- Yarn
+- Node.js
+- PostgreSQL
 
-* Database initialization
+## Tech Stack
 
-* How to run the test suite
+- **Backend:** Ruby on Rails 8
+- **Frontend:** React
+- **Build Tools:**
+    - Yarn
+    - ESBuild
+- **Transpilation:** Babel
+- **Testing:**
+    - RSpec (Backend)
+    - Jest (Frontend)
 
-* Services (job queues, cache servers, search engines, etc.)
+## Usage Workflow
 
-* Deployment instructions
+1. Add your current groceries to the inventory of current pantry items
+    - Groceries are automatically categorized by store section
+2. Upload or create recipes
+3. View which recipes you can make with current ingredients
+4. Generate a shopping list
+    - Items automatically sorted by grocery store layout
+    - Easy to follow when shopping
+5. Mark recipes as made
+    - Deduct ingredients from the inventory of current pantry items
 
-* ...
+## Grocery Store Section Organization
+
+The app intelligently categorizes groceries into common store sections:
+- Produce
+- Dairy
+- Meat & Seafood
+- Bakery
+- Frozen Foods
+- Pantry Staples
+- Canned Goods
+- Beverages
+- Snacks
+- Cleaning Supplies
+
+## Planned Features
+
+- [ ] Barcode scanning for grocery intake
+- [ ] Pantry inventory tracking
+- [ ] Custom store section configuration
+
+As this is a personal project, contributions are not currently accepted.
+
+## License
+
+This project is licensed under the MIT License.
+
+## Contact
+
+**Courtney White**
+- GitHub: [@courtneylwhite](https://github.com/courtneylwhite)
+- Personal Website/Portfolio: [Your Portfolio Link]
+- Email: [Your Professional Email]
+
+---
+
+**Happy Cooking and Shopping! 👨‍🍳🛍️**
