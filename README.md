@@ -69,13 +69,9 @@ The app intelligently categorizes groceries into common store sections:
 - [ ] Recipe notes
 - [ ] Barcode scanning for grocery intake
 
-As this is a personal project, contributions are not currently accepted.
-
-## License
-
-This project is licensed under the MIT License.
-
 ## Contact
+
+As this is a personal project, contributions are not currently accepted.
 
 **Courtney White**
 - GitHub: [@courtneylwhite](https://github.com/courtneylwhite)
