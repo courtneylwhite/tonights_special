@@ -4,7 +4,6 @@ Rails.application.routes.draw do
   # Devise routes
   devise_for :users,
              controllers: {
-               sessions: 'users/sessions',
                registrations: 'users/registrations'
              },
              defaults: { format: :json }
@@ -12,9 +11,9 @@ Rails.application.routes.draw do
   # Add an endpoint to check auth status
   get '/api/auth/status', to: 'auth#status'
 
-  # React routes
-  get '/signin', to: 'home#index'
-  get '/signup', to: 'home#index'
+  # get '/welcome', to: 'welcome#index'
+  # get '/signin', to: 'welcome#index'
+  # get '/signup', to: 'welcome#index'
 
 
   # get "home/index"

@@ -1,18 +1,21 @@
 class Users::RegistrationsController < Devise::RegistrationsController
-  respond_to :json
+  before_action :configure_permitted_parameters
 
-  private
+  def create
+    # Add additional validation or reCAPTCHA here if needed
+    super
+  end
 
-  def respond_with(resource, _opts = {})
-    if resource.persisted?
-      render json: {
-        status: { code: 200, message: 'Signed up successfully.' },
-        user: UserSerializer.new(resource).serializable_hash[:data][:attributes]
-      }
-    else
-      render json: {
-        status: { message: "User couldn't be created. #{resource.errors.full_messages.to_sentence}" }
-      }, status: :unprocessable_entity
-    end
+  protected
+
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:username, :email])
+  end
+
+  # Optional: Add rate limiting
+  def create
+    # Implement rate limiting logic here
+    # You might want to use a gem like rack-attack for this
+    super
   end
 end
