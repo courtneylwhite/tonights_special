@@ -1,5 +1,23 @@
 Rails.application.routes.draw do
-  get "home/index"
+  root "home#index"
+
+  # Devise routes
+  devise_for :users,
+             controllers: {
+               sessions: 'users/sessions',
+               registrations: 'users/registrations'
+             },
+             defaults: { format: :json }
+
+  # Add an endpoint to check auth status
+  get '/api/auth/status', to: 'auth#status'
+
+  # React routes
+  get '/signin', to: 'home#index'
+  get '/signup', to: 'home#index'
+
+
+  # get "home/index"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -11,5 +29,5 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Defines the root path route ("/")
-  root "home#index"
+
 end
