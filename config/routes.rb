@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   get "authentication/index"
   root 'home#index'
+  get '/favicon.ico', to: 'application#favicon'
 
   # Custom page to show authentication options
   get '/authenticate', to: 'authentication#index'
