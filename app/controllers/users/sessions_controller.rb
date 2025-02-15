@@ -9,6 +9,6 @@ class Users::SessionsController < Devise::SessionsController
 
   # Optional: Customize after sign in path
   def after_sign_in_path_for(resource)
-    root_path # or any custom path
+    pantry_path(resource)
   end
 end

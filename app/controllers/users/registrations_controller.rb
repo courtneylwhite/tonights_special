@@ -16,6 +16,6 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   # Optional: Customize after sign up path
   def after_sign_up_path_for(resource)
-    root_path # or any custom path
+    pantry_path
   end
 end

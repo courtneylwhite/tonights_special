@@ -12,5 +12,11 @@ Rails.application.routes.draw do
     registrations: 'users/registrations'
   }
 
+  get '/pantry', to: 'pantry#show', as: :pantry
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # Add the auth status endpoint
+  namespace :api do
+    get 'auth/status', to: 'auth#status'
+  end
 end

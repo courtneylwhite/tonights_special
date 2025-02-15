@@ -68,6 +68,7 @@ export const AuthProvider = ({ children }) => {
 
             const data = await response.json();
             setCurrentUser(data.user);
+            window.location.href = '/pantry'; // Add this line to handle client-side redirect
             return data;
         } catch (error) {
             throw error;
