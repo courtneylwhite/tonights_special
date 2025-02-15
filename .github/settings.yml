@@ -1,0 +1,49 @@
+# Repository Settings Configuration
+repository:
+  # See https://docs.github.com/en/rest/reference/repos#update-a-repository for all available settings.
+
+  # The name of the repository. Changing this will rename the repository
+  name: tonights_special
+
+  # A short description of the repository that will show up on GitHub
+  description: "ruby, rails, react, yarn, esbuild, jest"
+
+# Disable forks
+allow_forks: false
+
+# Disable squash merging and other merge options
+# Only allow your direct commits
+merge_modes:
+  - squash
+  - rebase
+
+# Restrict who can push to the repository
+# Note: You'll need to manually invite/manage collaborators in GitHub settings
+collaborators:
+  - username: courtneylwhite
+    permission: admin
+
+# Branch protection rules for the main branch
+branch_protection:
+  main:
+    # Require status checks to pass before merging
+    required_status_checks:
+      - security-checks
+      - pr-validation
+
+    # Enforce code owner reviews (optional)
+    required_pull_request_reviews:
+      required_approving_review_count: 1
+      dismiss_stale_reviews: true
+      require_code_owner_reviews: true
+
+# Disable public visibility of issues and PRs
+issues:
+  private: true
+
+# Disable wikis and projects
+has_wiki: false
+has_projects: false
+
+# Disable email notifications for repository events
+email_notifications: false

@@ -1,0 +1,73 @@
+name: Repository Security and Workflow
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  debug-context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug GitHub Context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "Full GitHub Context:"
+          echo '${{ env.GITHUB_CONTEXT }}' | jq .
+          echo ""
+          echo "Repository: ${{ github.repository }}"
+          echo "Repository Owner: ${{ github.repository_owner }}"
+          echo "Event Name: ${{ github.event_name }}"
+          
+          if ${{ github.event_name == 'pull_request' }}; then
+            echo "PR Author: ${{ github.event.pull_request.user.login }}"
+          fi
+
+  security-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # CodeQL Analysis for security scanning
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript  # Adjust based on your project's primary language
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  pr-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR Author
+        run: |
+          # Validate PR author
+          REPO_OWNER="${{ github.repository_owner }}"
+          
+          if ${{ github.event_name == 'pull_request' }}; then
+            PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          
+            echo "Repository Owner: $REPO_OWNER"
+            echo "Pull Request Author: $PR_AUTHOR"
+          
+            if [ "$PR_AUTHOR" != "$REPO_OWNER" ]; then
+              echo "::error::Pull requests are only allowed from the repository owner."
+              exit 1
+            fi
+          else
+            echo "Not a pull request event. Skipping validation."
+          fi
+
+  # Ensure all checks pass before merge
+  merge-checks:
+    needs: [debug-context, security-checks, pr-validation]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge Checks Passed
+        run: echo "All security and PR validation checks have passed"
