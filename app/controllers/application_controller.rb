@@ -5,15 +5,15 @@ class ApplicationController < ActionController::Base
   helper ReactHelper
 
   def favicon
-    send_file Rails.root.join('app', 'assets', 'images', 'favicon.svg'),
-              type: 'image/svg+xml',
-              disposition: 'inline'
+    send_file Rails.root.join("app", "assets", "images", "favicon.svg"),
+              type: "image/svg+xml",
+              disposition: "inline"
   end
 
   protected
 
   def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:email, :password, :password_confirmation])
+    devise_parameter_sanitizer.permit(:sign_up, keys: [ :email, :password, :password_confirmation ])
   end
 
   def after_sign_in_path_for(resource)
