@@ -12,9 +12,11 @@ The core features of this app will allow a user to
 - add groceries to their pantry
 - add recipes to their recipe box
 - mark recipes as "made/completed"
-- track depleated pantry items
-- create grocery lists based on depleated pantry items
-- view suggested recipes based on current pantry items
+- auto-deplete pantry groceries based on completed recipes
+- create grocery lists
+- add groceries to grocery list based on depletion levels
+- add groceries to grocery list based on minimal missing ingredients
+- view suggested recipes based on current pantry items and quantities
 
 This app has one user in mind &ndash; me
 
@@ -52,8 +54,8 @@ I have made this repository public as a way to display my work but this is not a
 ## Planned Features
 
 - [ ] Ingredient conversions
-- [ ] Recipe suggestions based on pantry groceries
-- [ ] Groceries suggestions based on pantry inventory
+- [ ] Recipe suggestions based on current pantry groceries
+- [ ] Groceries suggestions based on pantry inventory and recipe cross-referencing (i.e. "You just need mozerella to make your Chicken Paremsan recipe. Do you want to add this to your grocery list?")
 - [ ] Pantry inventory tracking
 - [ ] Recipe categorizing
 - [ ] Recipe notes
