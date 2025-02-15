@@ -2,7 +2,23 @@
 
 ## Overview
 
-Tonight's Special is a smart grocery and recipe management application designed to simplify meal planning and grocery shopping. The app helps you track your current groceries, match them against your recipes, and create efficient shopping lists organized by grocery store sections.
+Tonight's Special is a personal application designed to assist in answering the age old question of "What's for dinner". 
+
+Every day my husband wakes up at 5:30 am and and by 11:00 am he is in my office coaxing me into a conversation to determine what's for dinner.
+This takes some mental gymnastics on my part to parse the current groceries we have, what recipes we could make from that, if we need to do a grocery run... 
+_Did I use the rest of the parmesan when I made meatballs last week? Better get some more to be safe (repeat 4 more times)_
+
+The core features of this app will allow a user to 
+- add groceries to their pantry
+- add recipes to their recipe box
+- mark recipes as "made/completed"
+- track depleated pantry items
+- create grocery lists based on depleated pantry items
+- view suggested recipes based on current pantry items
+
+This app has one user in mind: me
+
+I have made this repository public as a way to display my work but this is not an open source project nor is it meant to be available for public use. This is an engineering project I am creating to solve my specific need.
 
 ## Key Features
 
