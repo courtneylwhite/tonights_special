@@ -43,6 +43,7 @@ I have made this repository public as a way to display my work but this is not a
 
 - **Backend:** Ruby on Rails 8
 - **Frontend:** React / TailwindCSS
+- **Database:** PostgreSQL
 - **Build Tools:**
     - Yarn
     - ESBuild
