@@ -1,4 +1,4 @@
-# Tonight's Special 🍽️🛒
+# Tonight's Special 🍽️
 
 ## Overview
 
