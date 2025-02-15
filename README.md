@@ -42,7 +42,7 @@ I have made this repository public as a way to display my work but this is not a
 ## Tech Stack
 
 - **Backend:** Ruby on Rails 8
-- **Frontend:** React
+- **Frontend:** React / TailwindCSS
 - **Build Tools:**
     - Yarn
     - ESBuild
