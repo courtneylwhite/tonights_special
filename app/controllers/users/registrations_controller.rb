@@ -1,21 +1,21 @@
 class Users::RegistrationsController < Devise::RegistrationsController
-  before_action :configure_permitted_parameters
-
+  # Optional: Add custom logic for sign up
   def create
-    # Add additional validation or reCAPTCHA here if needed
-    super
+    super do |resource|
+      # Add any custom logic after successful registration
+      # For example, welcome email, logging, etc.
+    end
   end
 
+  # Optional: Customize permitted parameters
   protected
 
-  def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:username, :email])
+  def sign_up_params
+    params.require(:user).permit(:email, :password, :password_confirmation)
   end
 
-  # Optional: Add rate limiting
-  def create
-    # Implement rate limiting logic here
-    # You might want to use a gem like rack-attack for this
-    super
+  # Optional: Customize after sign up path
+  def after_sign_up_path_for(resource)
+    root_path # or any custom path
   end
 end

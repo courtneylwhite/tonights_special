@@ -1,13 +1,14 @@
 import React, { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const AnimatedTitle = () => {
+const AnimatedTitle = ( {authenticatePath} ) => {
     const { currentUser } = useAuth();
     const pathRefs = useRef([]);
     const dotRefs = useRef([]);
     const clocheRef = useRef(null);
     const welcomeLinkRef = useRef(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         // Reset all paths, dots, and cloche
@@ -72,17 +73,22 @@ const AnimatedTitle = () => {
                 if (clocheRef.current) {
                     clocheRef.current.style.transition = 'opacity 1.5s ease-in-out';
                     clocheRef.current.style.opacity = '1';
+                    welcomeLinkRef.current.style.transition = 'opacity 1s ease-in-out';
+                    welcomeLinkRef.current.style.opacity = '1';
                 }
-                // Animate welcome link after cloche
-                setTimeout(() => {
-                    if (welcomeLinkRef.current) {
-                        welcomeLinkRef.current.style.transition = 'opacity 1s ease-in-out';
-                        welcomeLinkRef.current.style.opacity = '1';
-                    }
-                }, 500);
             }, dotRefs.current.length * 300 + 100);
         });
     }, []);
+
+    // Handler for the welcome link
+    const handleWelcomeClick = (e) => {
+        e.preventDefault();
+        const destination = currentUser ? '/pantry' : authenticatePath;
+
+        // Ensure full page reload to trigger route change
+        window.location.href = destination;
+    };
+
 
     return (
         <div className="w-full min-h-screen flex flex-col justify-center items-center bg-black p-8 gap-8">
@@ -302,6 +308,19 @@ const AnimatedTitle = () => {
                     className="fill-white"
                 />
             </svg>
+
+            {/* Welcome Link */}
+            <div
+                ref={welcomeLinkRef}
+                className="mt-8 opacity-0"
+            >
+                <button
+                    onClick={handleWelcomeClick}
+                    className="text-white hover:text-gray-300 text-lg font-medium flex items-center transition-colors duration-300"
+                >
+                    Welcome <span className="ml-1"></span>
+                </button>
+            </div>
         </div>
     );
 };
