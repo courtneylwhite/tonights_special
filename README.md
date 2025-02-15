@@ -66,9 +66,6 @@ As this is a personal project, contributions are not currently accepted.
 
 **Courtney White**
 - GitHub: [@courtneylwhite](https://github.com/courtneylwhite)
-- Personal Website/Portfolio: [Your Portfolio Link]
-- Email: [Your Professional Email]
-
 ---
 
 **Happy Cooking and Shopping! 👨‍🍳🛍️**
