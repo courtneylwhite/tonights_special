@@ -33,6 +33,7 @@ I have made this repository public as a way to display my work but this is not a
 
 - Ruby 3.4.1
 - Rails 8
+- React
 - Yarn
 - Node.js
 - PostgreSQL
@@ -49,32 +50,6 @@ I have made this repository public as a way to display my work but this is not a
     - RSpec (Backend)
     - Jest (Frontend)
 
-## Usage Workflow
-
-1. Add your current groceries to the inventory of current pantry items
-    - Groceries are automatically categorized by store section
-2. Upload or create recipes
-3. View which recipes you can make with current ingredients
-4. Generate a shopping list
-    - Items automatically sorted by grocery store layout
-    - Easy to follow when shopping
-5. Mark recipes as made
-    - Deduct ingredients from the inventory of current pantry items
-
-## Grocery Store Section Organization
-
-The app intelligently categorizes groceries into common store sections:
-- Produce
-- Dairy
-- Meat & Seafood
-- Bakery
-- Frozen Foods
-- Pantry Staples
-- Canned Goods
-- Beverages
-- Snacks
-- Cleaning Supplies
-
 ## Planned Features
 
 - [ ] Ingredient conversions
@@ -84,6 +59,7 @@ The app intelligently categorizes groceries into common store sections:
 - [ ] Recipe categorizing
 - [ ] Recipe notes
 - [ ] Barcode scanning for grocery intake
+- [ ] Grocery store receipt parsing for grocery intake
 
 ## Contact
 
