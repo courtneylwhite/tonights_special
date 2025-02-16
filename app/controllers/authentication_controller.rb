@@ -8,8 +8,6 @@ class AuthenticationController < ApplicationController
     @resource = resource_class.new
   end
 
-  private
-
   # These methods are required to make Devise helpers work
   def resource_name
     :user
@@ -22,6 +20,8 @@ class AuthenticationController < ApplicationController
   def devise_mapping
     @devise_mapping ||= Devise.mappings[:user]
   end
+
+  private
 
   def redirect_if_authenticated
     if user_signed_in?
