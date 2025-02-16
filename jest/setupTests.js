@@ -1,1 +1,7 @@
-require('@testing-library/jest-dom');
+//setupTests.js
+import '@testing-library/jest-dom';
+import 'whatwg-fetch';
+import { TextEncoder, TextDecoder } from 'util';
+
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;

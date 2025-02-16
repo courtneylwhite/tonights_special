@@ -10,46 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_09_044133) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_15_213042) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
-  create_table "grocery_lists", force: :cascade do |t|
+  create_table "pantries", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.bigint "ingredient_id", null: false
-    t.float "quantity"
-    t.string "unit"
-    t.boolean "purchased"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["ingredient_id"], name: "index_grocery_lists_on_ingredient_id"
-    t.index ["user_id"], name: "index_grocery_lists_on_user_id"
-  end
-
-  create_table "ingredients", force: :cascade do |t|
-    t.string "name"
-    t.string "category"
-    t.string "unit"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "recipe_ingredients", force: :cascade do |t|
-    t.bigint "recipe_id", null: false
-    t.bigint "ingredient_id", null: false
-    t.float "quantity"
-    t.string "unit"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["ingredient_id"], name: "index_recipe_ingredients_on_ingredient_id"
-    t.index ["recipe_id"], name: "index_recipe_ingredients_on_recipe_id"
-  end
-
-  create_table "recipes", force: :cascade do |t|
-    t.string "name"
-    t.text "description"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_pantries_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -64,8 +33,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_09_044133) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "grocery_lists", "ingredients"
-  add_foreign_key "grocery_lists", "users"
-  add_foreign_key "recipe_ingredients", "ingredients"
-  add_foreign_key "recipe_ingredients", "recipes"
+  add_foreign_key "pantries", "users"
 end

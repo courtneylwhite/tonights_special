@@ -7,4 +7,10 @@ module.exports = {
     './app/components/**/*.{erb,haml,html,slim,rb}'
   ],
   plugins: [],
+  theme: {
+    fontFamily: {
+      serif: ['Times New Roman', 'serif'],
+      sans: ['Times New Roman', 'serif'], // This makes Times New Roman the default font
+    },
+  },
 }
