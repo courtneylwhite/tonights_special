@@ -1,14 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 
 const AnimatedTitle = ( {authenticatePath} ) => {
-    const { currentUser } = useAuth();
     const pathRefs = useRef([]);
     const dotRefs = useRef([]);
     const clocheRef = useRef(null);
     const welcomeLinkRef = useRef(null);
-    const navigate = useNavigate();
 
     useEffect(() => {
         // Reset all paths, dots, and cloche
@@ -83,10 +79,17 @@ const AnimatedTitle = ( {authenticatePath} ) => {
     // Handler for the welcome link
     const handleWelcomeClick = (e) => {
         e.preventDefault();
-        const destination = currentUser ? '/pantry' : authenticatePath;
-
-        // Ensure full page reload to trigger route change
-        window.location.href = destination;
+        // Use the auth status endpoint we already have
+        fetch('/api/auth/status')
+            .then(response => response.json())
+            .then(data => {
+                const destination = data.authenticated ? '/pantry' : authenticatePath;
+                window.location.href = destination;
+            })
+            .catch(() => {
+                // If there's an error, default to authenticate path
+                window.location.href = authenticatePath;
+            });
     };
 
 
