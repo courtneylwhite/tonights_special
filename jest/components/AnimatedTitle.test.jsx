@@ -1,11 +1,28 @@
 import React from 'react';
 import { render, act } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
 import AnimatedTitle from '@/components/AnimatedTitle';
+import { AuthProvider } from '../../app/javascript/contexts/AuthContext';
+import 'whatwg-fetch';
+
+const AllTheProviders = ({ children }) => {
+    return (
+        <BrowserRouter>
+            <AuthProvider>
+                {children}
+            </AuthProvider>
+        </BrowserRouter>
+    );
+};
 
 // Mock getTotalLength since it's not available in JSDOM
 Element.prototype.getTotalLength = jest.fn().mockReturnValue(100);
 
 describe('AnimatedTitle', () => {
+    const renderWithProviders = (component) => {
+        return render(component, { wrapper: AllTheProviders });
+    };
+
     beforeEach(() => {
         // Clear all timers before each test
         jest.useFakeTimers();
@@ -18,12 +35,12 @@ describe('AnimatedTitle', () => {
     });
 
     it('renders without crashing', () => {
-        const { container } = render(<AnimatedTitle />);
+        const { container } = renderWithProviders(<AnimatedTitle />);
         expect(container).toBeInTheDocument();
     });
 
     it('contains the correct number of path and dot elements', () => {
-        const { container } = render(<AnimatedTitle />);
+        const { container } = renderWithProviders(<AnimatedTitle />);
         const paths = container.querySelectorAll('path');
         const dots = container.querySelectorAll('circle');
 
@@ -32,7 +49,7 @@ describe('AnimatedTitle', () => {
     });
 
     it('initializes paths with correct stroke properties', () => {
-        const { container } = render(<AnimatedTitle />);
+        const { container } = renderWithProviders(<AnimatedTitle />);
         const paths = container.querySelectorAll('path.stroke-white');
 
         // Check that all paths have the correct dasharray
@@ -53,7 +70,7 @@ describe('AnimatedTitle', () => {
     });
 
     it('initializes dots and cloche with opacity 0', () => {
-        const { container } = render(<AnimatedTitle />);
+        const { container } = renderWithProviders(<AnimatedTitle />);
         const dots = container.querySelectorAll('circle');
         const cloche = container.querySelector('.w-32.h-32');
 
@@ -64,7 +81,7 @@ describe('AnimatedTitle', () => {
     });
 
     it('animates paths sequentially', () => {
-        const { container } = render(<AnimatedTitle />);
+        const { container } = renderWithProviders(<AnimatedTitle />);
         const paths = container.querySelectorAll('path.stroke-white');
 
         // Fast-forward through all path animations
@@ -81,7 +98,7 @@ describe('AnimatedTitle', () => {
     });
 
     it('animates dots after paths are complete', () => {
-        const { container } = render(<AnimatedTitle />);
+        const { container } = renderWithProviders(<AnimatedTitle />);
         const dots = container.querySelectorAll('circle');
         const totalPathTime = 250 * 20 + 550; // Normal delays plus extra for the special delay
 
@@ -97,7 +114,7 @@ describe('AnimatedTitle', () => {
     });
 
     it('animates cloche last', () => {
-        const { container } = render(<AnimatedTitle />);
+        const { container } = renderWithProviders(<AnimatedTitle />);
         const cloche = container.querySelector('.w-32.h-32');
         const totalPathTime = 250 * 20 + 550;
         const totalDotTime = 300 * 2; // 2 dots * 300ms each
@@ -113,7 +130,7 @@ describe('AnimatedTitle', () => {
     });
 
     it('handles window resize appropriately', () => {
-        const { container, rerender } = render(<AnimatedTitle />);
+        const { container, rerender } = renderWithProviders(<AnimatedTitle />);
 
         // Trigger a window resize
         act(() => {
