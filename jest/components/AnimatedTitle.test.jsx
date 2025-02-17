@@ -33,7 +33,7 @@ describe('AnimatedTitle', () => {
 
     it('initializes paths with correct stroke properties', () => {
         const { container } = render(<AnimatedTitle />);
-        const paths = container.querySelectorAll('path.stroke-white');
+        const paths = container.querySelectorAll('path.stroke-amber-400');
 
         // Check that all paths have the correct dasharray
         paths.forEach(path => {
@@ -123,7 +123,7 @@ describe('AnimatedTitle', () => {
         // Re-render component
         rerender(<AnimatedTitle />);
 
-        const paths = container.querySelectorAll('path.stroke-white');
+        const paths = container.querySelectorAll('path.stroke-amber-400');
         const pathsArray = Array.from(paths);
 
         // All paths should maintain their dasharray

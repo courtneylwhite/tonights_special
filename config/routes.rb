@@ -7,8 +7,7 @@ Rails.application.routes.draw do
     registrations: "users/registrations"
   }
   get "/authenticate", to: "authentication#index", as: :authenticate
-  get "/pantry", to: "pantry#show", as: :pantry
-
+  resources :groceries
   namespace :api do
     get "auth/status", to: "auth#status"
   end

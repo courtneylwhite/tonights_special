@@ -1,9 +1,81 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 @layer base {
-    html {
+    html, body {
         font-family: 'Times New Roman', serif;
         font-size: 20px;
+        background-color: black;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    /* Heading styles from Pantry component with specific sizes */
+    h1, h2, h3, h4, h5, h6 {
+        font-family: serif;
+        font-style: italic;
+        color: #fbbf24; /* Tailwind's amber-400 */
+    }
+
+    h1 {
+        font-size: 2.25rem; /* text-4xl */
+        line-height: 2.5rem;
+    }
+
+    h2 {
+        font-size: 1.875rem; /* text-3xl */
+        line-height: 2.25rem;
+    }
+
+    h3 {
+        font-size: 1.5rem; /* text-2xl */
+        line-height: 2rem;
+    }
+
+    h4 {
+        font-size: 1.25rem; /* text-xl */
+        line-height: 1.75rem;
+    }
+
+    h5 {
+        font-size: 1.125rem; /* text-lg */
+        line-height: 1.75rem;
+    }
+
+    h6 {
+        font-size: 1rem; /* text-base */
+        line-height: 1.5rem;
+    }
+}
+
+/* Custom animations */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@layer components {
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out forwards;
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
     }
 }

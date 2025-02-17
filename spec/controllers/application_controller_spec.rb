@@ -75,7 +75,7 @@ RSpec.describe ApplicationController, type: :controller do
     end
 
     it 'redirects to pantry path after sign in' do
-      expect(controller.after_sign_in_path_for(:user)).to eq('/pantry')
+      expect(controller.after_sign_in_path_for(:user)).to eq('/groceries')
     end
 
     it 'redirects to root path after sign out' do
