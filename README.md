@@ -64,6 +64,7 @@ I have made this repository public as a way to display my work but this is not a
 - [ ] Grocery store receipt parsing for grocery intake
 - [ ] Recipe suggestions based on ingredients expiring soon
 - [ ] Grocery list suggestions based on expired ingredients
+- [ ] Add aisle numbers to grocery items in grocery list
 
 ## Contact
 
