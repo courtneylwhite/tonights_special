@@ -83,7 +83,7 @@ const AnimatedTitle = ( {authenticatePath} ) => {
         fetch('/api/auth/status')
             .then(response => response.json())
             .then(data => {
-                const destination = data.authenticated ? '/pantry' : authenticatePath;
+                const destination = data.authenticated ? '/groceries' : authenticatePath;
                 window.location.href = destination;
             })
             .catch(() => {

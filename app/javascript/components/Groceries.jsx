@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Search, ChevronDown, ChevronUp, Minimize2, Maximize2 } from 'lucide-react';
 
-const Pantry = ({ pantryItems = {} }) => {
+const Groceries = ({ groceryItems = {} }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [openDrawers, setOpenDrawers] = useState(
-        Object.keys(pantryItems || {}).reduce((acc, category) => ({
+        Object.keys(groceryItems || {}).reduce((acc, category) => ({
             ...acc,
             [category]: true
         }), {})
@@ -20,14 +20,14 @@ const Pantry = ({ pantryItems = {} }) => {
     const toggleAll = () => {
         const areAllOpen = Object.values(openDrawers).every(Boolean);
         setOpenDrawers(
-            Object.keys(pantryItems || {}).reduce((acc, category) => ({
+            Object.keys(groceryItems || {}).reduce((acc, category) => ({
                 ...acc,
                 [category]: !areAllOpen
             }), {})
         );
     };
 
-    const filteredPantryItems = Object.entries(pantryItems || {}).reduce((acc, [category, items]) => {
+    const filteredGroceryItems = Object.entries(groceryItems || {}).reduce((acc, [category, items]) => {
         const filteredItems = items.filter(item =>
             item?.name?.toLowerCase().includes(searchTerm.toLowerCase())
         );
@@ -47,7 +47,7 @@ const Pantry = ({ pantryItems = {} }) => {
                     <h1 className="text-center flex-1">
                         Culinary Inventory
                     </h1>
-                    {Object.keys(pantryItems || {}).length > 0 && (
+                    {Object.keys(groceryItems || {}).length > 0 && (
                         <button
                             onClick={toggleAll}
                             className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-amber-400 rounded-lg transition-colors duration-200 border border-gray-700 hover:border-amber-500"
@@ -66,7 +66,7 @@ const Pantry = ({ pantryItems = {} }) => {
                         </button>
                     )}
                 </div>
-                {Object.keys(pantryItems || {}).length > 0 && (
+                {Object.keys(groceryItems || {}).length > 0 && (
                     <div className="relative max-w-2xl mx-auto">
                         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                         <input
@@ -82,13 +82,13 @@ const Pantry = ({ pantryItems = {} }) => {
 
             {/* Cabinet/Shelving Layout */}
             <div className="max-w-5xl mx-auto p-6 relative z-0">
-                {Object.keys(pantryItems || {}).length === 0 ? (
+                {Object.keys(groceryItems || {}).length === 0 ? (
                     <div className="text-center text-gray-400 py-12">
-                        <p>No items in your pantry yet.</p>
+                        <p>No groceries in your pantry yet.</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {Object.entries(filteredPantryItems).map(([category, items], categoryIndex) => (
+                        {Object.entries(filteredGroceryItems).map(([category, items], categoryIndex) => (
                             <div
                                 key={category}
                                 className="bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-lg overflow-hidden shadow-lg transition-all duration-300 animate-slide-up"
@@ -148,4 +148,4 @@ const Pantry = ({ pantryItems = {} }) => {
     );
 };
 
-export default Pantry;
+export default Groceries;
