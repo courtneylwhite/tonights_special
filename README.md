@@ -8,15 +8,19 @@ Every day my husband wakes up at 5:30 am and by 11:00 am he is in my office coax
 This takes some mental gymnastics on my part to parse the current groceries we have, what recipes we could make from that, if we need to do a grocery run... 
 _Did I use the rest of the parmesan when I made meatballs last week? Better get some more to be safe (repeat 4 more times)_
 
-The core features of this app will allow a user to 
-- add groceries to their pantry
-- add recipes to their recipe box
-- mark recipes as "made/completed"
-- auto-deplete pantry groceries based on completed recipes
-- create grocery lists
-- add groceries to grocery list based on depletion levels
-- add groceries to grocery list based on minimal missing ingredients
-- view suggested recipes based on current pantry items and quantities
+The core features of this app will allow a user to
+- Create groceries to their pantry
+- Create recipes to their recipe box
+- View recipes they can make from their current supplies
+- View the recipes they are close to having all of the ingredients for
+- Create grocery lists based on missing ingredients from recipes
+- Flag recipes as "made"
+
+The app should automatically
+- Aggregate quantities of duplicate grocery items in grocery lists
+- Organize grocery list items by section at my favorite supermarket
+- Auto-clear the "made" flag after 3 days (my limit for eating leftovers)
+- Deplete current pantry inventories in correlation with the quantities useds in "made" recipes
 
 This app has one user in mind &ndash; me
 
