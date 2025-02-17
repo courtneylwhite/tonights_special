@@ -20,7 +20,7 @@ The app should automatically
 - Aggregate quantities of duplicate grocery items in grocery lists
 - Organize grocery list items by section at my favorite supermarket
 - Auto-clear the "made" flag after 3 days (my limit for eating leftovers)
-- Deplete current pantry inventories in correlation with the quantities useds in "made" recipes
+- Deplete current pantry inventories in correlation with the quantities used in "made" recipes
 
 This app has one user in mind &ndash; me
 
@@ -56,16 +56,14 @@ I have made this repository public as a way to display my work but this is not a
     - RSpec (Backend)
     - Jest (Frontend)
 
-## Planned Features
+## Future Planned Features
 
 - [ ] Ingredient conversions
-- [ ] Recipe suggestions based on current pantry groceries
-- [ ] Groceries suggestions based on pantry inventory and recipe cross-referencing (i.e. "You just need mozerella to make your Chicken Paremsan recipe. Do you want to add this to your grocery list?")
-- [ ] Pantry inventory tracking
-- [ ] Recipe categorizing
 - [ ] Recipe notes
 - [ ] Barcode scanning for grocery intake
 - [ ] Grocery store receipt parsing for grocery intake
+- [ ] Recipe suggestions based on ingredients expiring soon
+- [ ] Grocery list suggestions based on expired ingredients
 
 ## Contact
 
