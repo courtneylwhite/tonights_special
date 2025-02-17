@@ -2,27 +2,25 @@ import "@hotwired/turbo-rails"
 import { Application } from "@hotwired/stimulus"
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import AnimatedTitle from "./components/AnimatedTitle";
+import * as Components from './components'
 
 // Stimulus setup
 const application = Application.start()
 window.Stimulus = application
 
-// React setup
 document.addEventListener('DOMContentLoaded', () => {
-    const components = document.querySelectorAll('[data-react-component]')
+    const componentElements = document.querySelectorAll('[data-react-component]')
 
-    components.forEach(component => {
-        const name = component.dataset.reactComponent  // Changed from reactComponent to dataset.reactComponent
-        const props = JSON.parse(component.dataset.props || '{}')
-        const root = createRoot(component)
+    componentElements.forEach(element => {
+        const componentName = element.dataset.reactComponent
+        const props = JSON.parse(element.dataset.props || '{}')
+        const root = createRoot(element)
 
-        switch (name) {
-            case 'AnimatedTitle':
-                root.render(<AnimatedTitle {...props} />)
-                break
-            default:
-                console.warn(`Unknown component: ${name}`)
+        if (Components[componentName]) {
+            const Component = Components[componentName]
+            root.render(<Component {...props} />)
+        } else {
+            console.warn(`Component not found: ${componentName}`)
         }
     })
 })
