@@ -9,10 +9,10 @@ This takes some mental gymnastics on my part to parse the current groceries we h
 _Did I use the rest of the parmesan when I made meatballs last week? Better get some more to be safe (repeat 4 more times)_
 
 The core features of this app will allow a user to
-- Create groceries to their pantry
-- Create recipes to their recipe box
-- View recipes they can make from their current supplies
-- View the recipes they are close to having all of the ingredients for
+- Create groceries and add them to their pantry
+- Create recipes and add them to their recipe box
+- View suggested recipes they can make from their current supplies
+- View suggested recipes they are close to having all of the ingredients for
 - Create grocery lists based on missing ingredients from recipes
 - Flag recipes as "made"
 
