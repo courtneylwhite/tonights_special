@@ -1,9 +1,9 @@
 FactoryBot.define do
   factory :grocery_list_item do
-    user { nil }
-    grocery { nil }
+    association :user
+    association :grocery
+    association :unit
     quantity { "9.99" }
-    unit { nil }
     notes { "MyText" }
     purchased { false }
   end

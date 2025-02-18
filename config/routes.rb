@@ -43,7 +43,7 @@ Rails.application.routes.draw do
       post :mark_completed
       post :mark_incomplete
     end
-    resources :recipe_ingredients, only: [:create, :update, :destroy]
+    resources :recipe_ingredients, only: [ :create, :update, :destroy ]
   end
 
   resources :grocery_list_items do

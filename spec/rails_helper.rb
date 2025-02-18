@@ -50,6 +50,13 @@ RSpec.configure do |config|
   # Include Factory Bot methods if you're using factories
   config.include FactoryBot::Syntax::Methods
 
+  Shoulda::Matchers.configure do |config|
+    config.integrate do |with|
+      with.test_framework :rspec
+      with.library :rails
+    end
+  end
+
   # You can uncomment this line to turn off ActiveRecord support entirely.
   # config.use_active_record = false
 

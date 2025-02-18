@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :grocery_section do
-    name { "MyString" }
+    name { "bread" }
     display_order { 1 }
   end
 end

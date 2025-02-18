@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :recipe_ingredient do
-    recipe { nil }
-    grocery { nil }
     quantity { "9.99" }
-    unit { nil }
+    association :recipe
+    association :grocery
+    association :unit
   end
 end
