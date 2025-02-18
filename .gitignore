@@ -3,17 +3,20 @@ cat > .gitignore << EOL
 /.bundle
 
 # Ignore all logfiles and tempfiles
+log/
 /log/*
 /tmp/*
 !/log/.keep
 !/tmp/.keep
 
 # Ignore pidfiles
+tmp/
 /tmp/pids/*
 !/tmp/pids/
 !/tmp/pids/.keep
 
 # Ignore uploaded files in development
+storage/
 /storage/*
 !/storage/.keep
 /tmp/storage/*
@@ -28,6 +31,7 @@ cat > .gitignore << EOL
 /config/master.key
 
 # Ignore node modules
+.node-version
 /node_modules
 
 # Ignore yarn files
