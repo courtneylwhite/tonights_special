@@ -2,7 +2,7 @@ class GroceriesController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    @groceries = current_user.groceries
+    # @groceries = current_user.groceries
   end
 
   def show
