@@ -6,6 +6,7 @@ const Groceries = ({ groceryItems = {} }) => {
         const hex = unicodeString.replace('U+', '');
         return String.fromCodePoint(parseInt(hex, 16));
     };
+
     const [searchTerm, setSearchTerm] = useState('');
     const [openDrawers, setOpenDrawers] = useState(
         Object.keys(groceryItems || {}).reduce((acc, category) => ({
@@ -35,15 +36,18 @@ const Groceries = ({ groceryItems = {} }) => {
         );
     };
 
-    const filteredGroceryItems = Object.entries(groceryItems || {}).reduce((acc, [category, items]) => {
-        const filteredItems = items.filter(item =>
-            item?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        if (filteredItems.length > 0) {
-            acc[category] = filteredItems;
-        }
-        return acc;
-    }, {});
+    // Filter items while maintaining the order from display_order
+    const filteredGroceryItems = Object.entries(groceryItems || {})
+        .sort(([, a], [, b]) => a[0]?.display_order - b[0]?.display_order)
+        .reduce((acc, [category, items]) => {
+            const filteredItems = items.filter(item =>
+                item?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            if (filteredItems.length > 0) {
+                acc[category] = filteredItems;
+            }
+            return acc;
+        }, {});
 
     const areAllOpen = Object.values(openDrawers).every(Boolean);
 
@@ -135,13 +139,13 @@ const Groceries = ({ groceryItems = {} }) => {
                                                         }}
                                                     >
                                                         <div className="flex flex-col items-center">
-                                                            <span
-                                                                className="text-3xl mb-2">{unicodeToEmoji(item.emoji)}</span>
+                                                            <span className="text-3xl mb-2">
+                                                                {unicodeToEmoji(item.emoji)}
+                                                            </span>
                                                             <span className="text-sm font-medium text-center text-gray-300">
                                                                 {item?.name}
                                                             </span>
-                                                            <div
-                                                                className="mt-2 px-2 py-1 bg-amber-500 text-black rounded-full text-xs font-bold">
+                                                            <div className="mt-2 px-2 py-1 bg-amber-500 text-black rounded-full text-xs font-bold">
                                                                 {item?.quantity} {item?.unit}
                                                             </div>
                                                         </div>
