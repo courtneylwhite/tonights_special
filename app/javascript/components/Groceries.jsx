@@ -146,7 +146,7 @@ const Groceries = ({ groceryItems = {} }) => {
                                                                 {item?.name}
                                                             </span>
                                                             <div className="mt-2 px-2 py-1 bg-amber-500 text-black rounded-full text-xs font-bold">
-                                                                {item?.quantity} {item?.unit}
+                                                                {Math.round(item?.quantity)} {item?.unit}
                                                             </div>
                                                         </div>
                                                     </div>
