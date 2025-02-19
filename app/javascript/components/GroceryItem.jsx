@@ -144,7 +144,7 @@ const GroceryItem = ({ grocery = {} }) => {
 
                         {/* Unit */}
                         <div className="text-gray-400 text-sm">
-                            {grocery.unit}
+                            {quantity > 1 ? `${grocery.unit?.name}s` : grocery.unit?.name}
                         </div>
                     </div>
                 </div>

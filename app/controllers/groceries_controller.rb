@@ -15,6 +15,8 @@ class GroceriesController < ApplicationController
   end
 
   def show
+    @grocery = current_user.groceries.includes(:unit).find(params[:id])
+    @grocery_data = @grocery.as_json(include: { unit: { only: [:name] } })
     respond_to do |format|
       format.html
       format.json { render json: @grocery }
