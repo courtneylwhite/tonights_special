@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
-const GroceryShow = ({ grocery = {} }) => {
+const GroceryItem = ({ grocery = {} }) => {
     const [quantity, setQuantity] = useState(Math.round(grocery.quantity || 0));
     const [showSuccess, setShowSuccess] = useState(false);
     const [showError, setShowError] = useState(false);
@@ -153,6 +153,7 @@ const GroceryShow = ({ grocery = {} }) => {
                 <div className="mt-8 text-center">
                     <a
                         href="/groceries"
+                        data-turbo-frame="groceries_content"
                         className="inline-block px-4 py-2 bg-gray-900/90 backdrop-blur-sm text-amber-400 rounded-lg transition-colors duration-200 border border-gray-700 hover:border-amber-500"
                     >
                         Back to Inventory
@@ -163,4 +164,4 @@ const GroceryShow = ({ grocery = {} }) => {
     );
 };
 
-export default GroceryShow;
+export default GroceryItem;
