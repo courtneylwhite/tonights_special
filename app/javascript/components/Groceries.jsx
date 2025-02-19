@@ -47,39 +47,38 @@ const Groceries = ({ groceryItems = {} }) => {
         <div className="min-h-screen bg-black text-white relative">
             {/* Header with search */}
             <div className="bg-black/80 backdrop-blur-sm border-b border-gray-800 p-8 sticky top-0 z-10">
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-center flex-1">
-                        Culinary Inventory
-                    </h1>
-                    {Object.keys(groceryItems || {}).length > 0 && (
+                <h1 className="text-center mb-8">
+                    Culinary Inventory
+                </h1>
+                {Object.keys(groceryItems || {}).length > 0 && (
+                    <div className="flex items-center gap-4 max-w-2xl mx-auto">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                                    size={20}/>
+                            <input
+                                type="text"
+                                placeholder="Search your collection..."
+                                className="w-full pl-12 pr-4 py-3 bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-white placeholder-gray-400 transition-all duration-300"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
                         <button
                             onClick={toggleAll}
                             className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-amber-400 rounded-lg transition-colors duration-200 border border-gray-700 hover:border-amber-500"
                         >
                             {areAllOpen ? (
                                 <>
-                                    <Minimize2 size={18} />
+                                    <Minimize2 size={18}/>
                                     <span className="text-sm font-medium">Collapse All</span>
                                 </>
                             ) : (
                                 <>
-                                    <Maximize2 size={18} />
+                                    <Maximize2 size={18}/>
                                     <span className="text-sm font-medium">Expand All</span>
                                 </>
                             )}
                         </button>
-                    )}
-                </div>
-                {Object.keys(groceryItems || {}).length > 0 && (
-                    <div className="relative max-w-2xl mx-auto">
-                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                        <input
-                            type="text"
-                            placeholder="Search your collection..."
-                            className="w-full pl-12 pr-4 py-3 bg-gray-900/90 backdrop-blur-sm border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-white placeholder-gray-400 transition-all duration-300"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
                     </div>
                 )}
             </div>
@@ -107,9 +106,9 @@ const Groceries = ({ groceryItems = {} }) => {
                                 >
                                     <h3>{category}</h3>
                                     {openDrawers[category] ? (
-                                        <ChevronUp className="text-amber-400" size={20} />
+                                        <ChevronUp className="text-amber-400" size={20}/>
                                     ) : (
-                                        <ChevronDown className="text-amber-400" size={20} />
+                                        <ChevronDown className="text-amber-400" size={20}/>
                                     )}
                                 </button>
 
@@ -130,11 +129,13 @@ const Groceries = ({ groceryItems = {} }) => {
                                                     }}
                                                 >
                                                     <div className="flex flex-col items-center">
-                                                        <span className="text-3xl mb-2">{unicodeToEmoji(item.emoji)}</span>
+                                                        <span
+                                                            className="text-3xl mb-2">{unicodeToEmoji(item.emoji)}</span>
                                                         <span className="text-sm font-medium text-center text-gray-300">
                                                             {item?.name}
                                                         </span>
-                                                        <div className="mt-2 px-2 py-1 bg-amber-500 text-black rounded-full text-xs font-bold">
+                                                        <div
+                                                            className="mt-2 px-2 py-1 bg-amber-500 text-black rounded-full text-xs font-bold">
                                                             {item?.quantity} {item?.unit}
                                                         </div>
                                                     </div>
