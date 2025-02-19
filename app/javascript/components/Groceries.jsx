@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Search, ChevronDown, ChevronUp, Minimize2, Maximize2, Plus } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, Minimize2, Maximize2, Plus, ShoppingBasket } from 'lucide-react';
 import SectionModal from './SectionModal';
+import ItemModal from './ItemModal';
 
 const Groceries = ({ groceryItems = {} }) => {
     const unicodeToEmoji = (unicodeString) => {
@@ -10,6 +11,7 @@ const Groceries = ({ groceryItems = {} }) => {
 
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isItemModalOpen, setIsItemModalOpen] = useState(false);
     const [openDrawers, setOpenDrawers] = useState(
         Object.keys(groceryItems || {}).reduce((acc, category) => ({
             ...acc,
@@ -19,6 +21,10 @@ const Groceries = ({ groceryItems = {} }) => {
 
     const handleAddSection = () => {
         setIsModalOpen(true);
+    };
+
+    const handleAddItem = () => {
+        setIsItemModalOpen(true);
     };
 
     const handleGroceryClick = (groceryId) => {
@@ -100,13 +106,20 @@ const Groceries = ({ groceryItems = {} }) => {
 
                 {/* Cabinet/Shelving Layout */}
                 <div className="max-w-5xl mx-auto p-6 relative z-0">
-                    <div className="flex justify-end mb-4">
+                    <div className="flex justify-end mb-4 gap-4">
                         <button
                             onClick={handleAddSection}
                             className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
                         >
                             <Plus size={18}/>
                             <span className="text-sm font-medium">Section</span>
+                        </button>
+                        <button
+                            onClick={handleAddItem}
+                            className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
+                        >
+                            <Plus size={18}/>
+                            <span className="text-sm font-medium">Grocery</span>
                         </button>
                     </div>
 
@@ -181,6 +194,11 @@ const Groceries = ({ groceryItems = {} }) => {
                 <SectionModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
+                />
+
+                <ItemModal
+                    isOpen={isItemModalOpen}
+                    onClose={() => setIsItemModalOpen(false)}
                 />
             </div>
         </turbo-frame>

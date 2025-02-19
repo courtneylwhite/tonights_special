@@ -98,12 +98,21 @@ groceries = Grocery.create!([
       store_section: find_store_section('Produce Section'), emoji: 'U+1F34E' },
 
     # Meat
-    { user: user, name: 'Chicken Breast', quantity: 1, unit: pound,
+    { user: user, name: 'Chicken Thighs', quantity: 1, unit: pound,
       grocery_section: find_grocery_section('Meat & Seafood'),
       store_section: find_store_section('Meat Counter'), emoji: 'U+1F413' },
     { user: user, name: 'Shrimp', quantity: 1, unit: pound,
       grocery_section: find_grocery_section('Meat & Seafood'),
       store_section: find_store_section('Meat Counter'), emoji: 'U+1F364' },
+    { user: user, name: 'Pork Butt', quantity: 9, unit: pound,
+      grocery_section: find_grocery_section('Meat & Seafood'),
+      store_section: find_store_section('Meat Counter'), emoji: 'U+1F437' },
+    { user: user, name: 'Hamburger', quantity: 3, unit: pound,
+      grocery_section: find_grocery_section('Meat & Seafood'),
+      store_section: find_store_section('Meat Counter'), emoji: 'U+1F42E' },
+    { user: user, name: 'Walleye', quantity: 5, unit: pound,
+      grocery_section: find_grocery_section('Meat & Seafood'),
+      store_section: find_store_section('Meat Counter'), emoji: 'U+1F41F' },
 
     # Dairy
     { user: user, name: 'Milk', quantity: 1, unit: fl_oz,
