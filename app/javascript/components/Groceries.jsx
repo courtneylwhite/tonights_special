@@ -14,6 +14,10 @@ const Groceries = ({ groceryItems = {} }) => {
         }), {})
     );
 
+    const handleGroceryClick = (groceryId) => {
+        window.location.href = `/groceries/${groceryId}`;
+    };
+
     const toggleDrawer = (category) => {
         setOpenDrawers(prev => ({
             ...prev,
@@ -123,7 +127,8 @@ const Groceries = ({ groceryItems = {} }) => {
                                             {items.map((item, itemIndex) => (
                                                 <div
                                                     key={item?.id || itemIndex}
-                                                    className="bg-gray-800/90 backdrop-blur-sm rounded-lg p-4 border border-gray-700 relative hover:border-amber-500 hover:scale-105 transition-all duration-200 animate-fade-in"
+                                                    onClick={() => handleGroceryClick(item.id)}
+                                                    className="bg-gray-800/90 backdrop-blur-sm rounded-lg p-4 border border-gray-700 relative hover:border-amber-500 hover:scale-105 transition-all duration-200 animate-fade-in cursor-pointer"
                                                     style={{
                                                         animationDelay: `${(categoryIndex * 100) + (itemIndex * 50)}ms`
                                                     }}

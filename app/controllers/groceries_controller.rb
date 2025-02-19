@@ -16,6 +16,7 @@ class GroceriesController < ApplicationController
   end
 
   def show
+    @grocery = Grocery.find(params[:id])
   end
 
   def create
