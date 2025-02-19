@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Search, ChevronDown, ChevronUp, Minimize2, Maximize2 } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, Minimize2, Maximize2, Plus } from 'lucide-react';
+import SectionModal from './SectionModal';
 
 const Groceries = ({ groceryItems = {} }) => {
     const unicodeToEmoji = (unicodeString) => {
@@ -8,12 +9,17 @@ const Groceries = ({ groceryItems = {} }) => {
     };
 
     const [searchTerm, setSearchTerm] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [openDrawers, setOpenDrawers] = useState(
         Object.keys(groceryItems || {}).reduce((acc, category) => ({
             ...acc,
             [category]: true
         }), {})
     );
+
+    const handleAddSection = () => {
+        setIsModalOpen(true);
+    };
 
     const handleGroceryClick = (groceryId) => {
         window.location.href = `/groceries/${groceryId}`;
@@ -94,6 +100,16 @@ const Groceries = ({ groceryItems = {} }) => {
 
                 {/* Cabinet/Shelving Layout */}
                 <div className="max-w-5xl mx-auto p-6 relative z-0">
+                    <div className="flex justify-end mb-4">
+                        <button
+                            onClick={handleAddSection}
+                            className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
+                        >
+                            <Plus size={18}/>
+                            <span className="text-sm font-medium">Section</span>
+                        </button>
+                    </div>
+
                     {Object.keys(groceryItems || {}).length === 0 ? (
                         <div className="text-center text-gray-400 py-12">
                             <p>No groceries in your pantry yet.</p>
@@ -142,10 +158,12 @@ const Groceries = ({ groceryItems = {} }) => {
                                                             <span className="text-3xl mb-2">
                                                                 {unicodeToEmoji(item.emoji)}
                                                             </span>
-                                                            <span className="text-sm font-medium text-center text-gray-300">
+                                                            <span
+                                                                className="text-sm font-medium text-center text-gray-300">
                                                                 {item?.name}
                                                             </span>
-                                                            <div className="mt-2 px-2 py-1 bg-amber-500 text-black rounded-full text-xs font-bold">
+                                                            <div
+                                                                className="mt-2 px-2 py-1 bg-amber-500 text-black rounded-full text-xs font-bold">
                                                                 {Math.round(item?.quantity)} {item?.unit}
                                                             </div>
                                                         </div>
@@ -159,6 +177,11 @@ const Groceries = ({ groceryItems = {} }) => {
                         </div>
                     )}
                 </div>
+
+                <SectionModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                />
             </div>
         </turbo-frame>
     );
