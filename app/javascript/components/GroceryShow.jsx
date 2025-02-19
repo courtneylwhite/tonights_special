@@ -1,19 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 
 const GroceryShow = ({ grocery = {} }) => {
-    const [quantity, setQuantity] = useState(grocery.quantity || 0);
+    const [quantity, setQuantity] = useState(Math.round(grocery.quantity || 0));
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [showError, setShowError] = useState(false);
 
     const unicodeToEmoji = (unicodeString) => {
-        if (!unicodeString) return '❓'; // Return a question mark emoji if no unicode string is provided
+        if (!unicodeString) return '❓';
         try {
             const hex = unicodeString.replace('U+', '');
             return String.fromCodePoint(parseInt(hex, 16));
         } catch (error) {
             console.error('Error converting unicode to emoji:', error);
-            return '❓'; // Return a question mark emoji if conversion fails
+            return '❓';
         }
     };
+
+    useEffect(() => {
+        if (showSuccess) {
+            const timer = setTimeout(() => {
+                setShowSuccess(false);
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [showSuccess]);
+
+    useEffect(() => {
+        if (showError) {
+            const timer = setTimeout(() => {
+                setShowError(false);
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [showError]);
 
     const handleIncrement = async () => {
         try {
@@ -25,16 +45,23 @@ const GroceryShow = ({ grocery = {} }) => {
                 },
                 body: JSON.stringify({
                     grocery: {
-                        quantity: quantity + 1
+                        quantity: Math.round(quantity + 1)
                     }
                 })
             });
 
             if (response.ok) {
-                setQuantity(prev => prev + 1);
+                setQuantity(prev => Math.round(prev + 1));
+                setShowSuccess(true);
+                setShowError(false);
+            } else {
+                setShowError(true);
+                setShowSuccess(false);
             }
         } catch (error) {
             console.error('Error updating quantity:', error);
+            setShowError(true);
+            setShowSuccess(false);
         }
     };
 
@@ -50,23 +77,36 @@ const GroceryShow = ({ grocery = {} }) => {
                 },
                 body: JSON.stringify({
                     grocery: {
-                        quantity: quantity - 1
+                        quantity: Math.round(quantity - 1)
                     }
                 })
             });
 
             if (response.ok) {
-                setQuantity(prev => prev - 1);
+                setQuantity(prev => Math.round(prev - 1));
+                setShowSuccess(true);
+                setShowError(false);
+            } else {
+                setShowError(true);
+                setShowSuccess(false);
             }
         } catch (error) {
             console.error('Error updating quantity:', error);
+            setShowError(true);
+            setShowSuccess(false);
         }
     };
 
     return (
         <div className="min-h-screen bg-black text-white flex items-center justify-center">
             <div className="max-w-md w-full mx-auto p-8">
-                <div className="bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 shadow-xl">
+                <div className={`bg-gray-900/90 backdrop-blur-sm rounded-2xl p-8 shadow-xl transition-all duration-300 ${
+                    showSuccess
+                        ? 'border-2 border-green-500 border-opacity-100'
+                        : showError
+                            ? 'border-2 border-red-500 border-opacity-100'
+                            : 'border border-gray-800'
+                }`}>
                     {/* Name */}
                     <h1 className="text-2xl font-bold text-center mb-8 text-amber-400">
                         {grocery.name}
@@ -91,7 +131,7 @@ const GroceryShow = ({ grocery = {} }) => {
                             </button>
 
                             <div className="bg-gray-800 px-6 py-3 rounded-lg border border-gray-700 min-w-[100px] text-center">
-                                <span className="text-2xl font-bold">{quantity}</span>
+                                <span className="text-2xl font-bold">{Math.round(quantity)}</span>
                             </div>
 
                             <button
@@ -109,7 +149,7 @@ const GroceryShow = ({ grocery = {} }) => {
                     </div>
                 </div>
 
-                {/* Back Button - Now outside the main container */}
+                {/* Back Button */}
                 <div className="mt-8 text-center">
                     <a
                         href="/groceries"

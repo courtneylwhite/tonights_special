@@ -92,31 +92,34 @@ groceries = Grocery.create!([
     # Produce
     { user: user, name: 'Bananas', quantity: 1, unit: dozen,
       grocery_section: find_grocery_section('Produce'),
-      store_section: find_store_section('Produce Section') },
+      store_section: find_store_section('Produce Section'), emoji: 'U+1F34C' },
     { user: user, name: 'Apples', quantity: 1, unit: pound,
       grocery_section: find_grocery_section('Produce'),
-      store_section: find_store_section('Produce Section') },
+      store_section: find_store_section('Produce Section'), emoji: 'U+1F34E' },
 
     # Meat
     { user: user, name: 'Chicken Breast', quantity: 1, unit: pound,
       grocery_section: find_grocery_section('Meat & Seafood'),
-      store_section: find_store_section('Meat Counter') },
+      store_section: find_store_section('Meat Counter'), emoji: 'U+1F413' },
+    { user: user, name: 'Shrimp', quantity: 1, unit: pound,
+      grocery_section: find_grocery_section('Meat & Seafood'),
+      store_section: find_store_section('Meat Counter'), emoji: 'U+1F364' },
 
     # Dairy
     { user: user, name: 'Milk', quantity: 1, unit: fl_oz,
-      grocery_section: find_grocery_section('Dairy & Eggs'),
+      grocery_section: find_grocery_section('Dairy & Eggs'), emoji: 'U+1F95B',
       store_section: find_store_section('Dairy Wall') },
     { user: user, name: 'Eggs', quantity: 1, unit: dozen,
-      grocery_section: find_grocery_section('Dairy & Eggs'),
+      grocery_section: find_grocery_section('Dairy & Eggs'), emoji: 'U+1F95A',
       store_section: find_store_section('Dairy Wall') },
 
     # Pantry
     { user: user, name: 'Flour', quantity: 1, unit: pound,
       grocery_section: find_grocery_section('Pantry'),
-      store_section: find_store_section('Center Aisles') },
+      store_section: find_store_section('Center Aisles'), emoji: 'U+1F33E' },
     { user: user, name: 'Sugar', quantity: 1, unit: pound,
       grocery_section: find_grocery_section('Pantry'),
-      store_section: find_store_section('Center Aisles') }
+      store_section: find_store_section('Center Aisles'), emoji: 'U+1F370' }
   ])
 
 puts "Creating recipes..."
