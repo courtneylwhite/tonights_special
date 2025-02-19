@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { Search, ChevronDown, ChevronUp, Minimize2, Maximize2 } from 'lucide-react';
 
 const Groceries = ({ groceryItems = {} }) => {
+    const unicodeToEmoji = (unicodeString) => {
+        const hex = unicodeString.replace('U+', '');
+        return String.fromCodePoint(parseInt(hex, 16));
+    };
     const [searchTerm, setSearchTerm] = useState('');
     const [openDrawers, setOpenDrawers] = useState(
         Object.keys(groceryItems || {}).reduce((acc, category) => ({
@@ -126,7 +130,7 @@ const Groceries = ({ groceryItems = {} }) => {
                                                     }}
                                                 >
                                                     <div className="flex flex-col items-center">
-                                                        <span className="text-3xl mb-2">{item?.emoji}</span>
+                                                        <span className="text-3xl mb-2">{unicodeToEmoji(item.emoji)}</span>
                                                         <span className="text-sm font-medium text-center text-gray-300">
                                                             {item?.name}
                                                         </span>

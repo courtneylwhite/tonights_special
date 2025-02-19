@@ -10,9 +10,105 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_17_202600) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_19_022552) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "groceries", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "store_section_id", null: false
+    t.bigint "grocery_section_id", null: false
+    t.string "name"
+    t.decimal "quantity"
+    t.bigint "unit_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "emoji"
+    t.index ["grocery_section_id"], name: "index_groceries_on_grocery_section_id"
+    t.index ["store_section_id"], name: "index_groceries_on_store_section_id"
+    t.index ["unit_id"], name: "index_groceries_on_unit_id"
+    t.index ["user_id", "grocery_section_id"], name: "index_groceries_on_user_id_and_grocery_section_id"
+    t.index ["user_id", "name"], name: "index_groceries_on_user_id_and_name"
+    t.index ["user_id", "store_section_id"], name: "index_groceries_on_user_id_and_store_section_id"
+    t.index ["user_id"], name: "index_groceries_on_user_id"
+  end
+
+  create_table "grocery_list_items", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "grocery_id", null: false
+    t.decimal "quantity"
+    t.bigint "unit_id", null: false
+    t.text "notes"
+    t.boolean "purchased"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["grocery_id"], name: "index_grocery_list_items_on_grocery_id"
+    t.index ["unit_id"], name: "index_grocery_list_items_on_unit_id"
+    t.index ["user_id", "grocery_id"], name: "index_grocery_list_items_on_user_id_and_grocery_id"
+    t.index ["user_id", "purchased"], name: "index_grocery_list_items_on_user_id_and_purchased"
+    t.index ["user_id"], name: "index_grocery_list_items_on_user_id"
+  end
+
+  create_table "grocery_sections", force: :cascade do |t|
+    t.string "name"
+    t.integer "display_order"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["display_order"], name: "index_grocery_sections_on_display_order"
+  end
+
+  create_table "recipe_ingredients", force: :cascade do |t|
+    t.bigint "recipe_id", null: false
+    t.bigint "grocery_id", null: false
+    t.decimal "quantity"
+    t.bigint "unit_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["grocery_id"], name: "index_recipe_ingredients_on_grocery_id"
+    t.index ["recipe_id"], name: "index_recipe_ingredients_on_recipe_id"
+    t.index ["unit_id"], name: "index_recipe_ingredients_on_unit_id"
+  end
+
+  create_table "recipes", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name"
+    t.text "instructions"
+    t.boolean "completed"
+    t.datetime "completed_at"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "completed"], name: "index_recipes_on_user_id_and_completed"
+    t.index ["user_id", "name"], name: "index_recipes_on_user_id_and_name"
+    t.index ["user_id"], name: "index_recipes_on_user_id"
+  end
+
+  create_table "store_sections", force: :cascade do |t|
+    t.string "name"
+    t.integer "display_order"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "unit_conversions", force: :cascade do |t|
+    t.bigint "from_unit_id", null: false
+    t.bigint "to_unit_id", null: false
+    t.decimal "conversion_factor", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["from_unit_id", "to_unit_id"], name: "index_unit_conversions_on_from_unit_id_and_to_unit_id", unique: true
+    t.index ["from_unit_id"], name: "index_unit_conversions_on_from_unit_id"
+    t.index ["to_unit_id"], name: "index_unit_conversions_on_to_unit_id"
+  end
+
+  create_table "units", force: :cascade do |t|
+    t.string "name"
+    t.string "category"
+    t.string "abbreviation"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category", "name"], name: "index_units_on_category_and_name"
+  end
 
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
@@ -25,4 +121,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_17_202600) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
+
+  add_foreign_key "groceries", "grocery_sections"
+  add_foreign_key "groceries", "store_sections"
+  add_foreign_key "groceries", "units"
+  add_foreign_key "groceries", "users"
+  add_foreign_key "grocery_list_items", "groceries"
+  add_foreign_key "grocery_list_items", "units"
+  add_foreign_key "grocery_list_items", "users"
+  add_foreign_key "recipe_ingredients", "groceries"
+  add_foreign_key "recipe_ingredients", "recipes"
+  add_foreign_key "recipe_ingredients", "units"
+  add_foreign_key "recipes", "users"
+  add_foreign_key "unit_conversions", "units", column: "from_unit_id"
+  add_foreign_key "unit_conversions", "units", column: "to_unit_id"
 end
