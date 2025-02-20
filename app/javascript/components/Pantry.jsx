@@ -7,6 +7,7 @@ import ToggleButton from './ToggleButton';
 import Shelf from './Shelf';
 
 const Pantry = ({ groceries = {} }) => {
+    console.log(groceries);
     const unicodeToEmoji = (unicodeString) => {
         const hex = unicodeString.replace('U+', '');
         return String.fromCodePoint(parseInt(hex, 16));
@@ -47,12 +48,9 @@ const Pantry = ({ groceries = {} }) => {
     const filteredGroceries = Object.entries(groceries || {})
         .sort(([, a], [, b]) => a[0]?.display_order - b[0]?.display_order)
         .reduce((acc, [category, items]) => {
-            const filteredItems = items.filter(item =>
+            acc[category] = items.filter(item =>
                 item?.name?.toLowerCase().includes(searchTerm.toLowerCase())
             );
-            if (filteredItems.length > 0) {
-                acc[category] = filteredItems;
-            }
             return acc;
         }, {});
     const areAllOpen = Object.values(openShelves).every(Boolean);

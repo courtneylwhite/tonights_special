@@ -1,33 +1,76 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 
-const SectionModal = ({ isOpen, onClose }) => {
+const ErrorAlert = ({ message }) => (
+    <div className="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg mb-4">
+        {message}
+    </div>
+);
+
+const SectionModal = ({ isOpen, onClose, onSuccess }) => {
     const [formData, setFormData] = useState({
         name: '',
         display_order: ''
     });
+    const [error, setError] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        // Prevent Turbo from handling the form submission
+        e.stopPropagation();
+
+        setError(null);
+        setIsSubmitting(true);
 
         try {
+            const csrf = document.querySelector('[name="csrf-token"]')?.content;
+            if (!csrf) {
+                throw new Error('CSRF token not found');
+            }
+
+            // Disable Turbo for this request
             const response = await fetch('/grocery_sections', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content
+                    'Accept': 'application/json',
+                    'X-CSRF-Token': csrf,
+                    'Turbo-Frame': 'false'  // Tell Turbo to ignore this request
                 },
                 body: JSON.stringify({ grocery_section: formData })
             });
 
-            if (response.ok) {
-                onClose();
-                window.location.reload(); // Refresh to show new section
-            } else {
-                console.error('Failed to create section');
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (e) {
+                console.log('Raw response:', responseText);
+                setError('Server returned an invalid response. You might need to log in again.');
+                return;
             }
+
+            if (!response.ok) {
+                const errorMessage = data.errors ?
+                    data.errors.join(', ') :
+                    'Failed to create section. Please try again.';
+                setError(errorMessage);
+                return;
+            }
+            if (onSuccess) {
+                onSuccess(data);
+            }
+            onClose();
+
+            // Manually trigger a page refresh if needed
+            // window.location.reload();
+
         } catch (error) {
+            setError('An unexpected error occurred. Please try again.');
             console.error('Error creating section:', error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -46,13 +89,20 @@ const SectionModal = ({ isOpen, onClose }) => {
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors duration-200"
+                    disabled={isSubmitting}
                 >
                     <X size={20} />
                 </button>
 
                 <h2 className="text-xl font-semibold mb-6 text-white">Add New Section</h2>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                {error && <ErrorAlert message={error} />}
+
+                <form
+                    onSubmit={handleSubmit}
+                    className="space-y-4"
+                    data-turbo="false" // Disable Turbo for this form
+                >
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
                             Section Name
@@ -65,6 +115,7 @@ const SectionModal = ({ isOpen, onClose }) => {
                             onChange={handleChange}
                             className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-white placeholder-gray-400"
                             required
+                            disabled={isSubmitting}
                         />
                     </div>
 
@@ -80,14 +131,16 @@ const SectionModal = ({ isOpen, onClose }) => {
                             onChange={handleChange}
                             className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-white placeholder-gray-400"
                             required
+                            disabled={isSubmitting}
                         />
                     </div>
 
                     <button
                         type="submit"
-                        className="w-full px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 font-medium"
+                        className="w-full px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isSubmitting}
                     >
-                        Create Section
+                        {isSubmitting ? 'Creating...' : 'Create Section'}
                     </button>
                 </form>
             </div>

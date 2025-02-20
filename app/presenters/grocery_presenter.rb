@@ -1,7 +1,13 @@
 class GroceryPresenter
-  def self.grouped_groceries(groceries)
-    groceries.map { |grocery| format_grocery(grocery) }
-             .group_by { |g| g.delete(:category) }
+  def self.grouped_groceries(groceries, sections)
+    # First, format all groceries and group them by category
+    grouped = groceries.map { |grocery| format_grocery(grocery) }
+                       .group_by { |g| g.delete(:category) }
+
+    # Create a hash with all sections, even empty ones
+    sections.each_with_object({}) do |section, hash|
+      hash[section.name] = grouped[section.name] || []
+    end
   end
 
   private
