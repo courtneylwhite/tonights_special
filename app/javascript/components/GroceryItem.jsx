@@ -59,7 +59,6 @@ const GroceryItem = ({ grocery = {} }) => {
                 setShowSuccess(false);
             }
         } catch (error) {
-            console.error('Error updating quantity:', error);
             setShowError(true);
             setShowSuccess(false);
         }

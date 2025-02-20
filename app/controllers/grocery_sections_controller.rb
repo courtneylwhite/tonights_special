@@ -1,18 +1,14 @@
 class GrocerySectionsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_grocery_section, only: [ :destroy ]
 
   def create
-    @grocery_section = GrocerySection.new(grocery_section_params)
+    @grocery_section = current_user.grocery_sections.build(grocery_section_params)
 
     if @grocery_section.save
       render json: @grocery_section, status: :created
     else
       render json: { errors: @grocery_section.errors.full_messages }, status: :unprocessable_entity
     end
-  end
-
-  def destroy
   end
 
   private
@@ -22,6 +18,6 @@ class GrocerySectionsController < ApplicationController
   end
 
   def grocery_section_params
-    params.require(:grocery_section).permit(:name, :display_order)
+    params.require(:grocery_section).permit(:name, :display_order,)
   end
 end

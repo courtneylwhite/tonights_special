@@ -68,7 +68,6 @@ const SectionModal = ({ isOpen, onClose, onSuccess }) => {
 
         } catch (error) {
             setError('An unexpected error occurred. Please try again.');
-            console.error('Error creating section:', error);
         } finally {
             setIsSubmitting(false);
         }

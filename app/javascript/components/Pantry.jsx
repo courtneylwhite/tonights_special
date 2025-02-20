@@ -7,7 +7,6 @@ import ToggleButton from './ToggleButton';
 import Shelf from './Shelf';
 
 const Pantry = ({ groceries = {} }) => {
-    console.log(groceries);
     const unicodeToEmoji = (unicodeString) => {
         const hex = unicodeString.replace('U+', '');
         return String.fromCodePoint(parseInt(hex, 16));

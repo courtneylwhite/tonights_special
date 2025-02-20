@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   end
   # Main resource routes
   resources :store_sections
-  resources :grocery_sections, only: [ :create, :destroy ]
+  resources :grocery_sections, only: [ :create ]
   resources :units
   resources :unit_conversions
 

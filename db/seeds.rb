@@ -57,14 +57,14 @@ UnitConversion.create!([
 
 puts "Creating grocery sections..."
 grocery_sections = GrocerySection.create!([
-    { name: 'Produce', display_order: 1 },
-    { name: 'Meat & Seafood', display_order: 2 },
-    { name: 'Dairy & Eggs', display_order: 3 },
-    { name: 'Pantry', display_order: 4 },
-    { name: 'Frozen', display_order: 5 },
-    { name: 'Beverages', display_order: 6 },
-    { name: 'Snacks', display_order: 7 },
-    { name: 'Bakery', display_order: 8 }
+    { name: 'Produce', display_order: 1, user: user },
+    { name: 'Meat & Seafood', display_order: 2, user: user  },
+    { name: 'Dairy & Eggs', display_order: 3, user: user  },
+    { name: 'Pantry', display_order: 4, user: user  },
+    { name: 'Frozen', display_order: 5, user: user  },
+    { name: 'Beverages', display_order: 6, user: user  },
+    { name: 'Snacks', display_order: 7, user: user  },
+    { name: 'Bakery', display_order: 8, user: user  }
   ])
 
 puts "Creating store sections..."
@@ -80,8 +80,8 @@ store_sections = StoreSection.create!([
 
 puts "Creating groceries..."
 # Helper method to find sections by name
-def find_grocery_section(name)
-  GrocerySection.find_by(name: name)
+def find_grocery_section(name, user)
+  GrocerySection.find_by(name: name, user: user )
 end
 
 def find_store_section(name)
@@ -91,43 +91,43 @@ end
 groceries = Grocery.create!([
     # Produce
     { user: user, name: 'Bananas', quantity: 1, unit: dozen,
-      grocery_section: find_grocery_section('Produce'),
+      grocery_section: find_grocery_section('Produce', user),
       store_section: find_store_section('Produce Section'), emoji: 'U+1F34C' },
     { user: user, name: 'Apples', quantity: 1, unit: pound,
-      grocery_section: find_grocery_section('Produce'),
+      grocery_section: find_grocery_section('Produce', user),
       store_section: find_store_section('Produce Section'), emoji: 'U+1F34E' },
 
     # Meat
     { user: user, name: 'Chicken Thighs', quantity: 1, unit: pound,
-      grocery_section: find_grocery_section('Meat & Seafood'),
+      grocery_section: find_grocery_section('Meat & Seafood', user),
       store_section: find_store_section('Meat Counter'), emoji: 'U+1F413' },
     { user: user, name: 'Shrimp', quantity: 1, unit: pound,
-      grocery_section: find_grocery_section('Meat & Seafood'),
+      grocery_section: find_grocery_section('Meat & Seafood', user),
       store_section: find_store_section('Meat Counter'), emoji: 'U+1F364' },
     { user: user, name: 'Pork Butt', quantity: 9, unit: pound,
-      grocery_section: find_grocery_section('Meat & Seafood'),
+      grocery_section: find_grocery_section('Meat & Seafood', user),
       store_section: find_store_section('Meat Counter'), emoji: 'U+1F437' },
     { user: user, name: 'Hamburger', quantity: 3, unit: pound,
-      grocery_section: find_grocery_section('Meat & Seafood'),
+      grocery_section: find_grocery_section('Meat & Seafood', user),
       store_section: find_store_section('Meat Counter'), emoji: 'U+1F42E' },
     { user: user, name: 'Walleye', quantity: 5, unit: pound,
-      grocery_section: find_grocery_section('Meat & Seafood'),
+      grocery_section: find_grocery_section('Meat & Seafood', user),
       store_section: find_store_section('Meat Counter'), emoji: 'U+1F41F' },
 
     # Dairy
     { user: user, name: 'Milk', quantity: 1, unit: fl_oz,
-      grocery_section: find_grocery_section('Dairy & Eggs'), emoji: 'U+1F95B',
+      grocery_section: find_grocery_section('Dairy & Eggs', user), emoji: 'U+1F95B',
       store_section: find_store_section('Dairy Wall') },
     { user: user, name: 'Eggs', quantity: 1, unit: dozen,
-      grocery_section: find_grocery_section('Dairy & Eggs'), emoji: 'U+1F95A',
+      grocery_section: find_grocery_section('Dairy & Eggs', user), emoji: 'U+1F95A',
       store_section: find_store_section('Dairy Wall') },
 
     # Pantry
     { user: user, name: 'Flour', quantity: 1, unit: pound,
-      grocery_section: find_grocery_section('Pantry'),
+      grocery_section: find_grocery_section('Pantry', user),
       store_section: find_store_section('Center Aisles'), emoji: 'U+1F33E' },
     { user: user, name: 'Sugar', quantity: 1, unit: pound,
-      grocery_section: find_grocery_section('Pantry'),
+      grocery_section: find_grocery_section('Pantry', user),
       store_section: find_store_section('Center Aisles'), emoji: 'U+1F370' }
   ])
 
@@ -142,17 +142,21 @@ banana_bread = Recipe.create!(
 
 puts "Creating recipe ingredients..."
 RecipeIngredient.create!([
-     { recipe: banana_bread, grocery: Grocery.find_by(name: 'Bananas'), quantity: 3, unit: piece },
-     { recipe: banana_bread, grocery: Grocery.find_by(name: 'Flour'), quantity: 2, unit: cup },
-     { recipe: banana_bread, grocery: Grocery.find_by(name: 'Sugar'), quantity: 1, unit: cup },
-     { recipe: banana_bread, grocery: Grocery.find_by(name: 'Eggs'), quantity: 2, unit: piece }
+     { recipe: banana_bread, grocery: Grocery.find_by(name: 'Bananas', user: user), quantity: 3, unit: piece },
+     { recipe: banana_bread, grocery: Grocery.find_by(name: 'Flour', user: user), quantity: 2, unit: cup },
+     { recipe: banana_bread, grocery: Grocery.find_by(name: 'Sugar', user: user), quantity: 1, unit: cup },
+     { recipe: banana_bread, grocery: Grocery.find_by(name: 'Eggs', user: user), quantity: 2, unit: piece }
    ])
 
 puts "Creating grocery list items..."
+bananas = Grocery.find_by(name: 'Bananas', user: user)
+milk = Grocery.find_by(name: 'Milk', user: user)
+chicken = Grocery.find_by(name: 'Chicken Thighs', user: user)
+
 GroceryListItem.create!([
-      { user: user, grocery: Grocery.find_by(name: 'Bananas'), quantity: 1, unit: dozen, notes: 'For banana bread', purchased: false },
-      { user: user, grocery: Grocery.find_by(name: 'Milk'), quantity: 64, unit: fl_oz, notes: 'Running low', purchased: false },
-      { user: user, grocery: Grocery.find_by(name: 'Chicken Breast'), quantity: 2, unit: pound, notes: 'For meal prep', purchased: true }
+      { user: user, grocery: bananas, quantity: 1, unit: dozen, notes: 'For banana bread', purchased: false },
+      { user: user, grocery: milk, quantity: 64, unit: fl_oz, notes: 'Running low', purchased: false },
+      { user: user, grocery: chicken, quantity: 2, unit: pound, notes: 'For meal prep', purchased: true }
     ])
 
 puts "Seed completed successfully!"
