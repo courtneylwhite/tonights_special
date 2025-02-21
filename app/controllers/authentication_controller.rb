@@ -4,7 +4,10 @@ class AuthenticationController < ApplicationController
   helper Devise::Controllers::Helpers
   helper_method :resource_name, :resource_class, :devise_mapping
   def index
-    # This is necessary to make resource available
+    @resource = resource_class.new
+  end
+
+  def sign_up
     @resource = resource_class.new
   end
 
