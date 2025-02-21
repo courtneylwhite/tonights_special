@@ -1,3 +1,6 @@
-<%= react_component("Pantry", {
-  groceries: @grouped_groceries
-}) %>
+<div data-turbo="false">
+  <%= react_component("Pantry", {
+    groceries: @grouped_groceries.as_json,
+    key: Time.current.to_i  # Force React to create a new instance
+  }) %>
+</div>

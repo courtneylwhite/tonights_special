@@ -2,8 +2,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # Optional: Add custom logic for sign up
   def create
     super do |resource|
-      # Add any custom logic after successful registration
-      # For example, welcome email, logging, etc.
+      if resource.persisted?
+        response.headers["Turbo-Visit-Control"] = "reload"
+      end
     end
   end
 
