@@ -2,6 +2,6 @@ FactoryBot.define do
   factory :grocery_section do
     association :user
     name { "bread" }
-    display_order { 1 }
+    sequence(:display_order) { |n| n }
   end
 end

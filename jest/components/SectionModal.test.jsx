@@ -17,7 +17,6 @@ describe('SectionModal', () => {
     it('renders form fields when open', () => {
         render(<SectionModal {...mockProps} />);
         expect(screen.getByLabelText('Section Name')).toBeInTheDocument();
-        expect(screen.getByLabelText('Display Order')).toBeInTheDocument();
     });
 
     it('handles form submission', async () => {
@@ -29,7 +28,6 @@ describe('SectionModal', () => {
         render(<SectionModal {...mockProps} />);
 
         fireEvent.change(screen.getByLabelText('Section Name'), { target: { value: 'Fruits' } });
-        fireEvent.change(screen.getByLabelText('Display Order'), { target: { value: '1' } });
 
         fireEvent.submit(screen.getByRole('button', { name: /create section/i }));
 

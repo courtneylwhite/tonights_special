@@ -17,7 +17,7 @@ RSpec.describe GroceryPresenter do
           name: "Test1",
           user: user,
           grocery_section: fruits_section,
-          store_section: create(:store_section),
+          store_section: create(:store_section, user: user),
           unit: unit,
           quantity: 5
         )
@@ -26,7 +26,7 @@ RSpec.describe GroceryPresenter do
           name: "Test2",
           user: user,
           grocery_section: fruits_section,
-          store_section: create(:store_section),
+          store_section: create(:store_section, user: user),
           unit: unit,
           quantity: 3
         )
@@ -35,7 +35,7 @@ RSpec.describe GroceryPresenter do
           name: "Test3",
           user: user,
           grocery_section: veggies_section,
-          store_section: create(:store_section),
+          store_section: create(:store_section, user: user),
           unit: unit,
           quantity: 6
         )

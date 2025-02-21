@@ -1,6 +1,7 @@
 FactoryBot.define do
   factory :store_section do
+    association :user
     sequence(:name) { |n| "Grocery Aisle #{n}" }
-    display_order { 1 }
+    sequence(:display_order) { |n| n }
   end
 end
