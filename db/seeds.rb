@@ -81,7 +81,7 @@ store_sections = StoreSection.create!([
 puts "Creating groceries..."
 # Helper method to find sections by name
 def find_grocery_section(name, user)
-  GrocerySection.find_by(name: name, user: user )
+  GrocerySection.find_by(name: name, user: user)
 end
 
 def find_store_section(name)

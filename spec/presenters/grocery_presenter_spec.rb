@@ -10,7 +10,7 @@ RSpec.describe GroceryPresenter do
     before(:each) { Grocery.destroy_all }
 
     context 'with test data' do
-      let(:sections) { [fruits_section, veggies_section, dairy_section] }
+      let(:sections) { [ fruits_section, veggies_section, dairy_section ] }
 
       it 'groups groceries by their section' do
         g1 = Grocery.create!(
@@ -40,7 +40,7 @@ RSpec.describe GroceryPresenter do
           quantity: 6
         )
 
-        result = described_class.grouped_groceries([g1, g2, g3], sections)
+        result = described_class.grouped_groceries([ g1, g2, g3 ], sections)
         expect(result.keys).to contain_exactly('Fruits', 'Vegetables', 'Dairy')
         expect(result['Fruits'].length).to eq(2)
         expect(result['Vegetables'].length).to eq(1)
@@ -49,7 +49,7 @@ RSpec.describe GroceryPresenter do
 
       it 'formats each grocery correctly' do
         grocery = create(:grocery, user: user, grocery_section: fruits_section, unit: unit, quantity: 5)
-        result = described_class.grouped_groceries([grocery], sections)
+        result = described_class.grouped_groceries([ grocery ], sections)
 
         first_grocery = result['Fruits'].first
         expect(first_grocery).to include(
@@ -63,13 +63,13 @@ RSpec.describe GroceryPresenter do
 
       it 'includes empty sections' do
         grocery = create(:grocery, user: user, grocery_section: fruits_section, unit: unit)
-        result = described_class.grouped_groceries([grocery], sections)
+        result = described_class.grouped_groceries([ grocery ], sections)
         expect(result['Dairy']).to eq([])
       end
     end
 
     context 'with no groceries' do
-      let(:sections) { [fruits_section, veggies_section, dairy_section] }
+      let(:sections) { [ fruits_section, veggies_section, dairy_section ] }
 
       it 'returns empty arrays for all sections' do
         result = described_class.grouped_groceries([], sections)
@@ -81,7 +81,7 @@ RSpec.describe GroceryPresenter do
     context 'with no sections' do
       it 'returns an empty hash' do
         grocery = create(:grocery, user: user, grocery_section: fruits_section, unit: unit)
-        result = described_class.grouped_groceries([grocery], [])
+        result = described_class.grouped_groceries([ grocery ], [])
         expect(result).to be_empty
       end
     end
