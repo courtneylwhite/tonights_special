@@ -7,17 +7,23 @@ const ErrorAlert = ({ message }) => (
     </div>
 );
 
-const SectionModal = ({ isOpen, onClose, onSuccess }) => {
+const SectionModal = ({ isOpen, onClose, onSuccess, sections = 0 }) => {
     const [formData, setFormData] = useState({
-        name: '',
-        display_order: ''
+        name: ''
     });
     const [error, setError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Reset form data when modal is opened
+    React.useEffect(() => {
+        if (isOpen) {
+            setFormData({ name: '' });
+            setError(null);
+        }
+    }, [isOpen]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Prevent Turbo from handling the form submission
         e.stopPropagation();
 
         setError(null);
@@ -29,16 +35,20 @@ const SectionModal = ({ isOpen, onClose, onSuccess }) => {
                 throw new Error('CSRF token not found');
             }
 
-            // Disable Turbo for this request
+            const submitData = {
+                ...formData,
+                display_order: sections + 1
+            };
+
             const response = await fetch('/grocery_sections', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
                     'X-CSRF-Token': csrf,
-                    'Turbo-Frame': 'false'  // Tell Turbo to ignore this request
+                    'Turbo-Frame': 'false'
                 },
-                body: JSON.stringify({ grocery_section: formData })
+                body: JSON.stringify({ grocery_section: submitData })
             });
 
             const responseText = await response.text();
@@ -58,13 +68,14 @@ const SectionModal = ({ isOpen, onClose, onSuccess }) => {
                 setError(errorMessage);
                 return;
             }
+
+            // Reset form data after successful submission
+            setFormData({ name: '' });
+
             if (onSuccess) {
                 onSuccess(data);
             }
             onClose();
-
-            // Manually trigger a page refresh if needed
-            // window.location.reload();
 
         } catch (error) {
             setError('An unexpected error occurred. Please try again.');
@@ -100,7 +111,7 @@ const SectionModal = ({ isOpen, onClose, onSuccess }) => {
                 <form
                     onSubmit={handleSubmit}
                     className="space-y-4"
-                    data-turbo="false" // Disable Turbo for this form
+                    data-turbo="false"
                 >
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
@@ -111,22 +122,6 @@ const SectionModal = ({ isOpen, onClose, onSuccess }) => {
                             id="name"
                             name="name"
                             value={formData.name}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-white placeholder-gray-400"
-                            required
-                            disabled={isSubmitting}
-                        />
-                    </div>
-
-                    <div>
-                        <label htmlFor="display_order" className="block text-sm font-medium text-gray-300 mb-2">
-                            Display Order
-                        </label>
-                        <input
-                            type="number"
-                            id="display_order"
-                            name="display_order"
-                            value={formData.display_order}
                             onChange={handleChange}
                             className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-white placeholder-gray-400"
                             required

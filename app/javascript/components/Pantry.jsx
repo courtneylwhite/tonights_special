@@ -30,6 +30,9 @@ const Pantry = ({ groceries = {} }) => {
         }
     };
 
+    const handleSectionAdded = async (newSection) => {
+        await refreshData();
+    };
     const unicodeToEmoji = (unicodeString) => {
         const hex = unicodeString.replace('U+', '');
         return String.fromCodePoint(parseInt(hex, 16));
@@ -45,9 +48,6 @@ const Pantry = ({ groceries = {} }) => {
     );
     const handleAddSection = () => {
         setIsModalOpen(true);
-    };
-    const handleSectionAdded = async (newSection) => {
-        await refreshData();
     };
     const handleAddItem = () => {
         setIsItemModalOpen(true);
@@ -146,6 +146,7 @@ const Pantry = ({ groceries = {} }) => {
                 <SectionModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
+                    sections={Object.keys(groceries || {}).length}
                     onSuccess={handleSectionAdded}
                 />
 
