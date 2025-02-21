@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :store_section do
-    name { "bread / buns" }
+    sequence(:name) { |n| "Grocery Aisle #{n}" }
     display_order { 1 }
   end
 end

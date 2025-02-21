@@ -4,8 +4,8 @@ FactoryBot.define do
     association :store_section
     association :grocery_section
     association :unit
-    name { "Test Grocery" }
+    sequence(:name) { |n| "Grocery Item #{n}" }
     quantity { 1.0 }
-    emoji { "U+1F34E" } # apple emoji
+    emoji { "U+1F34E" }
   end
 end
