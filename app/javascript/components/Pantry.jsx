@@ -7,6 +7,29 @@ import ToggleButton from './ToggleButton';
 import Shelf from './Shelf';
 
 const Pantry = ({ groceries = {} }) => {
+    const [groceryData, setGroceryData] = useState(groceries);
+    const refreshData = async () => {
+        try {
+            const response = await fetch('/groceries', {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await response.json();
+            setGroceryData(data);
+
+            // Update openShelves state with new sections
+            setOpenShelves(
+                Object.keys(data || {}).reduce((acc, category) => ({
+                    ...acc,
+                    [category]: true
+                }), {})
+            );
+        } catch (error) {
+            console.error('Failed to refresh groceries:', error);
+        }
+    };
+
     const unicodeToEmoji = (unicodeString) => {
         const hex = unicodeString.replace('U+', '');
         return String.fromCodePoint(parseInt(hex, 16));
@@ -23,6 +46,9 @@ const Pantry = ({ groceries = {} }) => {
     const handleAddSection = () => {
         setIsModalOpen(true);
     };
+    const handleSectionAdded = async (newSection) => {
+        await refreshData();
+    };
     const handleAddItem = () => {
         setIsItemModalOpen(true);
     };
@@ -38,13 +64,13 @@ const Pantry = ({ groceries = {} }) => {
     const toggleAll = () => {
         const areAllOpen = Object.values(openShelves).every(Boolean);
         setOpenShelves(
-            Object.keys(groceries || {}).reduce((acc, category) => ({
+            Object.keys(groceryData || {}).reduce((acc, category) => ({
                 ...acc,
                 [category]: !areAllOpen
             }), {})
         );
     };
-    const filteredGroceries = Object.entries(groceries || {})
+    const filteredGroceries = Object.entries(groceryData || {})
         .sort(([, a], [, b]) => a[0]?.display_order - b[0]?.display_order)
         .reduce((acc, [category, items]) => {
             acc[category] = items.filter(item =>
@@ -62,7 +88,7 @@ const Pantry = ({ groceries = {} }) => {
                     <h1 className="text-center mb-8">
                         Culinary Inventory
                     </h1>
-                    {Object.keys(groceries || {}).length > 0 && (
+                    {Object.keys(groceryData || {}).length > 0 && (
                         <div className="flex items-center gap-4 max-w-2xl mx-auto">
                             <SearchBar
                                 searchTerm={searchTerm}
@@ -95,7 +121,7 @@ const Pantry = ({ groceries = {} }) => {
                         </button>
                     </div>
 
-                    {Object.keys(groceries || {}).length === 0 ? (
+                    {Object.keys(groceryData || {}).length === 0 ? (
                         <div className="text-center text-gray-400 py-12">
                             <p>No groceries in your pantry yet.</p>
                         </div>
@@ -120,6 +146,7 @@ const Pantry = ({ groceries = {} }) => {
                 <SectionModal
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
+                    onSuccess={handleSectionAdded}
                 />
 
                 <ItemModal

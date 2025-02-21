@@ -1,5 +1,4 @@
 class AuthenticationController < ApplicationController
-  # Optional: Redirect if already logged in
   before_action :redirect_if_authenticated
   helper Devise::Controllers::Helpers
   helper_method :resource_name, :resource_class, :devise_mapping
