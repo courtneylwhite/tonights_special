@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_20_001443) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_21_153558) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -56,6 +56,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_20_001443) do
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["display_order"], name: "index_grocery_sections_on_display_order"
+    t.index ["user_id", "display_order"], name: "index_grocery_sections_on_user_id_and_display_order", unique: true
     t.index ["user_id"], name: "index_grocery_sections_on_user_id"
   end
 
@@ -90,6 +91,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_20_001443) do
     t.integer "display_order"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id", "display_order"], name: "index_store_sections_on_user_id_and_display_order", unique: true
+    t.index ["user_id"], name: "index_store_sections_on_user_id"
   end
 
   create_table "unit_conversions", force: :cascade do |t|
@@ -136,6 +140,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_20_001443) do
   add_foreign_key "recipe_ingredients", "recipes"
   add_foreign_key "recipe_ingredients", "units"
   add_foreign_key "recipes", "users"
+  add_foreign_key "store_sections", "users"
   add_foreign_key "unit_conversions", "units", column: "from_unit_id"
   add_foreign_key "unit_conversions", "units", column: "to_unit_id"
 end

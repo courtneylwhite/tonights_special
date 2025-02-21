@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe GroceriesController, type: :controller do
   let(:user) { create(:user) }
   let(:grocery_section) { create(:grocery_section, name: 'Produce', user: user) }
-  let(:store_section) { create(:store_section, name: 'Main Store') }
+  let(:store_section) { create(:store_section, name: 'Main Store', user: user) }
   let(:unit) { create(:unit, name: 'pieces', abbreviation: 'pcs') }
   let!(:grocery) {
     create(:grocery,
