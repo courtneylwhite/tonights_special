@@ -6,6 +6,17 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_db
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
       - uses: actions/checkout@v3
 
@@ -24,6 +35,18 @@ jobs:
         run: |
           bundle install
           yarn install
+
+      - name: Set up database
+        env:
+          RAILS_ENV: test
+          POSTGRES_HOST: localhost
+          POSTGRES_DB: tonights_special_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          DATABASE_URL: postgres://postgres:${{ secrets.POSTGRES_PASSWORD }}@localhost:5432/tonights_special_test
+          run: |
+            bundle exec rails db:create RAILS_ENV=test
+            bundle exec rails db:schema:load RAILS_ENV=test
 
       - name: Run frontend tests
         run: yarn test --coverage

@@ -51,3 +51,6 @@ yarn-debug.log*
 .env
 .env.*
 EOL
+
+# Ignore coverage files
+coverage/
