@@ -70,4 +70,5 @@ group :test do
   gem "selenium-webdriver"
   gem "rails-controller-testing"
   gem "shoulda-matchers", "~> 6.4"
+  gem "simplecov", require: false
 end

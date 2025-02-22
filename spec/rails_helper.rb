@@ -1,4 +1,5 @@
-
+require 'simplecov'
+SimpleCov.start 'rails'
 require 'spec_helper'
 require 'factory_bot'
 ENV['RAILS_ENV'] ||= 'test'
