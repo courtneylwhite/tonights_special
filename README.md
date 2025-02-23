@@ -56,6 +56,25 @@ I have made this repository public as a way to display my work but this is not a
     - RSpec (Backend)
     - Jest (Frontend)
 
+## Development Tools
+
+### Dependabot
+
+This repository uses GitHub's Dependabot to keep dependencies up to date. Dependabot automatically creates pull requests when:
+- New versions of installed packages are released
+- Security vulnerabilities are discovered in existing dependencies
+
+Pull requests include:
+- Detailed changelog information
+- Compatibility information
+- Security advisory details (if applicable)
+
+### Code Coverage
+
+Code coverage is tracked using CodeCov, which provides detailed reports on test coverage across the codebase. The CodeCov badge at the top of this README shows the current coverage status for the main branch.
+
+Coverage reports are automatically generated and uploaded to CodeCov during CI/CD pipeline execution.
+
 ## Future Planned Features
 
 - [ ] Ingredient conversions
