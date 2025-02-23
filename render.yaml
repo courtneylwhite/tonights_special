@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: tonights-special
+    env: ruby
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec rails s"
+    envVars:
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tonights_special_db
+          property: connectionString
+
+databases:
+  - name: tonights_special_db
+    databaseName: tonights_special
+    ipAllowList: []

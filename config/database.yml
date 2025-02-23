@@ -17,20 +17,18 @@ test:
 
 # Keep your production config as is
 production:
-  primary: &primary_production
+  primary:
     <<: *default
-    database: tonights_special_production
-    username: tonights_special
-    password: <%= ENV["TONIGHTS_SPECIAL_DATABASE_PASSWORD"] %>
+    url: <%= ENV['DATABASE_URL'] %>
   cache:
-    <<: *primary_production
-    database: tonights_special_production_cache
+    <<: *default
+    url: <%= ENV['DATABASE_URL'] %>
     migrations_paths: db/cache_migrate
   queue:
-    <<: *primary_production
-    database: tonights_special_production_queue
+    <<: *default
+    url: <%= ENV['DATABASE_URL'] %>
     migrations_paths: db/queue_migrate
   cable:
-    <<: *primary_production
-    database: tonights_special_production_cable
+    <<: *default
+    url: <%= ENV['DATABASE_URL'] %>
     migrations_paths: db/cable_migrate
