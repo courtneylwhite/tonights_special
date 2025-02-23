@@ -8,6 +8,7 @@ class GroceriesController < ApplicationController
     @groceries = current_user.groceries.includes(:grocery_section, :unit)
     @grocery_sections = current_user.grocery_sections.order(display_order: :asc)
     @grouped_groceries = GroceryPresenter.grouped_groceries(@groceries, @grocery_sections)
+    @units = Unit.all
 
     respond_to do |format|
       format.html # This will render your index.html.erb
@@ -35,8 +36,10 @@ class GroceriesController < ApplicationController
     if @grocery.save
       render json: @grocery, status: :created
     else
-      render json: { error: @grocery.errors.full_messages.join(", ") },
-             status: :unprocessable_entity
+      render json: {
+          error: @grocery.errors.full_messages.join(", "),
+          details: @grocery.errors.details
+      }, status: :unprocessable_entity
     end
   end
 

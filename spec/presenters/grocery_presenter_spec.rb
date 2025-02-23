@@ -42,16 +42,16 @@ RSpec.describe GroceryPresenter do
 
         result = described_class.grouped_groceries([ g1, g2, g3 ], sections)
         expect(result.keys).to contain_exactly('Fruits', 'Vegetables', 'Dairy')
-        expect(result['Fruits'].length).to eq(2)
-        expect(result['Vegetables'].length).to eq(1)
-        expect(result['Dairy']).to be_empty
+        expect(result['Fruits'][:items].length).to eq(2)
+        expect(result['Vegetables'][:items].length).to eq(1)
+        expect(result['Dairy'][:items]).to be_empty
       end
 
       it 'formats each grocery correctly' do
         grocery = create(:grocery, user: user, grocery_section: fruits_section, unit: unit, quantity: 5)
         result = described_class.grouped_groceries([ grocery ], sections)
 
-        first_grocery = result['Fruits'].first
+        first_grocery = result['Fruits'][:items].first
         expect(first_grocery).to include(
                                    id: grocery.id,
                                    name: grocery.name,
@@ -64,17 +64,17 @@ RSpec.describe GroceryPresenter do
       it 'includes empty sections' do
         grocery = create(:grocery, user: user, grocery_section: fruits_section, unit: unit)
         result = described_class.grouped_groceries([ grocery ], sections)
-        expect(result['Dairy']).to eq([])
+        expect(result['Dairy'][:items]).to eq([])
       end
     end
 
     context 'with no groceries' do
       let(:sections) { [ fruits_section, veggies_section, dairy_section ] }
 
-      it 'returns empty arrays for all sections' do
+      it 'returns empty items arrays for all sections' do
         result = described_class.grouped_groceries([], sections)
         expect(result.keys).to contain_exactly('Fruits', 'Vegetables', 'Dairy')
-        expect(result.values).to all(be_empty)
+        expect(result.values).to all(satisfy { |section| section[:items].empty? })
       end
     end
 

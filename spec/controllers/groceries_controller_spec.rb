@@ -37,9 +37,9 @@ RSpec.describe GroceriesController, type: :controller do
       it 'groups groceries by section name' do
         get :index
         grouped = assigns(:grouped_groceries)
-        expect(grouped['Produce'].first[:name]).to eq('Apple')
-        expect(grouped['Produce'].first[:quantity]).to eq(5)
-        expect(grouped['Produce'].first[:emoji]).to eq('U+1F34E')
+        expect(grouped['Produce'][:items].first[:name]).to eq('Apple')
+        expect(grouped['Produce'][:items].first[:quantity]).to eq(5)
+        expect(grouped['Produce'][:items].first[:emoji]).to eq('U+1F34E')
       end
     end
 

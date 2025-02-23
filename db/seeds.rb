@@ -69,13 +69,13 @@ grocery_sections = GrocerySection.create!([
 
 puts "Creating store sections..."
 store_sections = StoreSection.create!([
-    { name: 'Front of Store', display_order: 1 },
-    { name: 'Produce Section', display_order: 2 },
-    { name: 'Meat Counter', display_order: 3 },
-    { name: 'Dairy Wall', display_order: 4 },
-    { name: 'Center Aisles', display_order: 5 },
-    { name: 'Frozen Section', display_order: 6 },
-    { name: 'Bakery Area', display_order: 7 }
+    { name: 'Front of Store', display_order: 1, user: user },
+    { name: 'Produce Section', display_order: 2, user: user },
+    { name: 'Meat Counter', display_order: 3, user: user },
+    { name: 'Dairy Wall', display_order: 4, user: user },
+    { name: 'Center Aisles', display_order: 5, user: user },
+    { name: 'Frozen Section', display_order: 6, user: user },
+    { name: 'Bakery Area', display_order: 7, user: user }
   ])
 
 puts "Creating groceries..."

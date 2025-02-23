@@ -6,7 +6,11 @@ class GroceryPresenter
 
     # Create a hash with all sections, even empty ones
     sections.each_with_object({}) do |section, hash|
-      hash[section.name] = grouped[section.name] || []
+      hash[section.name] = {
+        items: grouped[section.name] || [],
+        id: section.id,
+        display_order: section.display_order
+      }
     end
   end
 
