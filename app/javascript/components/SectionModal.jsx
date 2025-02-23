@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 const ErrorAlert = ({ message }) => (
@@ -8,33 +8,26 @@ const ErrorAlert = ({ message }) => (
 );
 
 const SectionModal = ({ isOpen, onClose, onSuccess, sections = 0 }) => {
-    const [formData, setFormData] = useState({
+    const initialFormState = {
         name: ''
-    });
+    }
+    const [formData, setFormData] = useState(initialFormState);
     const [error, setError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Reset form data when modal is opened
-    React.useEffect(() => {
+    useEffect(() => {
         if (isOpen) {
-            setFormData({ name: '' });
+            setFormData(initialFormState);
             setError(null);
         }
     }, [isOpen]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        e.stopPropagation();
-
         setError(null);
         setIsSubmitting(true);
 
         try {
-            const csrf = document.querySelector('[name="csrf-token"]')?.content;
-            if (!csrf) {
-                throw new Error('CSRF token not found');
-            }
-
             const submitData = {
                 ...formData,
                 display_order: sections + 1
@@ -44,22 +37,12 @@ const SectionModal = ({ isOpen, onClose, onSuccess, sections = 0 }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-Token': csrf,
-                    'Turbo-Frame': 'false'
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ grocery_section: submitData })
             });
 
-            const responseText = await response.text();
-            let data;
-            try {
-                data = JSON.parse(responseText);
-            } catch (e) {
-                console.log('Raw response:', responseText);
-                setError('Server returned an invalid response. You might need to log in again.');
-                return;
-            }
+            const data = await response.json();
 
             if (!response.ok) {
                 const errorMessage = data.errors ?
@@ -69,9 +52,7 @@ const SectionModal = ({ isOpen, onClose, onSuccess, sections = 0 }) => {
                 return;
             }
 
-            // Reset form data after successful submission
-            setFormData({ name: '' });
-
+            setFormData(initialFormState);
             if (onSuccess) {
                 onSuccess(data);
             }
@@ -85,9 +66,10 @@ const SectionModal = ({ isOpen, onClose, onSuccess, sections = 0 }) => {
     };
 
     const handleChange = (e) => {
+        const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [e.target.name]: e.target.value
+            [name]: value
         }));
     };
 
@@ -101,18 +83,14 @@ const SectionModal = ({ isOpen, onClose, onSuccess, sections = 0 }) => {
                     className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors duration-200"
                     disabled={isSubmitting}
                 >
-                    <X size={20} />
+                    <X size={20}/>
                 </button>
 
                 <h2 className="text-xl font-semibold mb-6 text-white">Add New Section</h2>
 
-                {error && <ErrorAlert message={error} />}
+                {error && <ErrorAlert message={error}/>}
 
-                <form
-                    onSubmit={handleSubmit}
-                    className="space-y-4"
-                    data-turbo="false"
-                >
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
                             Section Name

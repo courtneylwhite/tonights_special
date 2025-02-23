@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Plus } from 'lucide-react';
 import SectionModal from './SectionModal';
 import ItemModal from './ItemModal';
@@ -6,19 +6,25 @@ import SearchBar from './SearchBar';
 import ToggleButton from './ToggleButton';
 import Shelf from './Shelf';
 
-const Pantry = ({ groceries = {} }) => {
+const Pantry = ({ groceries = {}, units = [] }) => {
     const [groceryData, setGroceryData] = useState(groceries);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+    const [openShelves, setOpenShelves] = useState(
+        Object.keys(groceries || {}).reduce((acc, category) => ({
+            ...acc,
+            [category]: true
+        }), {})
+    );
+
     const refreshData = async () => {
         try {
             const response = await fetch('/groceries', {
-                headers: {
-                    'Accept': 'application/json'
-                }
+                headers: { 'Accept': 'application/json' }
             });
             const data = await response.json();
             setGroceryData(data);
-
-            // Update openShelves state with new sections
             setOpenShelves(
                 Object.keys(data || {}).reduce((acc, category) => ({
                     ...acc,
@@ -30,37 +36,18 @@ const Pantry = ({ groceries = {} }) => {
         }
     };
 
-    const handleSectionAdded = async (newSection) => {
-        await refreshData();
-    };
-    const unicodeToEmoji = (unicodeString) => {
-        const hex = unicodeString.replace('U+', '');
-        return String.fromCodePoint(parseInt(hex, 16));
-    };
-    const [searchTerm, setSearchTerm] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isItemModalOpen, setIsItemModalOpen] = useState(false);
-    const [openShelves, setOpenShelves] = useState(
-        Object.keys(groceries || {}).reduce((acc, category) => ({
-            ...acc,
-            [category]: true
-        }), {})
-    );
-    const handleAddSection = () => {
-        setIsModalOpen(true);
-    };
-    const handleAddItem = () => {
-        setIsItemModalOpen(true);
-    };
+    const handleSectionAdded = () => refreshData();
+    const handleItemAdded = () => refreshData();
+    const handleAddSection = () => setIsModalOpen(true);
+    const handleAddItem = () => setIsItemModalOpen(true);
     const handleGroceryClick = (groceryId) => {
         window.location.href = `/groceries/${groceryId}`;
     };
+
     const toggleShelf = (category) => {
-        setOpenShelves(prev => ({
-            ...prev,
-            [category]: !prev[category]
-        }));
+        setOpenShelves(prev => ({ ...prev, [category]: !prev[category] }));
     };
+
     const toggleAll = () => {
         const areAllOpen = Object.values(openShelves).every(Boolean);
         setOpenShelves(
@@ -70,25 +57,43 @@ const Pantry = ({ groceries = {} }) => {
             }), {})
         );
     };
-    const filteredGroceries = Object.entries(groceryData || {})
-        .sort(([, a], [, b]) => a[0]?.display_order - b[0]?.display_order)
-        .reduce((acc, [category, items]) => {
-            acc[category] = items.filter(item =>
-                item?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-            return acc;
-        }, {});
+
+    const processedData = useMemo(() => {
+        const filteredGroceries = Object.entries(groceryData || {})
+            .sort(([, a], [, b]) => a[0]?.display_order - b[0]?.display_order)
+            .reduce((acc, [category, sectionData]) => {
+                acc[category] = {
+                    ...sectionData,
+                    items: sectionData.items.filter(item =>
+                        item?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+                    )
+                }
+                return acc;
+            }, {});
+
+        const grocerySections = Object.entries(groceryData || {}).map(([name, data]) => ({
+            id: data.id,
+            name: name
+        }));
+
+        return { filteredGroceries, grocerySections };
+    }, [groceryData, searchTerm]);
+
     const areAllOpen = Object.values(openShelves).every(Boolean);
+    const hasGroceries = Object.keys(groceryData || {}).length > 0;
+    const unicodeToEmoji = (unicodeString) => {
+        const hex = unicodeString.replace('U+', '');
+        return String.fromCodePoint(parseInt(hex, 16));
+    };
 
     return (
         <turbo-frame id="groceries_content">
             <div className="min-h-screen bg-black text-white relative">
-                {/* Header with search */}
                 <div className="bg-black/80 backdrop-blur-sm border-b border-gray-800 p-8 sticky top-0 z-10">
                     <h1 className="text-center mb-8">
                         Culinary Inventory
                     </h1>
-                    {Object.keys(groceryData || {}).length > 0 && (
+                    {hasGroceries && (
                         <div className="flex items-center gap-4 max-w-2xl mx-auto">
                             <SearchBar
                                 searchTerm={searchTerm}
@@ -102,7 +107,6 @@ const Pantry = ({ groceries = {} }) => {
                     )}
                 </div>
 
-                {/* Cabinet/Shelving Layout */}
                 <div className="max-w-5xl mx-auto p-6 relative z-0">
                     <div className="flex justify-end mb-4 gap-4">
                         <button
@@ -121,17 +125,17 @@ const Pantry = ({ groceries = {} }) => {
                         </button>
                     </div>
 
-                    {Object.keys(groceryData || {}).length === 0 ? (
+                    {!hasGroceries ? (
                         <div className="text-center text-gray-400 py-12">
                             <p>No groceries in your pantry yet.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {Object.entries(filteredGroceries).map(([category, items], categoryIndex) => (
+                            {Object.entries(processedData.filteredGroceries).map(([category, sectionData], categoryIndex) => (
                                 <Shelf
                                     key={category}
                                     category={category}
-                                    items={items}
+                                    items={sectionData.items}
                                     categoryIndex={categoryIndex}
                                     isOpen={openShelves[category]}
                                     onToggle={toggleShelf}
@@ -153,6 +157,9 @@ const Pantry = ({ groceries = {} }) => {
                 <ItemModal
                     isOpen={isItemModalOpen}
                     onClose={() => setIsItemModalOpen(false)}
+                    grocerySections={processedData.grocerySections}
+                    units={units}
+                    onItemAdded={handleItemAdded}
                 />
             </div>
         </turbo-frame>
