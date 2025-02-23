@@ -1,3 +1,4 @@
+# spec/controllers/home_controller_spec.rb
 require 'rails_helper'
 
 RSpec.describe HomeController, type: :controller do
@@ -12,10 +13,6 @@ RSpec.describe HomeController, type: :controller do
 
     it 'renders the index template' do
       expect(response).to render_template('index')
-    end
-
-    it 'assigns @authenticate_path' do
-      expect(assigns(:authenticate_path)).to eq(authenticate_path)
     end
   end
 end

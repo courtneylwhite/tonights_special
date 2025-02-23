@@ -1,18 +1,26 @@
 import React from 'react';
-import { render, act } from '@testing-library/react';
+import { render, act, fireEvent } from '@testing-library/react';
 import AnimatedTitle from '@/components/AnimatedTitle';
+
+// Mock window.location
+const mockLocation = {
+    href: ''
+};
+Object.defineProperty(window, 'location', {
+    value: mockLocation,
+    writable: true
+});
 
 // Mock getTotalLength since it's not available in JSDOM
 Element.prototype.getTotalLength = jest.fn().mockReturnValue(100);
 
 describe('AnimatedTitle', () => {
     beforeEach(() => {
-        // Clear all timers before each test
         jest.useFakeTimers();
+        window.location.href = '';
     });
 
     afterEach(() => {
-        // Restore timers after each test
         jest.useRealTimers();
         jest.clearAllMocks();
     });
@@ -26,9 +34,11 @@ describe('AnimatedTitle', () => {
         const { container } = render(<AnimatedTitle />);
         const paths = container.querySelectorAll('path');
         const dots = container.querySelectorAll('circle');
+        const button = container.querySelector('button');
 
-        expect(paths.length).toBe(26); // Updated to match your actual SVG
+        expect(paths.length).toBe(26);
         expect(dots.length).toBe(2);
+        expect(button).toBeInTheDocument();
     });
 
     it('initializes paths with correct stroke properties', () => {
@@ -56,18 +66,19 @@ describe('AnimatedTitle', () => {
         const { container } = render(<AnimatedTitle />);
         const dots = container.querySelectorAll('circle');
         const cloche = container.querySelector('.w-32.h-32');
+        const button = container.querySelector('button').parentElement;
 
         dots.forEach(dot => {
             expect(dot.style.opacity).toBe('0');
         });
         expect(cloche.style.opacity).toBe('0');
+        expect(button.style.opacity).toBe('0');
     });
 
     it('animates paths sequentially', () => {
         const { container } = render(<AnimatedTitle />);
-        const paths = container.querySelectorAll('path.stroke-white');
+        const paths = container.querySelectorAll('path.stroke-amber-400');
 
-        // Fast-forward through all path animations
         paths.forEach((_, index) => {
             act(() => {
                 jest.advanceTimersByTime(index === 12 ? 800 : 250);
@@ -80,63 +91,85 @@ describe('AnimatedTitle', () => {
         });
     });
 
-    it('animates dots after paths are complete', () => {
+    it('keeps dots at opacity 0 after path animations', () => {
         const { container } = render(<AnimatedTitle />);
         const dots = container.querySelectorAll('circle');
-        const totalPathTime = 250 * 20 + 550; // Normal delays plus extra for the special delay
+        const totalPathTime = 250 * 20 + 550;
 
-        // Fast-forward through path animations
         act(() => {
             jest.advanceTimersByTime(totalPathTime);
         });
 
-        // Dots remain at opacity 0 as per actual component behavior
         dots.forEach(dot => {
             expect(dot.style.opacity).toBe('0');
         });
     });
 
-    it('animates cloche last', () => {
+    it('keeps cloche and button opacity at 0 until final animation', () => {
         const { container } = render(<AnimatedTitle />);
         const cloche = container.querySelector('.w-32.h-32');
+        const button = container.querySelector('button').parentElement;
         const totalPathTime = 250 * 20 + 550;
-        const totalDotTime = 300 * 2; // 2 dots * 300ms each
+        const totalDotTime = 300 * 2;
 
-        // Fast-forward through all previous animations
         act(() => {
             jest.advanceTimersByTime(totalPathTime + totalDotTime + 100);
         });
 
-        // The actual component doesn't set a transition style
         expect(cloche.style.transition).toBe('');
         expect(cloche.style.opacity).toBe('0');
+        expect(button.style.opacity).toBe('0');
     });
 
     it('handles window resize appropriately', () => {
         const { container, rerender } = render(<AnimatedTitle />);
 
-        // Trigger a window resize
         act(() => {
             window.dispatchEvent(new Event('resize'));
         });
 
-        // Re-render component
         rerender(<AnimatedTitle />);
 
         const paths = container.querySelectorAll('path.stroke-amber-400');
         const pathsArray = Array.from(paths);
 
-        // All paths should maintain their dasharray
         paths.forEach(path => {
             expect(path.style.strokeDasharray).toBe('100');
         });
 
-        // First path maintains offset 0
         expect(pathsArray[0].style.strokeDashoffset).toBe('0');
 
-        // All other paths maintain offset 100
         pathsArray.slice(1).forEach(path => {
             expect(path.style.strokeDashoffset).toBe('100');
         });
+    });
+
+    it('handles null refs gracefully', () => {
+        const originalError = console.error;
+        console.error = jest.fn();
+
+        const { container } = render(<AnimatedTitle />);
+
+        const paths = container.querySelectorAll('path.stroke-amber-400');
+        paths[0].remove();
+
+        act(() => {
+            jest.runAllTimers();
+        });
+
+        expect(container).toBeInTheDocument();
+        console.error = originalError;
+    });
+
+    it('redirects to sign in page when button is clicked', () => {
+        const { container } = render(<AnimatedTitle />);
+        const button = container.querySelector('button');
+
+        act(() => {
+            jest.runAllTimers();
+            fireEvent.click(button);
+        });
+
+        expect(window.location.href).toBe('/users/sign_in');
     });
 });

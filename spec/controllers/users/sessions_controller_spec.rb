@@ -12,10 +12,11 @@ RSpec.describe Users::SessionsController, type: :controller do
 
     context 'with valid credentials' do
       before do
+        @request.env["HTTP_ACCEPT"] = "text/html"
+
+        # Setup warden with more permissive stubs
         warden = double(Warden::Proxy)
-        # Handle both authenticate? formats
         allow(warden).to receive(:authenticate?).with(any_args).and_return(false)
-        allow(warden).to receive(:authenticate?).with(scope: :user).and_return(true)
         allow(warden).to receive(:authenticate!).and_return(user)
         allow(warden).to receive(:user).and_return(user)
 
@@ -27,7 +28,7 @@ RSpec.describe Users::SessionsController, type: :controller do
             email: user.email,
             password: password
           }
-        }
+        }, format: :html
       end
 
       it 'signs in the user' do
@@ -45,8 +46,10 @@ RSpec.describe Users::SessionsController, type: :controller do
 
     context 'with invalid credentials' do
       before do
+        @request.env["HTTP_ACCEPT"] = "text/html"
+
+        # Setup warden for authentication failure
         warden = double(Warden::Proxy)
-        # Handle both authenticate? formats
         allow(warden).to receive(:authenticate?).with(any_args).and_return(false)
         allow(warden).to receive(:authenticate!).and_raise(Warden::NotAuthenticated)
         allow(warden).to receive(:user).and_return(nil)
@@ -59,7 +62,7 @@ RSpec.describe Users::SessionsController, type: :controller do
             email: user.email,
             password: 'wrong_password'
           }
-        }
+        }, format: :html
       end
 
       it 'does not sign in the user' do
@@ -68,6 +71,14 @@ RSpec.describe Users::SessionsController, type: :controller do
 
       it 'returns an error status' do
         expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it 'renders the new template' do
+        expect(response).to render_template(:new)
+      end
+
+      it 'sets a flash alert' do
+        expect(flash[:alert]).to eq('Invalid email or password.')
       end
     end
   end

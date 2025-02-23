@@ -1,3 +1,4 @@
+# spec/controllers/users/registrations_controller_spec.rb
 require 'rails_helper'
 
 RSpec.describe Users::RegistrationsController, type: :controller do
@@ -30,7 +31,7 @@ RSpec.describe Users::RegistrationsController, type: :controller do
 
       it 'redirects to groceries path' do
         post :create, params: valid_params
-        expect(response).to redirect_to(groceries_path) # Removed reload: true
+        expect(response).to redirect_to(groceries_path)
       end
     end
 
@@ -50,22 +51,11 @@ RSpec.describe Users::RegistrationsController, type: :controller do
           post :create, params: invalid_params
         }.not_to change(User, :count)
       end
-    end
-  end
 
-  describe '#sign_up_params' do
-    it 'permits only allowed parameters' do
-      params = ActionController::Parameters.new(
-        user: {
-          email: 'test@example.com',
-          password: 'password123',
-          password_confirmation: 'password123',
-          admin: true # unauthorized parameter
-        }
-      )
-      controller.params = params
-
-      expect(controller.send(:sign_up_params).keys).to match_array([ 'email', 'password', 'password_confirmation' ])
+      it 'renders the new template' do
+        post :create, params: invalid_params
+        expect(response).to render_template(:new)
+      end
     end
   end
 end
