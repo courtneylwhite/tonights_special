@@ -2,7 +2,8 @@
 
 ## Overview
 
-Tonight's Special is a personal application designed to assist in answering the age old question of "What's for dinner". [trytonightsspecial.com](www.trytonightsspecial.com)
+Tonight's Special is a personal application designed to assist in answering the age old question of "What's for dinner". [Tonight's Special](https://trytonightsspecial.com)
+
 
 Every day my husband wakes up at 5:30 am and by 11:00 am he is in my office coaxing me into a conversation to determine what's for dinner.
 This takes some mental gymnastics on my part to parse the current groceries we have, what recipes we could make from that, if we need to do a grocery run... 
