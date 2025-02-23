@@ -26,6 +26,7 @@ const SectionModal = ({ isOpen, onClose, onSuccess, sections = 0 }) => {
         e.preventDefault();
         setError(null);
         setIsSubmitting(true);
+        const token = document.querySelector('meta[name="csrf-token"]')?.content;
 
         try {
             const submitData = {
@@ -37,7 +38,7 @@ const SectionModal = ({ isOpen, onClose, onSuccess, sections = 0 }) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'X-CSRF-Token': token,
                 },
                 body: JSON.stringify({ grocery_section: submitData })
             });
@@ -47,7 +48,7 @@ const SectionModal = ({ isOpen, onClose, onSuccess, sections = 0 }) => {
             if (!response.ok) {
                 const errorMessage = data.errors ?
                     data.errors.join(', ') :
-                    'Failed to create section. Please try again.';
+                    'Failed to create section.';
                 setError(errorMessage);
                 return;
             }
