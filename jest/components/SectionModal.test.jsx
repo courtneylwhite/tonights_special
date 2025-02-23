@@ -47,4 +47,20 @@ describe('SectionModal', () => {
             expect(screen.getByText(/an unexpected error occurred/i)).toBeInTheDocument();
         });
     });
+
+    it('displays error message when response is not ok', async () => {
+        global.fetch.mockResolvedValueOnce({
+            ok: false,
+            json: () => Promise.resolve({ errors: null })
+        });
+
+        render(<SectionModal {...mockProps} />);
+
+        fireEvent.submit(screen.getByRole('button', { name: /create section/i }));
+
+        await waitFor(() => {
+            expect(screen.getByText('Failed to create section.')).toBeInTheDocument();
+        });
+    });
+
 });
