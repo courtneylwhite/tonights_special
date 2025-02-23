@@ -1,12 +1,12 @@
 # == Schema Information
-# id :integer, not null 
-# email :string, not null default: 
-# encrypted_password :string, not null default: 
-# reset_password_token :string, nullable 
-# reset_password_sent_at :datetime, nullable 
-# remember_created_at :datetime, nullable 
-# created_at :datetime, not null 
-# updated_at :datetime, not null 
+# id :integer, not null
+# email :string, not null default:
+# encrypted_password :string, not null default:
+# reset_password_token :string, nullable
+# reset_password_sent_at :datetime, nullable
+# remember_created_at :datetime, nullable
+# created_at :datetime, not null
+# updated_at :datetime, not null
 class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable

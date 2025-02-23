@@ -50,18 +50,49 @@ describe('Pantry', () => {
 
     it('handles shelf toggling', () => {
         render(<Pantry groceries={mockGroceries} />);
-        const shelfHeader = screen.getByText('Fruits');
+        const shelfHeader = screen.getByText('Fruits').closest('button');
+        const shelfContent = screen.getByText('Fruits')
+            .closest('.bg-gray-900\\/90')
+            .querySelector('.transition-all');
+
+        // Check initial expanded state
+        expect(shelfContent).toHaveClass('max-h-[500px]');
+        expect(shelfContent).toHaveClass('opacity-100');
+
+        // Toggle closed
         fireEvent.click(shelfHeader);
-        // You might need to check for a class or attribute that indicates collapsed state
+        expect(shelfContent).toHaveClass('max-h-0');
+        expect(shelfContent).toHaveClass('opacity-0');
+
+        // Toggle open again
+        fireEvent.click(shelfHeader);
+        expect(shelfContent).toHaveClass('max-h-[500px]');
+        expect(shelfContent).toHaveClass('opacity-100');
     });
 
     it('toggles all shelves', () => {
         render(<Pantry groceries={mockGroceries} />);
-        const toggleAllButton = screen.getByRole('button', { name: /expand all|collapse all/i });
+        const toggleAllButton = screen.getByText(/collapse all/i);
+        const shelfContent = screen.getByText('Fruits')
+            .closest('.bg-gray-900\\/90')
+            .querySelector('.transition-all');
+
+        // Initial state should be expanded
+        expect(shelfContent).toHaveClass('max-h-[500px]');
+        expect(shelfContent).toHaveClass('opacity-100');
+        expect(toggleAllButton).toHaveTextContent(/collapse all/i);
+
+        // Click to collapse all
         fireEvent.click(toggleAllButton);
-        // Add assertions for collapsed state
-        fireEvent.click(toggleAllButton);
-        // Add assertions for expanded state
+        expect(shelfContent).toHaveClass('max-h-0');
+        expect(shelfContent).toHaveClass('opacity-0');
+        expect(screen.getByText(/expand all/i)).toBeInTheDocument();
+
+        // Click to expand all
+        fireEvent.click(screen.getByText(/expand all/i));
+        expect(shelfContent).toHaveClass('max-h-[500px]');
+        expect(shelfContent).toHaveClass('opacity-100');
+        expect(screen.getByText(/collapse all/i)).toBeInTheDocument();
     });
 
     it('handles grocery item clicks', () => {
@@ -76,53 +107,57 @@ describe('Pantry', () => {
         expect(window.location.href).toBe('/groceries/1');
     });
 
-    // it('refreshes data when sections are added', async () => {
-    //     // Mock successful fetch response
-    //     global.fetch.mockResolvedValueOnce({
-    //         ok: true,
-    //         json: () => Promise.resolve(mockGroceries)
-    //     });
-    //
-    //     render(<Pantry groceries={mockGroceries} />);
-    //
-    //     // Find and render the SectionModal
-    //     fireEvent.click(screen.getByText('Section'));
-    //
-    //     // Get the SectionModal component and call its onSuccess prop directly
-    //     const modal = screen.getByText('Add New Section').closest('div');
-    //     const form = modal.querySelector('form');
-    //     fireEvent.submit(form);
-    //
-    //     // Check if fetch was called correctly
-    //     await waitFor(() => {
-    //         expect(global.fetch).toHaveBeenCalledWith('/groceries', {
-    //             headers: { 'Accept': 'application/json' }
-    //         });
-    //     });
-    // });
+    it('refreshes data when sections are added', async () => {
+        global.fetch.mockResolvedValueOnce({
+            ok: true,
+            json: () => Promise.resolve(mockGroceries)
+        });
 
-    // it('handles refresh data error', async () => {
-    //     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    //     global.fetch.mockRejectedValueOnce(new Error('Failed to fetch'));
-    //
-    //     render(<Pantry groceries={mockGroceries} />);
-    //
-    //     // Find and render the SectionModal
-    //     fireEvent.click(screen.getByText('Section'));
-    //
-    //     // Get the SectionModal component and call its onSuccess prop directly
-    //     const modal = screen.getByText('Add New Section').closest('div');
-    //     const form = modal.querySelector('form');
-    //     fireEvent.submit(form);
-    //
-    //     // Check if error was logged correctly
-    //     await waitFor(() => {
-    //         expect(consoleSpy).toHaveBeenCalledWith(
-    //             'Failed to refresh groceries:',
-    //             expect.any(Error)
-    //         );
-    //     });
-    //
-    //     consoleSpy.mockRestore();
-    // });
+        render(<Pantry groceries={mockGroceries} />);
+        fireEvent.click(screen.getByText('Section'));
+
+        const submitButton = screen.getByText('Create Section');
+        const form = submitButton.closest('form');
+        fireEvent.submit(form);
+
+        await waitFor(() => {
+            expect(global.fetch).toHaveBeenCalledWith('/groceries', {
+                headers: { 'Accept': 'application/json' }
+            });
+        });
+    });
+
+    it('handles refresh data error', async () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        // Mock the two fetch calls that will happen
+        const error = new Error('Failed to fetch');
+        global.fetch
+            .mockResolvedValueOnce({ // First call succeeds (for the modal)
+                ok: true,
+                json: () => Promise.resolve({ id: 1, name: 'Test Section' })
+            })
+            .mockRejectedValueOnce(error); // Second call fails (for the refresh)
+
+        render(<Pantry groceries={mockGroceries} />);
+
+        // Open modal and fill form
+        fireEvent.click(screen.getByText('Section'));
+        const nameInput = screen.getByLabelText('Section Name');
+        fireEvent.change(nameInput, { target: { value: 'Test Section' } });
+
+        // Submit form
+        const submitButton = screen.getByText('Create Section');
+        fireEvent.click(submitButton);
+
+        // Wait for the error to be logged
+        await waitFor(() => {
+            expect(consoleSpy).toHaveBeenCalledWith(
+                'Failed to refresh groceries:',
+                expect.any(Error)
+            );
+        }, { timeout: 3000 });
+
+        consoleSpy.mockRestore();
+    });
 });

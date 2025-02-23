@@ -31,8 +31,8 @@ namespace :model_comments do
     columns = model.columns
 
     comments = columns.map do |column|
-      nullable = column.null ? 'nullable' : 'not null'
-      default = column.default ? "default: #{column.default}" : ''
+      nullable = column.null ? "nullable" : "not null"
+      default = column.default ? "default: #{column.default}" : ""
 
       "# #{column.name} :#{column.type}, #{nullable} #{default}"
     end.join("\n")

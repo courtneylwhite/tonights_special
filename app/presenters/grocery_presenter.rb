@@ -9,7 +9,7 @@ class GroceryPresenter
       hash[section.name] = {
         items: grouped[section.name] || [],
         id: section.id,
-        display_order: section.display_order,
+        display_order: section.display_order
       }
     end
   end
@@ -23,7 +23,7 @@ class GroceryPresenter
       quantity: grocery.quantity,
       unit: grocery.unit.abbreviation,
       emoji: grocery.emoji,
-      category: grocery.grocery_section.name,
+      category: grocery.grocery_section.name
     }
   end
 end

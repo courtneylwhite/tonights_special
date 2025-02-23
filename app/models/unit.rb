@@ -1,10 +1,10 @@
 # == Schema Information
-# id :integer, not null 
-# name :string, nullable 
-# category :string, nullable 
-# abbreviation :string, nullable 
-# created_at :datetime, not null 
-# updated_at :datetime, not null 
+# id :integer, not null
+# name :string, nullable
+# category :string, nullable
+# abbreviation :string, nullable
+# created_at :datetime, not null
+# updated_at :datetime, not null
 class Unit < ApplicationRecord
   has_many :groceries
   has_many :recipe_ingredients

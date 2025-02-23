@@ -1,14 +1,14 @@
 # == Schema Information
-# id :integer, not null 
-# user_id :integer, not null 
-# store_section_id :integer, not null 
-# grocery_section_id :integer, not null 
-# name :string, not null 
-# quantity :decimal, not null 
-# unit_id :integer, not null 
-# created_at :datetime, not null 
-# updated_at :datetime, not null 
-# emoji :string, nullable 
+# id :integer, not null
+# user_id :integer, not null
+# store_section_id :integer, not null
+# grocery_section_id :integer, not null
+# name :string, not null
+# quantity :decimal, not null
+# unit_id :integer, not null
+# created_at :datetime, not null
+# updated_at :datetime, not null
+# emoji :string, nullable
 class Grocery < ApplicationRecord
   belongs_to :user
   belongs_to :store_section
