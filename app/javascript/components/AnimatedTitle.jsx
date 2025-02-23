@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-const AnimatedTitle = ( {authenticatePath} ) => {
+const AnimatedTitle = () => {
     const pathRefs = useRef([]);
     const dotRefs = useRef([]);
     const clocheRef = useRef(null);
-    const welcomeLinkRef = useRef(null);
+    const buttonRef = useRef(null);
 
     useEffect(() => {
         // Reset all paths, dots, and cloche
@@ -25,8 +25,8 @@ const AnimatedTitle = ( {authenticatePath} ) => {
             clocheRef.current.style.opacity = '0';
         }
 
-        if (welcomeLinkRef.current) {
-            welcomeLinkRef.current.style.opacity = '0';
+        if (buttonRef.current) {
+            buttonRef.current.style.opacity = '0';
         }
 
         // Animate paths sequentially
@@ -69,29 +69,16 @@ const AnimatedTitle = ( {authenticatePath} ) => {
                 if (clocheRef.current) {
                     clocheRef.current.style.transition = 'opacity 1.5s ease-in-out';
                     clocheRef.current.style.opacity = '1';
-                    welcomeLinkRef.current.style.transition = 'opacity 1s ease-in-out';
-                    welcomeLinkRef.current.style.opacity = '1';
+                    buttonRef.current.style.transition = 'opacity 1.5s ease-in-out';
+                    buttonRef.current.style.opacity = '1';
                 }
             }, dotRefs.current.length * 300 + 100);
         });
     }, []);
 
-    // Handler for the welcome link
-    const handleWelcomeClick = (e) => {
-        e.preventDefault();
-        // Use the auth status endpoint we already have
-        fetch('/api/auth/status')
-            .then(response => response.json())
-            .then(data => {
-                const destination = data.authenticated ? '/groceries' : authenticatePath;
-                window.location.href = destination;
-            })
-            .catch(() => {
-                // If there's an error, default to authenticate path
-                window.location.href = authenticatePath;
-            });
-    };
-
+    const handleContinue = () => {
+        window.location.href = '/users/sign_in';
+    }
 
     return (
         <div className="w-full min-h-screen flex flex-col justify-center items-center bg-black p-8 gap-8">
@@ -311,17 +298,12 @@ const AnimatedTitle = ( {authenticatePath} ) => {
                     className="fill-amber-400"
                 />
             </svg>
-
-            {/* Welcome Link */}
-            <div
-                ref={welcomeLinkRef}
-                className="mt-8 opacity-0"
-            >
+            <div ref={buttonRef} className="p-4">
                 <button
-                    onClick={handleWelcomeClick}
-                    className="text-amber-400 hover:text-gray-300 text-lg font-medium flex items-center transition-colors duration-300"
+                    onClick={handleContinue}
+                    className="px-5 py-2 bg-amber-400 text-black rounded-lg hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-opacity-50"
                 >
-                    Welcome <span className="ml-1"></span>
+                    Sign In
                 </button>
             </div>
         </div>
