@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import ItemModal from './ItemModal';
 import SearchBar from './SearchBar';
@@ -7,7 +7,7 @@ import Shelf from './Shelf';
 
 const Pantry = ({ groceries = {}, units = [] }) => {
     const [groceryData, setGroceryData] = useState(groceries);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredGroceryData, setFilteredGroceryData] = useState(groceries);
     const [isItemModalOpen, setIsItemModalOpen] = useState(false);
     const [openShelves, setOpenShelves] = useState(
         Object.keys(groceries || {}).reduce((acc, category) => ({
@@ -23,6 +23,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
             });
             const data = await response.json();
             setGroceryData(data);
+            setFilteredGroceryData(data); // Reset filtered data when new data is loaded
             setOpenShelves(
                 Object.keys(data || {}).reduce((acc, category) => ({
                     ...acc,
@@ -34,7 +35,6 @@ const Pantry = ({ groceries = {}, units = [] }) => {
         }
     };
 
-    const handleSectionAdded = () => refreshData();
     const handleItemAdded = () => refreshData();
     const handleAddItem = () => setIsItemModalOpen(true);
     const handleGroceryClick = (groceryId) => {
@@ -55,26 +55,19 @@ const Pantry = ({ groceries = {}, units = [] }) => {
         );
     };
 
-    const processedData = useMemo(() => {
-        const filteredGroceries = Object.entries(groceryData || {})
-            .sort(([, a], [, b]) => a[0]?.display_order - b[0]?.display_order)
-            .reduce((acc, [category, sectionData]) => {
-                acc[category] = {
-                    ...sectionData,
-                    items: sectionData.items.filter(item =>
-                        item?.name?.toLowerCase().includes(searchTerm.toLowerCase())
-                    )
-                }
-                return acc;
-            }, {});
+    // Process the grocery sections for the ItemModal
+    const grocerySections = Object.entries(groceryData || {}).map(([name, data]) => ({
+        id: data.id,
+        name: name
+    }));
 
-        const grocerySections = Object.entries(groceryData || {}).map(([name, data]) => ({
-            id: data.id,
-            name: name
-        }));
-
-        return { filteredGroceries, grocerySections };
-    }, [groceryData, searchTerm]);
+    // Sort categories by display order
+    const sortedFilteredGroceries = Object.entries(filteredGroceryData || {})
+        .sort(([, a], [, b]) => a[0]?.display_order - b[0]?.display_order)
+        .reduce((acc, [category, data]) => {
+            acc[category] = data;
+            return acc;
+        }, {});
 
     const areAllOpen = Object.values(openShelves).every(Boolean);
     const hasGroceries = Object.keys(groceryData || {}).length > 0;
@@ -93,8 +86,10 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                     {hasGroceries && (
                         <div className="flex items-center gap-4 max-w-2xl mx-auto">
                             <SearchBar
-                                searchTerm={searchTerm}
-                                setSearchTerm={setSearchTerm}
+                                placeholder="Search your collection..."
+                                data={groceryData}
+                                searchKeys={['name']}
+                                onFilteredDataChange={setFilteredGroceryData}
                             />
                             <ToggleButton
                                 areAllOpen={areAllOpen}
@@ -121,7 +116,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {Object.entries(processedData.filteredGroceries).map(([category, sectionData], categoryIndex) => (
+                            {Object.entries(sortedFilteredGroceries).map(([category, sectionData], categoryIndex) => (
                                 <Shelf
                                     key={category}
                                     category={category}
@@ -140,7 +135,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                 <ItemModal
                     isOpen={isItemModalOpen}
                     onClose={() => setIsItemModalOpen(false)}
-                    grocerySections={processedData.grocerySections}
+                    grocerySections={grocerySections}
                     units={units}
                     onItemAdded={handleItemAdded}
                 />
