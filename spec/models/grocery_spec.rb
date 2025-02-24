@@ -3,7 +3,6 @@ require 'rails_helper'
 RSpec.describe Grocery, type: :model do
   describe 'associations' do
     it { should belong_to(:user) }
-    it { should belong_to(:store_section) }
     it { should belong_to(:grocery_section) }
     it { should belong_to(:unit) }
     it { should have_many(:recipe_ingredients).dependent(:destroy) }

@@ -12,6 +12,7 @@ class GroceryListItem < ApplicationRecord
   belongs_to :user
   belongs_to :grocery
   belongs_to :unit
+  belongs_to :store_section
 
   validates :quantity, presence: true, numericality: { greater_than: 0 }
 end
