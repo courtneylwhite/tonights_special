@@ -3,13 +3,11 @@ require 'rails_helper'
 RSpec.describe GroceriesController, type: :controller do
   let(:user) { create(:user) }
   let(:grocery_section) { create(:grocery_section, name: 'Produce', user: user) }
-  let(:store_section) { create(:store_section, name: 'Main Store', user: user) }
   let(:unit) { create(:unit, name: 'pieces', abbreviation: 'pcs') }
   let!(:grocery) {
     create(:grocery,
            user: user,
            grocery_section: grocery_section,
-           store_section: store_section,
            unit: unit,
            name: 'Apple',
            quantity: 5,
@@ -129,7 +127,6 @@ RSpec.describe GroceriesController, type: :controller do
                     emoji: 'U+1F34C',
                     unit_id: unit.id,
                     grocery_section_id: grocery_section.id,
-                    store_section_id: store_section.id
         }
       }
     }

@@ -3,6 +3,7 @@ FactoryBot.define do
     association :user
     association :grocery
     association :unit
+    association :store_section
     quantity { "9.99" }
     notes { "MyText" }
     purchased { false }

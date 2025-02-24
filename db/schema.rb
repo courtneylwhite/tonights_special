@@ -16,7 +16,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_24_143901) do
 
   create_table "groceries", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.bigint "store_section_id", null: false
     t.bigint "grocery_section_id", null: false
     t.string "name", null: false
     t.decimal "quantity", null: false
@@ -25,11 +24,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_24_143901) do
     t.datetime "updated_at", null: false
     t.string "emoji"
     t.index ["grocery_section_id"], name: "index_groceries_on_grocery_section_id"
-    t.index ["store_section_id"], name: "index_groceries_on_store_section_id"
     t.index ["unit_id"], name: "index_groceries_on_unit_id"
     t.index ["user_id", "grocery_section_id"], name: "index_groceries_on_user_id_and_grocery_section_id"
     t.index ["user_id", "name"], name: "index_groceries_on_user_id_and_name"
-    t.index ["user_id", "store_section_id"], name: "index_groceries_on_user_id_and_store_section_id"
     t.index ["user_id"], name: "index_groceries_on_user_id"
   end
 
@@ -42,10 +39,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_24_143901) do
     t.boolean "purchased"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "store_section_id"
     t.index ["grocery_id"], name: "index_grocery_list_items_on_grocery_id"
+    t.index ["store_section_id"], name: "index_grocery_list_items_on_store_section_id"
     t.index ["unit_id"], name: "index_grocery_list_items_on_unit_id"
     t.index ["user_id", "grocery_id"], name: "index_grocery_list_items_on_user_id_and_grocery_id"
     t.index ["user_id", "purchased"], name: "index_grocery_list_items_on_user_id_and_purchased"
+    t.index ["user_id", "store_section_id"], name: "index_grocery_list_items_on_user_id_and_store_section_id"
     t.index ["user_id"], name: "index_grocery_list_items_on_user_id"
   end
 
@@ -129,10 +129,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_24_143901) do
   end
 
   add_foreign_key "groceries", "grocery_sections"
-  add_foreign_key "groceries", "store_sections"
   add_foreign_key "groceries", "units"
   add_foreign_key "groceries", "users"
   add_foreign_key "grocery_list_items", "groceries"
+  add_foreign_key "grocery_list_items", "store_sections"
   add_foreign_key "grocery_list_items", "units"
   add_foreign_key "grocery_list_items", "users"
   add_foreign_key "grocery_sections", "users"

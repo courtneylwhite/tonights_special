@@ -73,7 +73,6 @@ class GroceriesController < ApplicationController
       :name,
       :unit_id,
       :grocery_section_id,
-      :store_section_id,
       :emoji
     )
   end
