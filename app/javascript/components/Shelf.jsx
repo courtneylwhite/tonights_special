@@ -1,6 +1,5 @@
 import React from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import ShelfItems from './ShelfItems';
 
 const Shelf = ({
                    category,
@@ -11,47 +10,57 @@ const Shelf = ({
                    handleGroceryClick,
                    unicodeToEmoji
                }) => {
-    return (
-        <div
-            className="bg-gray-900/90 backdrop-blur-sm border border-gray-800 rounded-lg overflow-hidden shadow-lg transition-all duration-300 animate-slide-up"
-            style={{
-                animationDelay: `${categoryIndex * 100}ms`
-            }}
-        >
-            {/* Shelf Header */}
-            <button
-                onClick={() => onToggle(category)}
-                className="w-full px-6 py-4 flex items-center justify-between border-b border-gray-800 hover:bg-gray-800/50 transition-colors duration-200"
-            >
-                <h3>{category}</h3>
-                {isOpen ? (
-                    <ChevronUp className="text-amber-400" size={20}/>
-                ) : (
-                    <ChevronDown className="text-amber-400" size={20}/>
-                )}
-            </button>
+    // Function to handle the visibility toggle for this shelf
+    const toggleShelf = () => {
+        onToggle(category);
+    };
 
-            {/* Shelf Contents */}
+    return (
+        <div className="rounded-lg overflow-hidden border border-gray-800 transition-all duration-300">
             <div
-                className={`transition-all duration-300 ease-in-out ${
-                    isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                } overflow-hidden`}
+                className="py-3 px-5 bg-gray-900 flex justify-between items-center cursor-pointer"
+                onClick={toggleShelf}
             >
-                <div className="p-4 bg-gray-900/50">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                        {items.map((item, itemIndex) => (
-                            <ShelfItems
-                                key={item?.id || itemIndex}
-                                item={item}
-                                categoryIndex={categoryIndex}
-                                itemIndex={itemIndex}
-                                onItemClick={handleGroceryClick}
-                                unicodeToEmoji={unicodeToEmoji}
-                            />
-                        ))}
-                    </div>
+                <div className="flex items-center">
+                    <h3 className="text-lg font-medium text-white">{category}</h3>
+                    <span className="ml-2 text-gray-400 text-sm">
+                        ({items.length} item{items.length !== 1 ? 's' : ''})
+                    </span>
                 </div>
+                <button className="text-gray-400 hover:text-white transition-colors">
+                    {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </button>
             </div>
+
+            {isOpen && (
+                <div className="p-4 bg-gray-800">
+                    {items.length === 0 ? (
+                        <p className="text-gray-400 text-center py-4">No items in this category</p>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {items.map((item, index) => (
+                                <div
+                                    key={item.id}
+                                    className="py-3 flex justify-between items-center hover:bg-gray-700/50 px-3 rounded transition-colors cursor-pointer border border-gray-700"
+                                    onClick={() => handleGroceryClick(item.id)}
+                                >
+                                    <div className="flex items-center overflow-hidden">
+                                        {item.emoji && (
+                                            <span className="mr-3 text-xl flex-shrink-0" title={item.emoji}>
+                                                {unicodeToEmoji(item.emoji)}
+                                            </span>
+                                        )}
+                                        <span className="font-medium truncate">{item.name}</span>
+                                    </div>
+                                    <div className="text-gray-400 text-sm ml-2 flex-shrink-0">
+                                        {item.quantity} {item.unit}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Plus } from 'lucide-react';
 import ItemModal from './ItemModal';
 import SearchBar from './SearchBar';
@@ -9,12 +9,12 @@ const Pantry = ({ groceries = {}, units = [] }) => {
     const [groceryData, setGroceryData] = useState(groceries);
     const [filteredGroceryData, setFilteredGroceryData] = useState(groceries);
     const [isItemModalOpen, setIsItemModalOpen] = useState(false);
-    const [openShelves, setOpenShelves] = useState(
-        Object.keys(groceries || {}).reduce((acc, category) => ({
-            ...acc,
-            [category]: true
-        }), {})
-    );
+
+    // Create initial toggle state for shelves
+    const initialToggleState = Object.keys(groceries || {}).reduce((acc, category) => ({
+        ...acc,
+        [category]: true
+    }), {});
 
     const refreshData = async () => {
         try {
@@ -24,12 +24,6 @@ const Pantry = ({ groceries = {}, units = [] }) => {
             const data = await response.json();
             setGroceryData(data);
             setFilteredGroceryData(data); // Reset filtered data when new data is loaded
-            setOpenShelves(
-                Object.keys(data || {}).reduce((acc, category) => ({
-                    ...acc,
-                    [category]: true
-                }), {})
-            );
         } catch (error) {
             console.error('Failed to refresh groceries:', error);
         }
@@ -39,20 +33,6 @@ const Pantry = ({ groceries = {}, units = [] }) => {
     const handleAddItem = () => setIsItemModalOpen(true);
     const handleGroceryClick = (groceryId) => {
         window.location.href = `/groceries/${groceryId}`;
-    };
-
-    const toggleShelf = (category) => {
-        setOpenShelves(prev => ({ ...prev, [category]: !prev[category] }));
-    };
-
-    const toggleAll = () => {
-        const areAllOpen = Object.values(openShelves).every(Boolean);
-        setOpenShelves(
-            Object.keys(groceryData || {}).reduce((acc, category) => ({
-                ...acc,
-                [category]: !areAllOpen
-            }), {})
-        );
     };
 
     // Process the grocery sections for the ItemModal
@@ -69,11 +49,21 @@ const Pantry = ({ groceries = {}, units = [] }) => {
             return acc;
         }, {});
 
-    const areAllOpen = Object.values(openShelves).every(Boolean);
     const hasGroceries = Object.keys(groceryData || {}).length > 0;
     const unicodeToEmoji = (unicodeString) => {
         const hex = unicodeString.replace('U+', '');
         return String.fromCodePoint(parseInt(hex, 16));
+    };
+
+    // State to track which shelves are open
+    const [shelfToggleState, setShelfToggleState] = useState(initialToggleState);
+
+    // Handler for when a shelf needs to be toggled
+    const handleShelfToggle = (category) => {
+        setShelfToggleState(prev => ({
+            ...prev,
+            [category]: !prev[category]
+        }));
     };
 
     return (
@@ -92,8 +82,10 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                                 onFilteredDataChange={setFilteredGroceryData}
                             />
                             <ToggleButton
-                                areAllOpen={areAllOpen}
-                                toggleAll={toggleAll}
+                                initialToggleState={shelfToggleState}
+                                onToggleChange={setShelfToggleState}
+                                expandText="Expand All"
+                                collapseText="Collapse All"
                             />
                         </div>
                     )}
@@ -122,8 +114,8 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                                     category={category}
                                     items={sectionData.items}
                                     categoryIndex={categoryIndex}
-                                    isOpen={openShelves[category]}
-                                    onToggle={toggleShelf}
+                                    isOpen={shelfToggleState[category]}
+                                    onToggle={handleShelfToggle}
                                     handleGroceryClick={handleGroceryClick}
                                     unicodeToEmoji={unicodeToEmoji}
                                 />
