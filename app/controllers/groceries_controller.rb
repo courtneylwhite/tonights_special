@@ -32,16 +32,44 @@ class GroceriesController < ApplicationController
 
   def create
     Rails.logger.info("Received grocery params: #{grocery_params}")
-    @grocery = current_user.groceries.build(grocery_params)
+    Rails.logger.info("Received new section params: #{new_section_params}") if params[:new_section].present?
 
-    if @grocery.save
-      render json: @grocery, status: :created
-    else
-      Rails.logger.warn("Validation failed: #{@grocery.errors.full_messages.join(', ')}")
-      render json: {
-        error: @grocery.errors.full_messages.join(", "),
-        details: @grocery.errors.details
-      }, status: :unprocessable_entity
+    ActiveRecord::Base.transaction do
+      # Create a new section if one was submitted
+      if params[:new_section].present?
+        section_params = new_section_params
+        section_params[:display_order] ||= current_user.grocery_sections.count + 1
+
+        @section = current_user.grocery_sections.build(section_params)
+        unless @section.save
+          Rails.logger.warn("Section validation failed: #{@section.errors.full_messages.join(', ')}")
+          render json: {
+            error: @section.errors.full_messages.join(", "),
+            details: @section.errors.details
+          }, status: :unprocessable_entity
+          return
+        end
+
+        # Use the newly created section's ID for the grocery
+        modified_params = grocery_params.to_h
+        modified_params[:grocery_section_id] = @section.id
+      else
+        modified_params = grocery_params
+      end
+
+      @grocery = current_user.groceries.build(modified_params)
+
+      if @grocery.save
+        render json: @grocery, status: :created
+      else
+        Rails.logger.warn("Validation failed: #{@grocery.errors.full_messages.join(', ')}")
+        # Rollback the transaction if the grocery couldn't be saved
+        raise ActiveRecord::Rollback
+        render json: {
+          error: @grocery.errors.full_messages.join(", "),
+          details: @grocery.errors.details
+        }, status: :unprocessable_entity
+      end
     end
   end
 
@@ -77,6 +105,10 @@ class GroceriesController < ApplicationController
       :grocery_section_id,
       :emoji
     )
+  end
+
+  def new_section_params
+    params.require(:new_section).permit(:name, :display_order)
   end
 
   def render_error(errors)

@@ -44,29 +44,26 @@ const ItemModal = ({
         const token = document.querySelector('meta[name="csrf-token"]')?.content;
 
         try {
-            // Create the data object to send to the server
-            const dataToSubmit = { ...formData };
-
-            // If we're adding a new section, include that information
-            const isNewSection = isAddingSectionMode && formData.new_section_name?.trim();
-
-            // Set up the data structure as expected by the backend
+            // Prepare the request data
             const requestData = {
                 grocery: {
-                    name: dataToSubmit.name,
-                    quantity: dataToSubmit.quantity,
-                    unit_id: dataToSubmit.unit_id,
-                    grocery_section_id: isNewSection ? null : dataToSubmit.grocery_section_id,
-                    emoji: dataToSubmit.emoji
+                    name: formData.name,
+                    quantity: formData.quantity,
+                    unit_id: formData.unit_id,
+                    emoji: formData.emoji
                 }
             };
 
-            // If creating a new section, include that info
-            if (isNewSection) {
+            // Handle section data based on mode
+            if (isAddingSectionMode && formData.new_section_name?.trim()) {
+                // Creating a new section
                 requestData.new_section = {
-                    name: dataToSubmit.new_section_name,
+                    name: formData.new_section_name,
                     display_order: grocerySections.length + 1
                 };
+            } else {
+                // Using an existing section
+                requestData.grocery.grocery_section_id = formData.grocery_section_id;
             }
 
             const response = await fetch('/groceries', {
@@ -89,9 +86,6 @@ const ItemModal = ({
             }
 
             onItemAdded(data);
-            if (isNewSection && onSectionAdded) {
-                onSectionAdded(data);
-            }
             onClose();
 
         } catch (error) {
