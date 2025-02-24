@@ -49,18 +49,27 @@ const ItemModal = ({
                 body: JSON.stringify({ grocery: { ...formData } })
             });
 
-            const data = await response.json();
+            // Add logging to see response details
+            console.log('Response status:', response.status);
 
-            if (response.ok) {
-                onItemAdded(data);
-                onClose();
-            } else {
-                const errorMessage = data.errors ?
+            const data = await response.json();
+            console.log('Response data:', data);
+
+            if (!response.ok) {
+                // This matches your working SectionModal pattern
+                const errorMessage = data.error || (data.errors ?
                     data.errors.join(', ') :
-                    'Failed to create item. Please try again.';
+                    'Failed to create item. Please try again.');
                 setError(errorMessage);
+                return;
             }
+
+            // Only proceed if response was successful
+            onItemAdded(data);
+            onClose();
+
         } catch (error) {
+            console.error('Fetch error details:', error);
             setError('An unexpected error occurred. Please try again.');
         } finally {
             setIsSubmitting(false);
@@ -140,7 +149,7 @@ const ItemModal = ({
                                 required
                                 disabled={isSubmitting}
                             >
-                                <option value="">Select a Unit</option>
+                                <option value="">Select</option>
                                 {units.map((unit) => (
                                     <option key={unit.id} value={unit.id}>
                                         {unit.name}
@@ -149,10 +158,10 @@ const ItemModal = ({
                             </select>
                         </div>
                     </div>
-
+                    
                     <div>
                         <label htmlFor="grocery_section_id" className="block text-sm font-medium text-gray-300 mb-1">
-                            Section
+                            Pantry Section
                         </label>
                         <select
                             id="grocery_section_id"
@@ -163,7 +172,7 @@ const ItemModal = ({
                             required
                             disabled={isSubmitting}
                         >
-                            <option value="">Select a Section</option>
+                            <option value="">Select</option>
                             {grocerySections.map((section) => (
                                 <option key={section.id} value={section.id}>
                                     {section.name}

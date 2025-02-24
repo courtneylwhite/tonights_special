@@ -31,14 +31,16 @@ class GroceriesController < ApplicationController
   end
 
   def create
+    Rails.logger.info("Received grocery params: #{grocery_params}")
     @grocery = current_user.groceries.build(grocery_params)
 
     if @grocery.save
       render json: @grocery, status: :created
     else
+      Rails.logger.warn("Validation failed: #{@grocery.errors.full_messages.join(', ')}")
       render json: {
-          error: @grocery.errors.full_messages.join(", "),
-          details: @grocery.errors.details
+        error: @grocery.errors.full_messages.join(", "),
+        details: @grocery.errors.details
       }, status: :unprocessable_entity
     end
   end

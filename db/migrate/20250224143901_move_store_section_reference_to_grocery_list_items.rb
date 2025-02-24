@@ -10,9 +10,9 @@ class MoveStoreSectionReferenceToGroceryListItems < ActiveRecord::Migration[8.0]
     remove_reference :groceries, :store_section, foreign_key: true, index: true
 
     # Remove the compound index
-    remove_index :groceries, [:user_id, :store_section_id], if_exists: true
+    remove_index :groceries, [ :user_id, :store_section_id ], if_exists: true
 
     # Add compound index to grocery_list_items
-    add_index :grocery_list_items, [:user_id, :store_section_id]
+    add_index :grocery_list_items, [ :user_id, :store_section_id ]
   end
 end
