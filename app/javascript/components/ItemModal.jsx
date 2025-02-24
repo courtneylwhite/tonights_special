@@ -37,19 +37,16 @@ const ItemModal = ({
         e.preventDefault();
         setError(null);
         setIsSubmitting(true);
+        const token = document.querySelector('meta[name="csrf-token"]')?.content;
 
         try {
             const response = await fetch('/groceries', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-CSRF-Token': token
                 },
-                body: JSON.stringify({
-                    grocery: {
-                        ...formData,
-                        store_section_id: 1
-                    }
-                })
+                body: JSON.stringify({ grocery: { ...formData } })
             });
 
             const data = await response.json();
