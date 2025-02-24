@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Plus } from 'lucide-react';
-import SectionModal from './SectionModal';
 import ItemModal from './ItemModal';
 import SearchBar from './SearchBar';
 import ToggleButton from './ToggleButton';
@@ -9,7 +8,6 @@ import Shelf from './Shelf';
 const Pantry = ({ groceries = {}, units = [] }) => {
     const [groceryData, setGroceryData] = useState(groceries);
     const [searchTerm, setSearchTerm] = useState('');
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [isItemModalOpen, setIsItemModalOpen] = useState(false);
     const [openShelves, setOpenShelves] = useState(
         Object.keys(groceries || {}).reduce((acc, category) => ({
@@ -38,7 +36,6 @@ const Pantry = ({ groceries = {}, units = [] }) => {
 
     const handleSectionAdded = () => refreshData();
     const handleItemAdded = () => refreshData();
-    const handleAddSection = () => setIsModalOpen(true);
     const handleAddItem = () => setIsItemModalOpen(true);
     const handleGroceryClick = (groceryId) => {
         window.location.href = `/groceries/${groceryId}`;
@@ -110,13 +107,6 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                 <div className="max-w-5xl mx-auto p-6 relative z-0">
                     <div className="flex justify-end mb-4 gap-4">
                         <button
-                            onClick={handleAddSection}
-                            className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
-                        >
-                            <Plus size={18}/>
-                            <span className="text-sm font-medium">Section</span>
-                        </button>
-                        <button
                             onClick={handleAddItem}
                             className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
                         >
@@ -146,13 +136,6 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                         </div>
                     )}
                 </div>
-
-                <SectionModal
-                    isOpen={isModalOpen}
-                    onClose={() => setIsModalOpen(false)}
-                    sections={Object.keys(groceries || {}).length}
-                    onSuccess={handleSectionAdded}
-                />
 
                 <ItemModal
                     isOpen={isItemModalOpen}

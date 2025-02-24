@@ -32,15 +32,21 @@ class GroceriesController < ApplicationController
 
   def create
     Rails.logger.info("Received grocery params: #{grocery_params}")
-    @grocery = current_user.groceries.build(grocery_params)
+    Rails.logger.info("Received new section params: #{new_section_params}") if params[:new_section].present?
 
-    if @grocery.save
-      render json: @grocery, status: :created
+    creator = GroceryCreator.new(
+      current_user,
+      grocery_params.to_h,
+      params[:new_section].present? ? new_section_params.to_h : nil
+    )
+
+    if creator.call
+      render json: creator.grocery, status: :created
     else
-      Rails.logger.warn("Validation failed: #{@grocery.errors.full_messages.join(', ')}")
+      Rails.logger.warn("Creation failed: #{creator.error_messages}")
       render json: {
-        error: @grocery.errors.full_messages.join(", "),
-        details: @grocery.errors.details
+        error: creator.error_messages,
+        details: {}
       }, status: :unprocessable_entity
     end
   end
@@ -77,6 +83,10 @@ class GroceriesController < ApplicationController
       :grocery_section_id,
       :emoji
     )
+  end
+
+  def new_section_params
+    params.require(:new_section).permit(:name, :display_order)
   end
 
   def render_error(errors)
