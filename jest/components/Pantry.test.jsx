@@ -14,6 +14,10 @@ describe('Pantry', () => {
         }
     };
 
+    const mockUnits = [
+        { id: 1, name: 'pieces' }
+    ];
+
     beforeEach(() => {
         global.fetch = jest.fn();
     });
@@ -38,12 +42,9 @@ describe('Pantry', () => {
         expect(screen.queryByText('Banana')).not.toBeInTheDocument();
     });
 
-    it('opens modals when add buttons are clicked', () => {
+    it('opens item modal when grocery button is clicked', () => {
         render(<Pantry groceries={mockGroceries} />);
-        fireEvent.click(screen.getByText('Section'));
-        expect(screen.getByText('Add New Section')).toBeInTheDocument();
-
-        // Test Item modal
+        // Use the actual button text from your component
         fireEvent.click(screen.getByText('Grocery'));
         expect(screen.getByText('Add New Item')).toBeInTheDocument();
     });
@@ -107,20 +108,52 @@ describe('Pantry', () => {
         expect(window.location.href).toBe('/groceries/1');
     });
 
-    it('refreshes data when sections are added', async () => {
-        global.fetch.mockResolvedValueOnce({
-            ok: true,
-            json: () => Promise.resolve(mockGroceries)
-        });
+    it('refreshes data when items are added', async () => {
+        // Mock successful fetch responses
+        global.fetch
+            .mockResolvedValueOnce({ // First call succeeds for item creation
+                ok: true,
+                json: () => Promise.resolve({ id: 3, name: 'Orange' })
+            })
+            .mockResolvedValueOnce({ // Second call succeeds for data refresh
+                ok: true,
+                json: () => Promise.resolve(mockGroceries)
+            });
 
-        render(<Pantry groceries={mockGroceries} />);
-        fireEvent.click(screen.getByText('Section'));
+        // Mock CSRF token
+        document.body.innerHTML = '<meta name="csrf-token" content="test-token" />';
 
-        const submitButton = screen.getByText('Create Section');
-        const form = submitButton.closest('form');
+        render(<Pantry groceries={mockGroceries} units={mockUnits} />);
+
+        // Open the ItemModal
+        fireEvent.click(screen.getByText('Grocery'));
+
+        // Fill in form data
+        fireEvent.change(screen.getByLabelText('Item Name'), { target: { value: 'Orange' } });
+        fireEvent.change(screen.getByLabelText('Quantity'), { target: { value: '3' } });
+
+        // Fill required unit field
+        fireEvent.change(screen.getByLabelText('Unit'), { target: { value: '1' } });
+
+        // Fill required section field
+        fireEvent.change(screen.getByLabelText('Pantry Section'), { target: { value: '1' } });
+
+        // Form submission
+        const form = screen.getByRole('button', { name: /create item/i }).closest('form');
         fireEvent.submit(form);
 
+        // Wait for the fetch calls
         await waitFor(() => {
+            // First fetch call should be for creating the item
+            expect(global.fetch).toHaveBeenCalledWith('/groceries', expect.objectContaining({
+                method: 'POST',
+                headers: expect.objectContaining({
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': 'test-token'
+                })
+            }));
+
+            // Second fetch call should be for refreshing data
             expect(global.fetch).toHaveBeenCalledWith('/groceries', {
                 headers: { 'Accept': 'application/json' }
             });
@@ -131,27 +164,39 @@ describe('Pantry', () => {
         const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
         // Mock the two fetch calls that will happen
-        const error = new Error('Failed to fetch');
         global.fetch
-            .mockResolvedValueOnce({ // First call succeeds (for the modal)
+            .mockResolvedValueOnce({ // First call succeeds (for the item creation)
                 ok: true,
-                json: () => Promise.resolve({ id: 1, name: 'Test Section' })
+                json: () => Promise.resolve({ id: 1, name: 'Orange' })
             })
-            .mockRejectedValueOnce(error); // Second call fails (for the refresh)
+            .mockRejectedValueOnce(new Error('Failed to fetch')); // Second call fails (for the refresh)
 
-        render(<Pantry groceries={mockGroceries} />);
+        // Mock CSRF token
+        document.body.innerHTML = '<meta name="csrf-token" content="test-token" />';
 
-        // Open modal and fill form
-        fireEvent.click(screen.getByText('Section'));
-        const nameInput = screen.getByLabelText('Section Name');
-        fireEvent.change(nameInput, { target: { value: 'Test Section' } });
+        render(<Pantry groceries={mockGroceries} units={mockUnits} />);
 
-        // Submit form
-        const submitButton = screen.getByText('Create Section');
-        fireEvent.click(submitButton);
+        // Open modal and fill form using the correct button text
+        fireEvent.click(screen.getByText('Grocery'));
+
+        // Fill out all required form fields
+        fireEvent.change(screen.getByLabelText('Item Name'), { target: { value: 'Orange' } });
+        fireEvent.change(screen.getByLabelText('Quantity'), { target: { value: '3' } });
+        fireEvent.change(screen.getByLabelText('Unit'), { target: { value: '1' } });
+        fireEvent.change(screen.getByLabelText('Pantry Section'), { target: { value: '1' } });
+
+        // Form submission
+        const form = screen.getByRole('button', { name: /create item/i }).closest('form');
+        fireEvent.submit(form);
 
         // Wait for the error to be logged
         await waitFor(() => {
+            // First check that the POST fetch was called
+            expect(global.fetch).toHaveBeenCalledWith('/groceries', expect.objectContaining({
+                method: 'POST'
+            }));
+
+            // Then check that the refresh fetch was called and caught the error
             expect(consoleSpy).toHaveBeenCalledWith(
                 'Failed to refresh groceries:',
                 expect.any(Error)
