@@ -81,12 +81,6 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                                 searchKeys={['name']}
                                 onFilteredDataChange={setFilteredGroceryData}
                             />
-                            <ToggleButton
-                                initialToggleState={shelfToggleState}
-                                onToggleChange={setShelfToggleState}
-                                expandText="Expand All"
-                                collapseText="Collapse All"
-                            />
                             <button
                                 onClick={handleAddItem}
                                 className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
@@ -94,6 +88,10 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                                 <Plus size={18}/>
                                 <span className="text-sm font-medium">Grocery</span>
                             </button>
+                            <ToggleButton
+                                initialToggleState={shelfToggleState}
+                                onToggleChange={setShelfToggleState}
+                            />
                         </div>
                     )}
                 </div>

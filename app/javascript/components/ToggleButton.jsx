@@ -8,11 +8,8 @@ const ToggleButton = ({
                           // Callback when toggle states change
                           onToggleChange,
 
-                          // Button text customization
-                          expandText = "Expand All",
-                          collapseText = "Collapse All",
-
                           // Button styling options
+                          // flex justify-end mb-4 gap-4
                           buttonClassName = "flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-amber-400 rounded-lg transition-colors duration-200 border border-gray-700 hover:border-amber-500",
 
                           // Icon customization
@@ -62,13 +59,10 @@ const ToggleButton = ({
         >
             {allOpen ? (
                 <>
-                    <CollapseIcon size={iconSize}/>
-                    <span className="text-sm font-medium">{collapseText}</span>
-                </>
+                    <CollapseIcon size={iconSize}/></>
             ) : (
                 <>
                     <ExpandIcon size={iconSize}/>
-                    <span className="text-sm font-medium">{expandText}</span>
                 </>
             )}
         </button>
