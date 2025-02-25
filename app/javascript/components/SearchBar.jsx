@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 // No Lucide import
 
 const SearchBar = ({
@@ -8,33 +8,13 @@ const SearchBar = ({
                        searchKeys = ['name'],
                        debounceTime = 300
                    }) => {
-    const [searchTerm, setSearchTerm] = useState('');
     const [internalSearchTerm, setInternalSearchTerm] = useState('');
 
-    // Debounce the search input to avoid excessive filtering
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setSearchTerm(internalSearchTerm);
-        }, debounceTime);
-
-        return () => {
-            clearTimeout(handler);
-        };
-    }, [internalSearchTerm, debounceTime]);
-
-    // Filter the data whenever searchTerm changes
-    useEffect(() => {
-        if (!data) return;
-
-        const filteredData = filterData(data, searchTerm, searchKeys);
-        onFilteredDataChange(filteredData);
-    }, [searchTerm, data, searchKeys, onFilteredDataChange]);
-
     // Generic filtering function that can work with different data structures
-    const filterData = (data, term, keys) => {
+    // Memoized to prevent recreation on each render
+    const filterData = useCallback((data, term, keys) => {
         if (!term.trim()) return data;
 
-        // Rest of your filter function...
         const lowercaseTerm = term.toLowerCase();
 
         if (Array.isArray(data)) {
@@ -77,12 +57,27 @@ const SearchBar = ({
         }
 
         return data;
-    };
+    }, []);
+
+    // Combined effect for debouncing and filtering
+    useEffect(() => {
+        // Skip if no data is provided
+        if (!data) return;
+
+        // Debounce the search and filtering
+        const handler = setTimeout(() => {
+            const filteredData = filterData(data, internalSearchTerm, searchKeys);
+            onFilteredDataChange(filteredData);
+        }, debounceTime);
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [internalSearchTerm, data, searchKeys, filterData, onFilteredDataChange, debounceTime]);
 
     // Clear the search input
     const handleClearSearch = () => {
         setInternalSearchTerm('');
-        setSearchTerm('');
     };
 
     // Create a base64 encoded SVG for the search icon - amber color
