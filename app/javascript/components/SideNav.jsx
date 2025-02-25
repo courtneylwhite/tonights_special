@@ -70,7 +70,7 @@ const SideNav = () => {
                     <nav className="mt-12 space-y-4">
                         {currentPath !== '/recipes' && (
                             <a
-                                href="/recipes"
+                                href="/Users/courtney/dev/tonights_special/app/javascript/components/RecipeBox"
                                 className="flex items-center gap-3 text-white hover:bg-amber-500 hover:text-black p-3 rounded-lg transition-colors duration-200"
                             >
                                 <ChefHat size={20}/>
