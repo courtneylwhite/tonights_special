@@ -76,7 +76,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                     {hasGroceries && (
                         <div className="flex items-center gap-4 max-w-3xl mx-auto">
                             <SearchBar
-                                placeholder="Search your collection..."
+                                placeholder="Search your pantry..."
                                 data={groceryData}
                                 searchKeys={['name']}
                                 onFilteredDataChange={setFilteredGroceryData}

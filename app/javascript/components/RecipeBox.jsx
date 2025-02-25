@@ -76,7 +76,7 @@ const RecipeBox = ({ recipes = {}, units = [] }) => {
                     {hasRecipes && (
                         <div className="flex items-center gap-4 max-w-3xl mx-auto">
                             <SearchBar
-                                placeholder="Search your collection..."
+                                placeholder="Search your recipes..."
                                 data={recipeData}
                                 searchKeys={['name']}
                                 onFilteredDataChange={setFilteredRecipeData}
