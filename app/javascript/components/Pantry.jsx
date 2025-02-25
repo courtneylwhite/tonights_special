@@ -15,7 +15,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
         ...acc,
         [category]: true
     }), {});
-    
+
     const refreshData = async () => {
         try {
             const response = await fetch('/groceries', {
@@ -74,7 +74,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                         Culinary Inventory
                     </h1>
                     {hasGroceries && (
-                        <div className="flex items-center gap-4 max-w-2xl mx-auto">
+                        <div className="flex items-center gap-4 max-w-3xl mx-auto">
                             <SearchBar
                                 placeholder="Search your collection..."
                                 data={groceryData}
@@ -87,21 +87,18 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                                 expandText="Expand All"
                                 collapseText="Collapse All"
                             />
+                            <button
+                                onClick={handleAddItem}
+                                className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
+                            >
+                                <Plus size={18}/>
+                                <span className="text-sm font-medium">Grocery</span>
+                            </button>
                         </div>
                     )}
                 </div>
 
                 <div className="max-w-5xl mx-auto p-6 relative z-0">
-                    <div className="flex justify-end mb-4 gap-4">
-                        <button
-                            onClick={handleAddItem}
-                            className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
-                        >
-                            <Plus size={18}/>
-                            <span className="text-sm font-medium">Grocery</span>
-                        </button>
-                    </div>
-
                     {!hasGroceries ? (
                         <div className="text-center text-gray-400 py-12">
                             <p>No groceries in your pantry yet.</p>
