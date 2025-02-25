@@ -1,6 +1,6 @@
 <div data-turbo="false">
   <%= react_component("Recipes", {
-    groceries: @recipes.as_json,
+    recipes: @recipes.as_json,
     key: Time.current.to_i
   }) %>
 </div>
