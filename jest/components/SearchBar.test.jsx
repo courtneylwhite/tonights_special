@@ -18,6 +18,29 @@ describe('SearchBar', () => {
         }
     };
 
+    // Array data structure for testing
+    const mockArrayData = [
+        { id: 1, name: 'Apple' },
+        { id: 2, name: 'Banana' },
+        { id: 3, name: 'Carrot' },
+        { id: 4, name: 'Donut' }
+    ];
+
+    // Nested structure without "items" array
+    const mockNestedData = {
+        category1: [
+            { id: 1, name: 'Apple' },
+            { id: 2, name: 'Banana' }
+        ],
+        category2: [
+            { id: 3, name: 'Carrot' },
+            { id: 4, name: 'Donut' }
+        ]
+    };
+
+    // Non-array, non-object data to test default case
+    const mockInvalidData = "This is a string, not an array or object";
+
     const mockOnFilteredDataChange = jest.fn();
 
     beforeEach(() => {
@@ -150,5 +173,108 @@ describe('SearchBar', () => {
         // Verify onFilteredDataChange was called with original data
         expect(mockOnFilteredDataChange).toHaveBeenCalled();
         expect(mockOnFilteredDataChange).toHaveBeenLastCalledWith(mockData);
+    });
+
+    // NEW TEST: Tests array data filtering (covers lines 21-23)
+    it('correctly filters array data', () => {
+        render(
+            <SearchBar
+                data={mockArrayData}
+                onFilteredDataChange={mockOnFilteredDataChange}
+                searchKeys={['name']}
+            />
+        );
+
+        mockOnFilteredDataChange.mockClear();
+
+        const input = screen.getByRole('textbox');
+        fireEvent.change(input, { target: { value: 'app' } });
+
+        act(() => {
+            jest.advanceTimersByTime(300);
+        });
+
+        // Expected filtered array with only items containing 'app'
+        expect(mockOnFilteredDataChange).toHaveBeenCalledWith(
+            expect.arrayContaining([
+                expect.objectContaining({ name: 'Apple' })
+            ])
+        );
+        expect(mockOnFilteredDataChange.mock.calls[0][0].length).toBe(1);
+    });
+
+    // NEW TEST: Tests nested data without 'items' array (covers lines 31-33)
+    it('correctly filters nested data without items property', () => {
+        render(
+            <SearchBar
+                data={mockNestedData}
+                onFilteredDataChange={mockOnFilteredDataChange}
+                searchKeys={['name']}
+            />
+        );
+
+        mockOnFilteredDataChange.mockClear();
+
+        const input = screen.getByRole('textbox');
+        fireEvent.change(input, { target: { value: 'app' } });
+
+        act(() => {
+            jest.advanceTimersByTime(300);
+        });
+
+        // Expected filtered data with only items containing 'app'
+        const expectedData = {
+            category1: [
+                { id: 1, name: 'Apple' }
+            ]
+        };
+
+        expect(mockOnFilteredDataChange).toHaveBeenCalledWith(expect.objectContaining(expectedData));
+    });
+
+    // NEW TEST: Tests handling of non-array, non-object data (covers line 38)
+    it('returns original data for invalid data types', () => {
+        render(
+            <SearchBar
+                data={mockInvalidData}
+                onFilteredDataChange={mockOnFilteredDataChange}
+                searchKeys={['name']}
+            />
+        );
+
+        mockOnFilteredDataChange.mockClear();
+
+        const input = screen.getByRole('textbox');
+        fireEvent.change(input, { target: { value: 'app' } });
+
+        act(() => {
+            jest.advanceTimersByTime(300);
+        });
+
+        // Should return the original string
+        expect(mockOnFilteredDataChange).toHaveBeenCalledWith(mockInvalidData);
+    });
+
+    // NEW TEST: Tests when no data is provided (covers line 59)
+    it('does not filter when no data is provided', () => {
+        render(
+            <SearchBar
+                data={null}
+                onFilteredDataChange={mockOnFilteredDataChange}
+                searchKeys={['name']}
+            />
+        );
+
+        mockOnFilteredDataChange.mockClear();
+
+        const input = screen.getByRole('textbox');
+        fireEvent.change(input, { target: { value: 'app' } });
+
+        act(() => {
+            jest.advanceTimersByTime(300);
+        });
+
+        // Should not call onFilteredDataChange when no data is provided
+        expect(mockOnFilteredDataChange).not.toHaveBeenCalled();
     });
 });
