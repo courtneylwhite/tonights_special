@@ -15,7 +15,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
         ...acc,
         [category]: true
     }), {});
-
+    
     const refreshData = async () => {
         try {
             const response = await fetch('/groceries', {
