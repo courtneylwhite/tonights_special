@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import ItemModal from './ItemModal';
 import SearchBar from './SearchBar';
 import ToggleButton from './ToggleButton';
-import Shelf from './Shelf';
+import ScrollableContainer from './ScrollableContainer';
 
 const Pantry = ({ groceries = {}, units = [] }) => {
     const [groceryData, setGroceryData] = useState(groceries);
     const [filteredGroceryData, setFilteredGroceryData] = useState(groceries);
     const [isItemModalOpen, setIsItemModalOpen] = useState(false);
 
-    // Create initial toggle state for shelves
+    // Create initial toggle state for containers
     const initialToggleState = Object.keys(groceries || {}).reduce((acc, category) => ({
         ...acc,
         [category]: true
@@ -55,12 +55,12 @@ const Pantry = ({ groceries = {}, units = [] }) => {
         return String.fromCodePoint(parseInt(hex, 16));
     };
 
-    // State to track which shelves are open
-    const [shelfToggleState, setShelfToggleState] = useState(initialToggleState);
+    // State to track which containers are open
+    const [containerToggleState, setContainerToggleState] = useState(initialToggleState);
 
-    // Handler for when a shelf needs to be toggled
-    const handleShelfToggle = (category) => {
-        setShelfToggleState(prev => ({
+    // Handler for when a container needs to be toggled
+    const handleContainerToggle = (category) => {
+        setContainerToggleState(prev => ({
             ...prev,
             [category]: !prev[category]
         }));
@@ -73,7 +73,6 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                     <h1 className="text-center mb-8">
                         Culinary Inventory
                     </h1>
-                    {hasGroceries && (
                         <div className="flex items-center gap-4 max-w-3xl mx-auto">
                             <SearchBar
                                 placeholder="Search your pantry..."
@@ -89,11 +88,10 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                                 <span className="text-sm font-medium">Grocery</span>
                             </button>
                             <ToggleButton
-                                initialToggleState={shelfToggleState}
-                                onToggleChange={setShelfToggleState}
+                                initialToggleState={containerToggleState}
+                                onToggleChange={setContainerToggleState}
                             />
                         </div>
-                    )}
                 </div>
 
                 <div className="max-w-5xl mx-auto p-6 relative z-0">
@@ -104,13 +102,13 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                     ) : (
                         <div className="space-y-4">
                             {Object.entries(sortedFilteredGroceries).map(([category, sectionData], categoryIndex) => (
-                                <Shelf
+                                <ScrollableContainer
                                     key={category}
                                     category={category}
                                     items={sectionData.items}
                                     categoryIndex={categoryIndex}
-                                    isOpen={shelfToggleState[category]}
-                                    onToggle={handleShelfToggle}
+                                    isOpen={containerToggleState[category]}
+                                    onToggle={handleContainerToggle}
                                     handleGroceryClick={handleGroceryClick}
                                     unicodeToEmoji={unicodeToEmoji}
                                 />

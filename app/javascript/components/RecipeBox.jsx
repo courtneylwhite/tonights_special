@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import ItemModal from './ItemModal';
 import SearchBar from './SearchBar';
 import ToggleButton from './ToggleButton';
-import Shelf from './Shelf';
+import ScrollableContainer from './ScrollableContainer';
 
-const RecipeBox = ({ recipes = {}, units = [] }) => {
+const Recipes = ({ recipes = {}, units = [] }) => {
     const [recipeData, setRecipeData] = useState(recipes);
     const [filteredRecipeData, setFilteredRecipeData] = useState(recipes);
     const [isItemModalOpen, setIsItemModalOpen] = useState(false);
 
-    // Create initial toggle state for shelves
+    // Create initial toggle state for containers
     const initialToggleState = Object.keys(recipes || {}).reduce((acc, category) => ({
         ...acc,
         [category]: true
@@ -55,12 +55,12 @@ const RecipeBox = ({ recipes = {}, units = [] }) => {
         return String.fromCodePoint(parseInt(hex, 16));
     };
 
-    // State to track which shelves are open
-    const [shelfToggleState, setShelfToggleState] = useState(initialToggleState);
+    // State to track which containers are open
+    const [containerToggleState, setContainerToggleState] = useState(initialToggleState);
 
-    // Handler for when a shelf needs to be toggled
-    const handleShelfToggle = (category) => {
-        setShelfToggleState(prev => ({
+    // Handler for when a container needs to be toggled
+    const handleContainerToggle = (category) => {
+        setContainerToggleState(prev => ({
             ...prev,
             [category]: !prev[category]
         }));
@@ -73,10 +73,9 @@ const RecipeBox = ({ recipes = {}, units = [] }) => {
                     <h1 className="text-center mb-8">
                         Recipes
                     </h1>
-                    {hasRecipes && (
                         <div className="flex items-center gap-4 max-w-3xl mx-auto">
                             <SearchBar
-                                placeholder="Search your recipes..."
+                                placeholder="Search your recipe box..."
                                 data={recipeData}
                                 searchKeys={['name']}
                                 onFilteredDataChange={setFilteredRecipeData}
@@ -89,11 +88,10 @@ const RecipeBox = ({ recipes = {}, units = [] }) => {
                                 <span className="text-sm font-medium">Recipe</span>
                             </button>
                             <ToggleButton
-                                initialToggleState={shelfToggleState}
-                                onToggleChange={setShelfToggleState}
+                                initialToggleState={containerToggleState}
+                                onToggleChange={setContainerToggleState}
                             />
                         </div>
-                    )}
                 </div>
 
                 <div className="max-w-5xl mx-auto p-6 relative z-0">
@@ -104,13 +102,13 @@ const RecipeBox = ({ recipes = {}, units = [] }) => {
                     ) : (
                         <div className="space-y-4">
                             {Object.entries(sortedFilteredRecipes).map(([category, sectionData], categoryIndex) => (
-                                <Shelf
+                                <ScrollableContainer
                                     key={category}
                                     category={category}
                                     items={sectionData.items}
                                     categoryIndex={categoryIndex}
-                                    isOpen={shelfToggleState[category]}
-                                    onToggle={handleShelfToggle}
+                                    isOpen={containerToggleState[category]}
+                                    onToggle={handleContainerToggle}
                                     handleRecipeClick={handleRecipeClick}
                                     unicodeToEmoji={unicodeToEmoji}
                                 />
@@ -131,4 +129,4 @@ const RecipeBox = ({ recipes = {}, units = [] }) => {
     );
 };
 
-export default RecipeBox;
+export default Recipes;
