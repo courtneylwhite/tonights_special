@@ -5,51 +5,51 @@ import SearchBar from './SearchBar';
 import ToggleButton from './ToggleButton';
 import ScrollableContainer from './ScrollableContainer';
 
-const Pantry = ({ groceries = {}, units = [] }) => {
-    const [groceryData, setGroceryData] = useState(groceries);
-    const [filteredGroceryData, setFilteredGroceryData] = useState(groceries);
+const Recipes = ({ recipes = {}, units = [] }) => {
+    const [recipeData, setRecipeData] = useState(recipes);
+    const [filteredRecipeData, setFilteredRecipeData] = useState(recipes);
     const [isItemModalOpen, setIsItemModalOpen] = useState(false);
 
     // Create initial toggle state for containers
-    const initialToggleState = Object.keys(groceries || {}).reduce((acc, category) => ({
+    const initialToggleState = Object.keys(recipes || {}).reduce((acc, category) => ({
         ...acc,
         [category]: true
     }), {});
 
     const refreshData = async () => {
         try {
-            const response = await fetch('/groceries', {
+            const response = await fetch('/recipes', {
                 headers: { 'Accept': 'application/json' }
             });
             const data = await response.json();
-            setGroceryData(data);
-            setFilteredGroceryData(data); // Reset filtered data when new data is loaded
+            setRecipeData(data);
+            setFilteredRecipeData(data); // Reset filtered data when new data is loaded
         } catch (error) {
-            console.error('Failed to refresh groceries:', error);
+            console.error('Failed to refresh recipes:', error);
         }
     };
 
     const handleItemAdded = () => refreshData();
     const handleAddItem = () => setIsItemModalOpen(true);
-    const handleGroceryClick = (groceryId) => {
-        window.location.href = `/groceries/${groceryId}`;
+    const handleRecipeClick = (recipeId) => {
+        window.location.href = `/recipes/${recipeId}`;
     };
 
-    // Process the grocery sections for the ItemModal
-    const grocerySections = Object.entries(groceryData || {}).map(([name, data]) => ({
+    // Process the recipe sections for the ItemModal
+    const recipeSections = Object.entries(recipeData || {}).map(([name, data]) => ({
         id: data.id,
         name: name
     }));
 
     // Sort categories by display order
-    const sortedFilteredGroceries = Object.entries(filteredGroceryData || {})
+    const sortedFilteredRecipes = Object.entries(filteredRecipeData || {})
         .sort(([, a], [, b]) => a[0]?.display_order - b[0]?.display_order)
         .reduce((acc, [category, data]) => {
             acc[category] = data;
             return acc;
         }, {});
 
-    const hasGroceries = Object.keys(groceryData || {}).length > 0;
+    const hasRecipes = Object.keys(recipeData || {}).length > 0;
     const unicodeToEmoji = (unicodeString) => {
         const hex = unicodeString.replace('U+', '');
         return String.fromCodePoint(parseInt(hex, 16));
@@ -67,25 +67,25 @@ const Pantry = ({ groceries = {}, units = [] }) => {
     };
 
     return (
-        <turbo-frame id="groceries_content">
+        <turbo-frame id="recipes_content">
             <div className="min-h-screen bg-black text-white relative">
                 <div className="bg-black/80 backdrop-blur-sm border-b border-gray-800 p-8 sticky top-0 z-10">
                     <h1 className="text-center mb-8">
-                        Culinary Inventory
+                        Recipes
                     </h1>
                         <div className="flex items-center gap-4 max-w-3xl mx-auto">
                             <SearchBar
-                                placeholder="Search your pantry..."
-                                data={groceryData}
+                                placeholder="Search your recipe box..."
+                                data={recipeData}
                                 searchKeys={['name']}
-                                onFilteredDataChange={setFilteredGroceryData}
+                                onFilteredDataChange={setFilteredRecipeData}
                             />
                             <button
                                 onClick={handleAddItem}
                                 className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
                             >
                                 <Plus size={18}/>
-                                <span className="text-sm font-medium">Grocery</span>
+                                <span className="text-sm font-medium">Recipe</span>
                             </button>
                             <ToggleButton
                                 initialToggleState={containerToggleState}
@@ -95,13 +95,13 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                 </div>
 
                 <div className="max-w-5xl mx-auto p-6 relative z-0">
-                    {!hasGroceries ? (
+                    {!hasRecipes ? (
                         <div className="text-center text-gray-400 py-12">
-                            <p>No groceries in your pantry yet.</p>
+                            <p>No recipes in your recipe box yet.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
-                            {Object.entries(sortedFilteredGroceries).map(([category, sectionData], categoryIndex) => (
+                            {Object.entries(sortedFilteredRecipes).map(([category, sectionData], categoryIndex) => (
                                 <ScrollableContainer
                                     key={category}
                                     category={category}
@@ -109,7 +109,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                                     categoryIndex={categoryIndex}
                                     isOpen={containerToggleState[category]}
                                     onToggle={handleContainerToggle}
-                                    handleGroceryClick={handleGroceryClick}
+                                    handleRecipeClick={handleRecipeClick}
                                     unicodeToEmoji={unicodeToEmoji}
                                 />
                             ))}
@@ -120,7 +120,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                 <ItemModal
                     isOpen={isItemModalOpen}
                     onClose={() => setIsItemModalOpen(false)}
-                    grocerySections={grocerySections}
+                    recipeSections={recipeSections}
                     units={units}
                     onItemAdded={handleItemAdded}
                 />
@@ -129,4 +129,4 @@ const Pantry = ({ groceries = {}, units = [] }) => {
     );
 };
 
-export default Pantry;
+export default Recipes;

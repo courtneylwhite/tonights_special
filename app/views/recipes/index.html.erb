@@ -1,0 +1,7 @@
+
+<div data-turbo="false">
+  <%= react_component("RecipeBox", {
+    recipes: @recipes,
+    key: Time.current.to_i
+  }) %>
+</div>

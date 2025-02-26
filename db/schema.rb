@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_24_143901) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_25_041932) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -60,6 +60,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_24_143901) do
     t.index ["user_id"], name: "index_grocery_sections_on_user_id"
   end
 
+  create_table "recipe_categories", force: :cascade do |t|
+    t.string "name"
+    t.integer "display_order"
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "display_order"], name: "index_recipe_categories_on_user_id_and_display_order", unique: true
+    t.index ["user_id"], name: "index_recipe_categories_on_user_id"
+  end
+
   create_table "recipe_ingredients", force: :cascade do |t|
     t.bigint "recipe_id", null: false
     t.bigint "grocery_id", null: false
@@ -81,6 +91,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_24_143901) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "recipe_category_id"
+    t.index ["recipe_category_id"], name: "index_recipes_on_recipe_category_id"
     t.index ["user_id", "completed"], name: "index_recipes_on_user_id_and_completed"
     t.index ["user_id", "name"], name: "index_recipes_on_user_id_and_name"
     t.index ["user_id"], name: "index_recipes_on_user_id"
@@ -136,9 +148,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_24_143901) do
   add_foreign_key "grocery_list_items", "units"
   add_foreign_key "grocery_list_items", "users"
   add_foreign_key "grocery_sections", "users"
+  add_foreign_key "recipe_categories", "users"
   add_foreign_key "recipe_ingredients", "groceries"
   add_foreign_key "recipe_ingredients", "recipes"
   add_foreign_key "recipe_ingredients", "units"
+  add_foreign_key "recipes", "recipe_categories"
   add_foreign_key "recipes", "users"
   add_foreign_key "store_sections", "users"
   add_foreign_key "unit_conversions", "units", column: "from_unit_id"

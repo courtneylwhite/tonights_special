@@ -13,7 +13,6 @@ const ItemModal = ({
                        grocerySections = [],
                        units = [],
                        onItemAdded = () => {},
-                       onSectionAdded = () => {}
                    }) => {
     const initialFormState = {
         name: '',
