@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_02_25_041932) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_26_222343) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -32,7 +32,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_25_041932) do
 
   create_table "grocery_list_items", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.bigint "grocery_id", null: false
+    t.bigint "grocery_id"
     t.decimal "quantity"
     t.bigint "unit_id", null: false
     t.text "notes"
@@ -51,7 +51,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_25_041932) do
 
   create_table "grocery_sections", force: :cascade do |t|
     t.string "name"
-    t.integer "display_order"
+    t.integer "display_order", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
@@ -61,22 +61,24 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_25_041932) do
   end
 
   create_table "recipe_categories", force: :cascade do |t|
-    t.string "name"
+    t.string "name", null: false
     t.integer "display_order"
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_recipe_categories_on_name", unique: true
     t.index ["user_id", "display_order"], name: "index_recipe_categories_on_user_id_and_display_order", unique: true
     t.index ["user_id"], name: "index_recipe_categories_on_user_id"
   end
 
   create_table "recipe_ingredients", force: :cascade do |t|
     t.bigint "recipe_id", null: false
-    t.bigint "grocery_id", null: false
-    t.decimal "quantity"
+    t.bigint "grocery_id"
+    t.decimal "quantity", null: false
     t.bigint "unit_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "name", null: false
     t.index ["grocery_id"], name: "index_recipe_ingredients_on_grocery_id"
     t.index ["recipe_id"], name: "index_recipe_ingredients_on_recipe_id"
     t.index ["unit_id"], name: "index_recipe_ingredients_on_unit_id"
@@ -84,14 +86,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_25_041932) do
 
   create_table "recipes", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.string "name"
-    t.text "instructions"
+    t.string "name", null: false
+    t.text "instructions", null: false
     t.boolean "completed"
     t.datetime "completed_at"
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "recipe_category_id"
+    t.bigint "recipe_category_id", null: false
+    t.index ["name"], name: "index_recipes_on_name", unique: true
     t.index ["recipe_category_id"], name: "index_recipes_on_recipe_category_id"
     t.index ["user_id", "completed"], name: "index_recipes_on_user_id_and_completed"
     t.index ["user_id", "name"], name: "index_recipes_on_user_id_and_name"

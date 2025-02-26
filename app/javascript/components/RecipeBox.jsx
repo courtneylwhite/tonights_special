@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
-import ItemModal from './ItemModal';
+import RecipeModal from './RecipeModal';
 import SearchBar from './SearchBar';
 import ToggleButton from './ToggleButton';
 import ScrollableContainer from './ScrollableContainer';
 
 const Recipes = ({ recipes = {}, units = [] }) => {
+    console.log(recipes);
     const [recipeData, setRecipeData] = useState(recipes);
     const [filteredRecipeData, setFilteredRecipeData] = useState(recipes);
-    const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+    const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
 
     // Create initial toggle state for containers
     const initialToggleState = Object.keys(recipes || {}).reduce((acc, category) => ({
@@ -29,14 +30,14 @@ const Recipes = ({ recipes = {}, units = [] }) => {
         }
     };
 
-    const handleItemAdded = () => refreshData();
-    const handleAddItem = () => setIsItemModalOpen(true);
+    const handleRecipeAdded = () => refreshData();
+    const handleAddRecipe = () => setIsRecipeModalOpen(true);
     const handleRecipeClick = (recipeId) => {
         window.location.href = `/recipes/${recipeId}`;
     };
 
-    // Process the recipe sections for the ItemModal
-    const recipeSections = Object.entries(recipeData || {}).map(([name, data]) => ({
+    // Process the recipe sections for the RecipeModal
+    const recipeCategories = Object.entries(recipeData || {}).map(([name, data]) => ({
         id: data.id,
         name: name
     }));
@@ -71,33 +72,33 @@ const Recipes = ({ recipes = {}, units = [] }) => {
             <div className="min-h-screen bg-black text-white relative">
                 <div className="bg-black/80 backdrop-blur-sm border-b border-gray-800 p-8 sticky top-0 z-10">
                     <h1 className="text-center mb-8">
-                        Recipes
+                        Culinary Inventory
                     </h1>
-                        <div className="flex items-center gap-4 max-w-3xl mx-auto">
-                            <SearchBar
-                                placeholder="Search your recipe box..."
-                                data={recipeData}
-                                searchKeys={['name']}
-                                onFilteredDataChange={setFilteredRecipeData}
-                            />
-                            <button
-                                onClick={handleAddItem}
-                                className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
-                            >
-                                <Plus size={18}/>
-                                <span className="text-sm font-medium">Recipe</span>
-                            </button>
-                            <ToggleButton
-                                initialToggleState={containerToggleState}
-                                onToggleChange={setContainerToggleState}
-                            />
-                        </div>
+                    <div className="flex items-center gap-4 max-w-3xl mx-auto">
+                        <SearchBar
+                            placeholder="Search your pantry..."
+                            data={recipeData}
+                            searchKeys={['name']}
+                            onFilteredDataChange={setFilteredRecipeData}
+                        />
+                        <button
+                            onClick={handleAddRecipe}
+                            className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
+                        >
+                            <Plus size={18}/>
+                            <span className="text-sm font-medium">Recipe</span>
+                        </button>
+                        <ToggleButton
+                            initialToggleState={containerToggleState}
+                            onToggleChange={setContainerToggleState}
+                        />
+                    </div>
                 </div>
 
                 <div className="max-w-5xl mx-auto p-6 relative z-0">
                     {!hasRecipes ? (
                         <div className="text-center text-gray-400 py-12">
-                            <p>No recipes in your recipe box yet.</p>
+                            <p>No recipes in your pantry yet.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
@@ -117,12 +118,11 @@ const Recipes = ({ recipes = {}, units = [] }) => {
                     )}
                 </div>
 
-                <ItemModal
-                    isOpen={isItemModalOpen}
-                    onClose={() => setIsItemModalOpen(false)}
-                    recipeSections={recipeSections}
-                    units={units}
-                    onItemAdded={handleItemAdded}
+                <RecipeModal
+                    isOpen={isRecipeModalOpen}
+                    onClose={() => setIsRecipeModalOpen(false)}
+                    recipeCategories={recipeCategories}
+                    onRecipeAdded={handleRecipeAdded}
                 />
             </div>
         </turbo-frame>

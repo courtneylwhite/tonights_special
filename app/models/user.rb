@@ -14,6 +14,7 @@ class User < ApplicationRecord
   has_many :recipes, dependent: :destroy
   has_many :grocery_list_items, dependent: :destroy
   has_many :grocery_sections, dependent: :destroy
+  has_many :recipe_categories, dependent: :destroy
 
   validates :email, presence: true, uniqueness: true
   validates :encrypted_password, presence: true
