@@ -6,22 +6,12 @@ class RecipesController < ApplicationController
   def index
     @recipes = current_user.recipes.includes(:recipe_category)
                            .order(created_at: :desc)
+    @recipe_categories = current_user.recipe_categories.order(display_order: :asc)
+    @grouped_recipes = RecipePresenter.grouped_recipes(@recipes, @recipe_categories)
 
     respond_to do |format|
-      format.html
-      format.json {
-        render json: {
-          recipes: @recipes.map do |recipe|
-            {
-              id: recipe.id,
-              name: recipe.name,
-              category: recipe.recipe_category.name,
-              completed: recipe.completed,
-              completed_at: recipe.completed_at
-            }
-          end
-        }
-      }
+      format.html # This will render your index.html.erb
+      format.json { render json: @grouped_recipes }
     end
   end
 
@@ -62,64 +52,44 @@ class RecipesController < ApplicationController
   end
 
   def create
-    # Handle new category creation if needed
-    if params[:new_category].present?
-      # Create the category manually instead of using the association directly
-      category = RecipeCategory.new(
-        name: params[:new_category][:name],
-        display_order: params[:new_category][:display_order] || RecipeCategory.where(user_id: current_user.id).count + 1,
-        user_id: current_user.id
-      )
-      category.save
-
-      if category.persisted?
-        # Use the new category for the recipe
-        params[:recipe][:recipe_category_id] = category.id
-      else
-        # Return errors if category creation failed
-        respond_to do |format|
-          format.html {
-            @recipe_categories = current_user.recipe_categories.order(:name)
-            flash.now[:alert] = "Failed to create category: #{category.errors.full_messages.join(', ')}"
-            render :new
-          }
-          format.json { render json: { status: 'error', errors: category.errors.full_messages }, status: :unprocessable_entity }
-        end
-        return
-      end
-    end
-
-    @recipe = current_user.recipes.build(recipe_params)
-
-    # If we get raw_text, parse it for possible ingredients
-    parsed_data = {}
-    if params[:raw_text].present?
-      parsed_data = RecipeParserService.new(params[:raw_text]).parse
-    end
+    result = ::RecipeServices::Creator.new(current_user, params).create
 
     respond_to do |format|
-      if @recipe.save
-        format.html { redirect_to @recipe, notice: 'Recipe was successfully created.' }
+      if result[:success]
+        notice = result[:warnings].present? ? result[:warnings].join(', ') : 'Recipe was successfully created.'
+
+        format.html { redirect_to result[:recipe], notice: notice }
         format.json {
-          render json: {
+          response_data = {
             status: 'success',
-            message: 'Recipe was successfully created.',
+            message: notice,
             recipe: {
-              id: @recipe.id,
-              name: @recipe.name,
-              instructions: @recipe.instructions,
-              notes: @recipe.notes,
-              category: @recipe.recipe_category.name,
-              parsed_ingredients: parsed_data[:ingredients]
+              id: result[:recipe].id,
+              name: result[:recipe].name,
+              instructions: result[:recipe].instructions,
+              notes: result[:recipe].notes,
+              category: result[:recipe].recipe_category.name,
+              ingredients: result[:recipe].recipe_ingredients.includes(:grocery, :unit).map do |ri|
+                {
+                  id: ri.id,
+                  grocery_name: ri.grocery&.name,
+                  quantity: ri.quantity,
+                  unit: ri.unit&.name
+                }
+              end
             }
-          }, status: :created
+          }
+
+          render json: response_data, status: :created
         }
       else
         format.html {
+          @recipe = Recipe.new(params.require(:recipe).permit(:name, :instructions, :notes, :recipe_category_id))
           @recipe_categories = current_user.recipe_categories.order(:name)
+          flash.now[:alert] = result[:errors].join(', ')
           render :new
         }
-        format.json { render json: { status: 'error', errors: @recipe.errors.full_messages }, status: :unprocessable_entity }
+        format.json { render json: { status: 'error', errors: result[:errors] }, status: :unprocessable_entity }
       end
     end
   end

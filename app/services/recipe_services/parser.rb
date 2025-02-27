@@ -1,4 +1,4 @@
-module Recipe
+module RecipeServices
   class Parser
     attr_reader :raw_text
 
@@ -95,7 +95,7 @@ module Recipe
 
       lines.each do |line|
         # Skip subheadings or comments
-        next if line.match(/^-{3,}$/) || line.match(/^#{3,}$/) || line.match(/^\/\//)
+        next if line.match(/^-{3,}$/) || line.match(/^\#{3,}$/) || line.match(/^\/\//)
 
         # Try to extract quantity, unit, and ingredient name
         # Pattern: "1 cup flour" or "1.5 cups flour" or "1/2 cup flour" or "1 1/2 cups flour" etc.
@@ -137,7 +137,7 @@ module Recipe
         cleaned_line = line.gsub(/^\d+[\.\)]\s*|^Step\s+\d+[\.\:]\s*/i, "").strip
 
         # Skip empty lines or separator lines
-        next if cleaned_line.empty? || cleaned_line.match(/^-{3,}$/) || cleaned_line.match(/^#{3,}$/)
+        next if cleaned_line.empty? || cleaned_line.match(/^-{3,}$/) || cleaned_line.match(/^\#{3,}$/)
 
         # Check if this is a new step or a continuation
         if line.match(/^\d+[\.\)]|^Step\s+\d+[\.\:]/i) || current_instruction.empty?
