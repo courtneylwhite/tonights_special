@@ -7,7 +7,7 @@ const ScrollableContainer = ({
                                  categoryIndex,
                                  isOpen,
                                  onToggle,
-                                 handleGroceryClick,
+                                 handleItemClick,
                                  unicodeToEmoji
                              }) => {
     const scrollContainerRef = useRef(null);
@@ -98,7 +98,7 @@ const ScrollableContainer = ({
                                     <div
                                         key={item.id}
                                         className="flex-shrink-0 snap-start w-36 bg-gray-800/90 backdrop-blur-sm rounded-lg p-3 border border-gray-700 hover:border-amber-500 hover:scale-105 transition-all duration-200 cursor-pointer"
-                                        onClick={() => handleGroceryClick(item.id)}
+                                        onClick={() => handleItemClick(item.id)}
                                         style={{
                                             scrollSnapAlign: 'start',
                                             animationDelay: `${(categoryIndex * 50) + (index * 20)}ms`

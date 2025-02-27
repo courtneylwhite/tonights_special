@@ -6,7 +6,6 @@ import ToggleButton from './ToggleButton';
 import ScrollableContainer from './ScrollableContainer';
 
 const Recipes = ({ recipes = {}, units = [] }) => {
-    console.log(recipes);
     const [recipeData, setRecipeData] = useState(recipes);
     const [filteredRecipeData, setFilteredRecipeData] = useState(recipes);
     const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false);
@@ -110,7 +109,7 @@ const Recipes = ({ recipes = {}, units = [] }) => {
                                     categoryIndex={categoryIndex}
                                     isOpen={containerToggleState[category]}
                                     onToggle={handleContainerToggle}
-                                    handleRecipeClick={handleRecipeClick}
+                                    handleItemClick={handleRecipeClick}
                                     unicodeToEmoji={unicodeToEmoji}
                                 />
                             ))}

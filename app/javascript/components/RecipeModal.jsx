@@ -292,7 +292,22 @@ const RecipeModal = ({
                             placeholder="Paste or type your recipe here. Include sections for ingredients and instructions."
                         />
                         <div className="text-gray-400 text-xs mt-1 ml-1">
-                            <strong>Tip:</strong> For best results, include "Ingredients:" and "Instructions:" headings.
+                            <strong>Format:</strong> Include clear "Ingredients:" and "Instructions:" sections.
+                            Ingredients will be extracted and saved separately.
+                        </div>
+                        <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-2 mt-2 text-gray-300 text-xs">
+                            <p className="font-medium text-amber-400">Example format:</p>
+                            <pre className="mt-1 text-gray-300 whitespace-pre-wrap">
+Ingredients:
+2 cups flour
+1 tsp salt
+1/2 cup sugar
+
+Instructions:
+1. Mix dry ingredients
+2. Add wet ingredients
+3. Bake at 350°F for 25 minutes
+                            </pre>
                         </div>
                     </div>
 
