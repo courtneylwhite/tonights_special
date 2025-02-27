@@ -21,7 +21,7 @@ describe('ScrollableContainer', () => {
         categoryIndex: 0,
         isOpen: true,
         onToggle: jest.fn(),
-        handleGroceryClick: jest.fn(),
+        handleItemClick: jest.fn(),
         unicodeToEmoji: (str) => str ? '🍎' : '❓' // Mock function to convert unicode to emoji
     };
 
@@ -66,12 +66,12 @@ describe('ScrollableContainer', () => {
         expect(mockProps.onToggle).toHaveBeenCalledWith('Fruits');
     });
 
-    it('calls handleGroceryClick when an item is clicked', () => {
+    it('calls handleItemClick when an item is clicked', () => {
         render(<ScrollableContainer {...mockProps} />);
         // Find the Apple item container and click it
         const items = screen.getAllByText(/Apple|Banana|Orange/);
         fireEvent.click(items[0].closest('div'));
-        expect(mockProps.handleGroceryClick).toHaveBeenCalledWith(1);
+        expect(mockProps.handleItemClick).toHaveBeenCalledWith(1);
     });
 
     it('shows correct chevron icon based on isOpen state', () => {
