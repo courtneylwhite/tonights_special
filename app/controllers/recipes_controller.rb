@@ -1,13 +1,12 @@
-# app/controllers/recipes_controller.rb
 class RecipesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_recipe, only: [:show, :edit, :update, :destroy, :mark_completed, :mark_incomplete]
 
   def index
-    @recipes = current_user.recipes.includes(:recipe_category)
+    @recipes = current_user.recipes.includes(:recipe_category, recipe_ingredients: [:grocery, :unit])
                            .order(created_at: :desc)
     @recipe_categories = current_user.recipe_categories.order(display_order: :asc)
-    @grouped_recipes = RecipePresenter.grouped_recipes(@recipes, @recipe_categories)
+    @grouped_recipes = RecipePresenter.grouped_recipes_with_availability(@recipes, @recipe_categories, current_user)
 
     respond_to do |format|
       format.html # This will render your index.html.erb
@@ -16,6 +15,8 @@ class RecipesController < ApplicationController
   end
 
   def show
+    @recipe_availability = RecipeServices::AvailabilityChecker.new(current_user, @recipe).availability_info
+
     respond_to do |format|
       format.html
       format.json {
@@ -28,6 +29,7 @@ class RecipesController < ApplicationController
             category: @recipe.recipe_category.name,
             completed: @recipe.completed,
             completed_at: @recipe.completed_at,
+            availability: @recipe_availability,
             ingredients: @recipe.recipe_ingredients.includes(:grocery, :unit).map do |ingredient|
               {
                 id: ingredient.id,
