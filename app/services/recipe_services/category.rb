@@ -19,9 +19,9 @@ module RecipeServices
       # If there's a conflict, use max + 1
       display_order = if existing_display_order
                         RecipeCategory.where(user_id: user.id).maximum(:display_order).to_i + 1
-                      else
+      else
                         params[:display_order] || RecipeCategory.where(user_id: user.id).count + 1
-                      end
+      end
 
       # Create the category
       category = RecipeCategory.new(

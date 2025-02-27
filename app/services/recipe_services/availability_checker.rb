@@ -46,9 +46,9 @@ module RecipeServices
           missing << {
             name: ingredient.name,
             required: ingredient.quantity,
-            required_unit: ingredient.unit&.name || 'whole',
+            required_unit: ingredient.unit&.name || "whole",
             available: grocery&.quantity || 0,
-            available_unit: grocery&.unit&.name || 'whole'
+            available_unit: grocery&.unit&.name || "whole"
           }
         end
       end

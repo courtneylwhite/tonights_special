@@ -1,9 +1,9 @@
 class RecipesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_recipe, only: [:show, :edit, :update, :destroy, :mark_completed, :mark_incomplete]
+  before_action :set_recipe, only: [ :show, :edit, :update, :destroy, :mark_completed, :mark_incomplete ]
 
   def index
-    @recipes = current_user.recipes.includes(:recipe_category, recipe_ingredients: [:grocery, :unit])
+    @recipes = current_user.recipes.includes(:recipe_category, recipe_ingredients: [ :grocery, :unit ])
                            .order(created_at: :desc)
     @recipe_categories = current_user.recipe_categories.order(display_order: :asc)
     @grouped_recipes = RecipePresenter.grouped_recipes_with_availability(@recipes, @recipe_categories, current_user)
@@ -58,12 +58,12 @@ class RecipesController < ApplicationController
 
     respond_to do |format|
       if result[:success]
-        notice = result[:warnings].present? ? result[:warnings].join(', ') : 'Recipe was successfully created.'
+        notice = result[:warnings].present? ? result[:warnings].join(", ") : "Recipe was successfully created."
 
         format.html { redirect_to result[:recipe], notice: notice }
         format.json {
           response_data = {
-            status: 'success',
+            status: "success",
             message: notice,
             recipe: {
               id: result[:recipe].id,
@@ -88,10 +88,10 @@ class RecipesController < ApplicationController
         format.html {
           @recipe = Recipe.new(params.require(:recipe).permit(:name, :instructions, :notes, :recipe_category_id))
           @recipe_categories = current_user.recipe_categories.order(:name)
-          flash.now[:alert] = result[:errors].join(', ')
+          flash.now[:alert] = result[:errors].join(", ")
           render :new
         }
-        format.json { render json: { status: 'error', errors: result[:errors] }, status: :unprocessable_entity }
+        format.json { render json: { status: "error", errors: result[:errors] }, status: :unprocessable_entity }
       end
     end
   end
@@ -99,14 +99,14 @@ class RecipesController < ApplicationController
   def update
     respond_to do |format|
       if @recipe.update(recipe_params)
-        format.html { redirect_to @recipe, notice: 'Recipe was successfully updated.' }
-        format.json { render json: { status: 'success', message: 'Recipe was successfully updated.' } }
+        format.html { redirect_to @recipe, notice: "Recipe was successfully updated." }
+        format.json { render json: { status: "success", message: "Recipe was successfully updated." } }
       else
         format.html {
           @recipe_categories = current_user.recipe_categories.order(:name)
           render :edit
         }
-        format.json { render json: { status: 'error', errors: @recipe.errors.full_messages }, status: :unprocessable_entity }
+        format.json { render json: { status: "error", errors: @recipe.errors.full_messages }, status: :unprocessable_entity }
       end
     end
   end
@@ -114,24 +114,24 @@ class RecipesController < ApplicationController
   def destroy
     @recipe.destroy
     respond_to do |format|
-      format.html { redirect_to recipes_url, notice: 'Recipe was successfully deleted.' }
-      format.json { render json: { status: 'success', message: 'Recipe was successfully deleted.' } }
+      format.html { redirect_to recipes_url, notice: "Recipe was successfully deleted." }
+      format.json { render json: { status: "success", message: "Recipe was successfully deleted." } }
     end
   end
 
   def mark_completed
     @recipe.update(completed: true, completed_at: Time.current)
     respond_to do |format|
-      format.html { redirect_to @recipe, notice: 'Recipe marked as completed.' }
-      format.json { render json: { status: 'success', message: 'Recipe marked as completed.' } }
+      format.html { redirect_to @recipe, notice: "Recipe marked as completed." }
+      format.json { render json: { status: "success", message: "Recipe marked as completed." } }
     end
   end
 
   def mark_incomplete
     @recipe.update(completed: false, completed_at: nil)
     respond_to do |format|
-      format.html { redirect_to @recipe, notice: 'Recipe marked as incomplete.' }
-      format.json { render json: { status: 'success', message: 'Recipe marked as incomplete.' } }
+      format.html { redirect_to @recipe, notice: "Recipe marked as incomplete." }
+      format.json { render json: { status: "success", message: "Recipe marked as incomplete." } }
     end
   end
 

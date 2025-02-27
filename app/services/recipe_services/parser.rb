@@ -48,8 +48,8 @@ module RecipeServices
       lines = raw_text.split("\n").map(&:strip).reject(&:empty?)
 
       # Find the indices that separate ingredients from instructions
-      ingredient_start_idx = find_section_start(lines, ['ingredients', 'ingredients:'])
-      instruction_start_idx = find_section_start(lines, ['instructions', 'instructions:', 'directions', 'directions:', 'steps', 'steps:', 'method', 'method:'])
+      ingredient_start_idx = find_section_start(lines, [ 'ingredients', 'ingredients:' ])
+      instruction_start_idx = find_section_start(lines, [ 'instructions', 'instructions:', 'directions', 'directions:', 'steps', 'steps:', 'method', 'method:' ])
 
       # Handle cases where sections aren't explicitly defined
       if ingredient_start_idx.nil? && instruction_start_idx.nil?
@@ -65,7 +65,7 @@ module RecipeServices
         end
       elsif ingredient_start_idx.nil?
         ingredient_start_idx = 0
-        instruction_start_idx = [instruction_start_idx, lines.size].min
+        instruction_start_idx = [ instruction_start_idx, lines.size ].min
       elsif instruction_start_idx.nil?
         instruction_start_idx = lines.size
       end
@@ -73,15 +73,15 @@ module RecipeServices
       # Extract sections
       ingredient_lines = if ingredient_start_idx + 1 < instruction_start_idx
                            lines[(ingredient_start_idx + 1)...instruction_start_idx]
-                         else
+      else
                            []
-                         end
+      end
 
       instruction_lines = if instruction_start_idx + 1 <= lines.size
                             lines[(instruction_start_idx + 1)..]
-                          else
+      else
                             []
-                          end
+      end
 
       {
         ingredients: parse_ingredients(ingredient_lines),

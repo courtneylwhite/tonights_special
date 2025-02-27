@@ -11,7 +11,7 @@ module RecipeServices
       # Handle new category creation if needed
       category_id = get_category_id
 
-      return { success: false, errors: ["Failed to create category"] } if category_id.nil? && params[:new_category].present?
+      return { success: false, errors: [ "Failed to create category" ] } if category_id.nil? && params[:new_category].present?
 
       # Create the recipe_services with the category
       recipe_attributes = recipe_params.merge(
@@ -44,7 +44,7 @@ module RecipeServices
             return {
               success: true,
               recipe: recipe,
-              warnings: ["Recipe saved but some ingredients could not be created: #{ingredient_result[:errors].join(', ')}"]
+              warnings: [ "Recipe saved but some ingredients could not be created: #{ingredient_result[:errors].join(', ')}" ]
             }
           end
         end

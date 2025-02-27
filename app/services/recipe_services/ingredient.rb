@@ -54,7 +54,7 @@ module RecipeServices
 
         { success: true, ingredient: ingredient }
       rescue => e
-        { success: false, errors: ["Error creating ingredient #{ingredient_data[:name]}: #{e.message}"] }
+        { success: false, errors: [ "Error creating ingredient #{ingredient_data[:name]}: #{e.message}" ] }
       end
     end
 
@@ -161,9 +161,9 @@ module RecipeServices
     end
 
     def determine_unit_category(unit_name)
-      volume_units = ['cup', 'tablespoon', 'teaspoon', 'pint', 'quart', 'gallon', 'liter', 'milliliter', 'fluid']
-      weight_units = ['pound', 'ounce', 'gram', 'kilogram']
-      length_units = ['inch', 'centimeter', 'millimeter', 'meter']
+      volume_units = [ 'cup', 'tablespoon', 'teaspoon', 'pint', 'quart', 'gallon', 'liter', 'milliliter', 'fluid' ]
+      weight_units = [ 'pound', 'ounce', 'gram', 'kilogram' ]
+      length_units = [ 'inch', 'centimeter', 'millimeter', 'meter' ]
 
       unit_downcase = unit_name.downcase
 
