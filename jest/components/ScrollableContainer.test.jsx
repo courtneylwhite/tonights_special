@@ -7,7 +7,8 @@ jest.mock('lucide-react', () => ({
     ChevronDown: () => <div data-testid="chevron-down">ChevronDown</div>,
     ChevronUp: () => <div data-testid="chevron-up">ChevronUp</div>,
     ChevronLeft: () => <div data-testid="chevron-left">ChevronLeft</div>,
-    ChevronRight: () => <div data-testid="chevron-right">ChevronRight</div>
+    ChevronRight: () => <div data-testid="chevron-right">ChevronRight</div>,
+    CheckCircle: () => <div data-testid="check-circle">CheckCircle</div>
 }));
 
 describe('ScrollableContainer', () => {
@@ -153,5 +154,25 @@ describe('ScrollableContainer', () => {
     it('shows "No items in this category" when items array is empty', () => {
         render(<ScrollableContainer {...mockProps} items={[]} />);
         expect(screen.getByText('No items in this category')).toBeInTheDocument();
+    });
+
+    it('renders availability indicator when item has can_make property set to true', () => {
+        // Create new mock props with can_make set to true for one item
+        const mockPropsWithAvailability = {
+            ...mockProps,
+            items: [
+                { id: 1, name: 'Apple', quantity: 5, unit: 'piece', emoji: 'U+1F34E', can_make: true },
+                { id: 2, name: 'Banana', quantity: 3, unit: 'piece', emoji: 'U+1F34C' },
+                { id: 3, name: 'Orange', quantity: 2, unit: 'piece', emoji: 'U+1F34A' }
+            ]
+        };
+
+        render(<ScrollableContainer {...mockPropsWithAvailability} />);
+
+        // Verify the CheckCircle indicator is rendered
+        expect(screen.getByTestId('check-circle')).toBeInTheDocument();
+
+        // Verify it's only rendered once (only for the Apple item)
+        expect(screen.getAllByTestId('check-circle').length).toBe(1);
     });
 });
