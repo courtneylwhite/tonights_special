@@ -6,6 +6,8 @@ class RecipesController < ApplicationController
     @recipes = current_user.recipes.includes(:recipe_category, recipe_ingredients: [ :grocery, :unit ])
                            .order(created_at: :desc)
     @recipe_categories = current_user.recipe_categories.order(display_order: :asc)
+
+    # Uses the optimized grouped_recipes_with_availability which preloads groceries once
     @grouped_recipes = RecipePresenter.grouped_recipes_with_availability(@recipes, @recipe_categories, current_user)
 
     respond_to do |format|
@@ -15,7 +17,16 @@ class RecipesController < ApplicationController
   end
 
   def show
-    @recipe_availability = RecipeServices::AvailabilityChecker.new(current_user, @recipe).availability_info
+    # Preload groceries for performance
+    user_groceries = current_user.groceries.includes(:unit).index_by(&:id)
+
+    # Use the limit parameter to get at most 2 missing ingredients
+    # This makes the response more focused and improves performance
+    @recipe_availability = RecipeServices::AvailabilityChecker.new(
+      current_user,
+      @recipe,
+      user_groceries
+    ).availability_info(2)
 
     respond_to do |format|
       format.html

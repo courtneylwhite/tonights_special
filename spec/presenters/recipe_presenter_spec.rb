@@ -81,12 +81,12 @@ RSpec.describe RecipePresenter do
     it 'includes availability information' do
       # Create user, category, and recipe
       user = create(:user)
-      category = create(:recipe_category, name: 'Breakfast')
-      recipe = create(:recipe, recipe_category: category, name: 'Pancakes')
+      category = create(:recipe_category, name: 'Breakfast', user: user)
+      recipe = create(:recipe, recipe_category: category, name: 'Pancakes', user: user)
 
-      # Mock the availability checker
+      # Set up a checker that will return true for availability
       availability_checker = instance_double(RecipeServices::AvailabilityChecker, available?: true)
-      allow(RecipeServices::AvailabilityChecker).to receive(:new).with(user, recipe).and_return(availability_checker)
+      allow(RecipeServices::AvailabilityChecker).to receive(:new).and_return(availability_checker)
 
       # Call the method
       result = RecipePresenter.grouped_recipes_with_availability([ recipe ], [ category ], user)
@@ -99,15 +99,15 @@ RSpec.describe RecipePresenter do
     it 'handles empty categories with availability information' do
       # Create user and categories
       user = create(:user)
-      category1 = create(:recipe_category, name: 'Breakfast', display_order: 1)
-      category2 = create(:recipe_category, name: 'Dessert', display_order: 2) # Empty category
+      category1 = create(:recipe_category, name: 'Breakfast', display_order: 1, user: user)
+      category2 = create(:recipe_category, name: 'Dessert', display_order: 2, user: user) # Empty category
 
       # Create recipe in only one category
-      recipe = create(:recipe, recipe_category: category1, name: 'Pancakes')
+      recipe = create(:recipe, recipe_category: category1, name: 'Pancakes', user: user)
 
-      # Mock the availability checker
+      # Set up a checker that will return true for availability
       availability_checker = instance_double(RecipeServices::AvailabilityChecker, available?: true)
-      allow(RecipeServices::AvailabilityChecker).to receive(:new).with(user, recipe).and_return(availability_checker)
+      allow(RecipeServices::AvailabilityChecker).to receive(:new).and_return(availability_checker)
 
       # Call the method
       result = RecipePresenter.grouped_recipes_with_availability([ recipe ], [ category1, category2 ], user)
@@ -116,6 +116,46 @@ RSpec.describe RecipePresenter do
       expect(result.keys).to contain_exactly('Breakfast', 'Dessert')
       expect(result['Dessert'][:items]).to eq([])
       expect(result['Breakfast'][:items].first[:can_make]).to be true
+    end
+
+    it 'preloads groceries to avoid N+1 queries' do
+      # Create user, category, and recipes
+      user = create(:user)
+      category = create(:recipe_category, name: 'Breakfast', user: user)
+      recipe1 = create(:recipe, recipe_category: category, name: 'Pancakes', user: user)
+      recipe2 = create(:recipe, recipe_category: category, name: 'Waffles', user: user)
+
+      # Create grocery items for the user
+      cup_unit = create(:unit, name: 'cup')
+      create(:grocery, name: 'flour', user: user, unit: cup_unit, quantity: 5)
+      create(:grocery, name: 'milk', user: user, unit: cup_unit, quantity: 2)
+
+      # Verify that user.groceries is only called once to preload
+      expect(user).to receive(:groceries).once.and_call_original
+
+      # Call the method - with 2 recipes, this would normally cause N+1 queries
+      # but our optimized version should only load groceries once
+      RecipePresenter.grouped_recipes_with_availability([ recipe1, recipe2 ], [ category ], user)
+    end
+  end
+
+  describe '.format_recipe_with_availability' do
+    it 'adds availability flag to recipe data' do
+      # Create user, category, and recipe
+      user = create(:user)
+      category = create(:recipe_category, name: 'Breakfast', user: user)
+      recipe = create(:recipe, recipe_category: category, name: 'Pancakes', user: user)
+
+      # Set up a checker that will return true for availability
+      availability_checker = instance_double(RecipeServices::AvailabilityChecker, available?: true)
+      allow(RecipeServices::AvailabilityChecker).to receive(:new).and_return(availability_checker)
+
+      # Call the private method using send
+      result = RecipePresenter.send(:format_recipe_with_availability, recipe, user)
+
+      # Verify the result
+      expect(result[:name]).to eq('Pancakes')
+      expect(result[:can_make]).to be true
     end
   end
 end
