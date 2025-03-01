@@ -41,9 +41,9 @@ module RecipeServices
       # Use preloaded groceries if provided, otherwise load them
       user_groceries = if preloaded_groceries
                          preloaded_groceries
-                       else
+      else
                          user.groceries.includes(:unit).index_by(&:id)
-                       end
+      end
 
       recipe.recipe_ingredients.includes(:grocery, :unit).each do |ingredient|
         # Stop checking if we've hit our limit

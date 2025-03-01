@@ -24,7 +24,8 @@ describe('RecipeModal', () => {
         render(<RecipeModal {...mockProps} />);
         expect(screen.getByLabelText('Recipe Name')).toBeInTheDocument();
         expect(screen.getByLabelText('Recipe Category')).toBeInTheDocument();
-        expect(screen.getByLabelText('Recipe Content')).toBeInTheDocument();
+        expect(screen.getByLabelText('Ingredients')).toBeInTheDocument();
+        expect(screen.getByLabelText('Instructions')).toBeInTheDocument();
         expect(screen.getByLabelText('Notes (Optional)')).toBeInTheDocument();
     });
 
@@ -44,8 +45,11 @@ describe('RecipeModal', () => {
         fireEvent.change(screen.getByLabelText('Recipe Category'), {
             target: { value: '1' }
         });
-        fireEvent.change(screen.getByLabelText('Recipe Content'), {
-            target: { value: 'Ingredients:\n2 cups flour\n1 cup sugar\n\nInstructions:\n1. Mix dry ingredients\n2. Bake' }
+        fireEvent.change(screen.getByLabelText('Ingredients'), {
+            target: { value: '2 cups flour\n1 cup sugar' }
+        });
+        fireEvent.change(screen.getByLabelText('Instructions'), {
+            target: { value: '1. Mix dry ingredients\n2. Bake' }
         });
         fireEvent.change(screen.getByLabelText('Notes (Optional)'), {
             target: { value: 'Family favorite' }
@@ -75,8 +79,11 @@ describe('RecipeModal', () => {
         fireEvent.change(screen.getByLabelText('Recipe Category'), {
             target: { value: '1' }
         });
-        fireEvent.change(screen.getByLabelText('Recipe Content'), {
-            target: { value: 'Ingredients:\n2 cups flour\n1 cup sugar\n\nInstructions:\n1. Mix dry ingredients\n2. Bake' }
+        fireEvent.change(screen.getByLabelText('Ingredients'), {
+            target: { value: '2 cups flour\n1 cup sugar' }
+        });
+        fireEvent.change(screen.getByLabelText('Instructions'), {
+            target: { value: '1. Mix dry ingredients\n2. Bake' }
         });
 
         fireEvent.submit(screen.getByRole('button', { name: /create recipe/i }));
@@ -102,36 +109,37 @@ describe('RecipeModal', () => {
 
         // Check that form fields are reset to initial state
         expect(screen.getByLabelText('Recipe Name')).toHaveValue('');
-        expect(screen.getByLabelText('Recipe Content')).toHaveValue('');
+        expect(screen.getByLabelText('Ingredients')).toHaveValue('');
+        expect(screen.getByLabelText('Instructions')).toHaveValue('');
         expect(screen.getByLabelText('Notes (Optional)')).toHaveValue('');
     });
 
-    it('toggles recipe preview when button is clicked', async () => {
+    it('toggles ingredients preview when button is clicked', async () => {
         render(<RecipeModal {...mockProps} />);
 
-        // Enter recipe content to trigger preview option
-        fireEvent.change(screen.getByLabelText('Recipe Content'), {
-            target: { value: 'Ingredients:\n2 cups flour\n1 cup sugar\n\nInstructions:\n1. Mix dry ingredients\n2. Bake' }
+        // Enter ingredients to trigger preview option
+        fireEvent.change(screen.getByLabelText('Ingredients'), {
+            target: { value: '2 cups flour\n1 cup sugar' }
         });
 
         // Wait for the preview button to appear
         await waitFor(() => {
-            expect(screen.getByText('Show Recipe Preview')).toBeInTheDocument();
+            expect(screen.getByText('Show Ingredients Preview')).toBeInTheDocument();
         });
 
         // Click the preview button
-        fireEvent.click(screen.getByText('Show Recipe Preview'));
+        fireEvent.click(screen.getByText('Show Ingredients Preview'));
 
         // Check if preview content is shown
-        expect(screen.getByText('Preview (How your recipe will be parsed)')).toBeInTheDocument();
+        expect(screen.getByText('Preview (How your ingredients will be parsed)')).toBeInTheDocument();
         expect(screen.getByText('flour')).toBeInTheDocument();
-        expect(screen.getByText('Mix dry ingredients')).toBeInTheDocument();
+        expect(screen.getByText('sugar')).toBeInTheDocument();
 
         // Click again to hide preview
-        fireEvent.click(screen.getByText('Hide Preview'));
+        fireEvent.click(screen.getByText('Hide Ingredients Preview'));
 
         // Preview should be hidden
-        expect(screen.queryByText('Preview (How your recipe will be parsed)')).not.toBeInTheDocument();
+        expect(screen.queryByText('Preview (How your ingredients will be parsed)')).not.toBeInTheDocument();
     });
 
     describe('New Category Mode', () => {
@@ -153,8 +161,9 @@ describe('RecipeModal', () => {
             fireEvent.change(categorySelect, { target: { value: 'new' } });
 
             // Now find and click the cancel button (X)
+            // Using a more specific approach to find the cancel button next to the New Category Name input
             const cancelButton = screen.getByLabelText('New Category Name')
-                .parentElement.querySelector('button');
+                .parentElement.querySelector('button[type="button"]');
             fireEvent.click(cancelButton);
 
             // Should switch back to category select
@@ -171,8 +180,11 @@ describe('RecipeModal', () => {
             fireEvent.change(screen.getByLabelText('Recipe Category'), {
                 target: { value: '1' }
             });
-            fireEvent.change(screen.getByLabelText('Recipe Content'), {
-                target: { value: 'Ingredients:\n2 cups flour\n1 cup sugar\n\nInstructions:\n1. Mix dry ingredients\n2. Bake' }
+            fireEvent.change(screen.getByLabelText('Ingredients'), {
+                target: { value: '2 cups flour\n1 cup sugar' }
+            });
+            fireEvent.change(screen.getByLabelText('Instructions'), {
+                target: { value: '1. Mix dry ingredients\n2. Bake' }
             });
         };
 

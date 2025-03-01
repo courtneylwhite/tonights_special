@@ -1,9 +1,9 @@
 class RecipesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_recipe, only: [:show, :edit, :update, :destroy, :mark_completed, :mark_incomplete]
+  before_action :set_recipe, only: [ :mark_completed, :mark_incomplete ]
 
   def index
-    @recipes = current_user.recipes.includes(:recipe_category, recipe_ingredients: [:grocery, :unit])
+    @recipes = current_user.recipes.includes(:recipe_category, recipe_ingredients: [ :grocery, :unit ])
                            .order(created_at: :desc)
     @recipe_categories = current_user.recipe_categories.order(display_order: :asc)
 
@@ -13,70 +13,6 @@ class RecipesController < ApplicationController
     respond_to do |format|
       format.html # Renders the index page with React components
       format.json { render json: @grouped_recipes }
-    end
-  end
-
-  def show
-    # Preload groceries for performance
-    user_groceries = current_user.groceries.includes(:unit).index_by(&:id)
-
-    @recipe_availability = RecipeServices::AvailabilityChecker.new(
-      current_user,
-      @recipe,
-      user_groceries
-    ).availability_info(2)
-
-    respond_to do |format|
-      format.html # Renders show page with React components
-      format.json {
-        render json: {
-          recipe: {
-            id: @recipe.id,
-            name: @recipe.name,
-            instructions: @recipe.instructions,
-            notes: @recipe.notes,
-            category: @recipe.recipe_category.name,
-            completed: @recipe.completed,
-            completed_at: @recipe.completed_at,
-            availability: @recipe_availability,
-            ingredients: @recipe.recipe_ingredients.includes(:grocery, :unit).map do |ingredient|
-              {
-                id: ingredient.id,
-                grocery_name: ingredient.grocery&.name || "Unknown",
-                quantity: ingredient.quantity,
-                unit: ingredient.unit.name,
-                preparation: ingredient.preparation,
-                size: ingredient.size
-              }
-            end
-          }
-        }
-      }
-    end
-  end
-
-  def new
-    @recipe = Recipe.new
-    @recipe_categories = current_user.recipe_categories.order(:name)
-
-    # If this is an AJAX request, return category data as JSON
-    respond_to do |format|
-      format.html
-      format.json { render json: { categories: @recipe_categories } }
-    end
-  end
-
-  def edit
-    @recipe_categories = current_user.recipe_categories.order(:name)
-
-    respond_to do |format|
-      format.html
-      format.json {
-        render json: {
-          recipe: format_recipe_for_json(@recipe),
-          categories: @recipe_categories
-        }
-      }
     end
   end
 
@@ -104,29 +40,6 @@ class RecipesController < ApplicationController
         errors: result[:errors]
       }, status: :unprocessable_entity
     end
-  end
-
-  def update
-    if @recipe.update(recipe_params)
-      render json: {
-        status: "success",
-        message: "Recipe was successfully updated.",
-        recipe: format_recipe_for_json(@recipe)
-      }
-    else
-      render json: {
-        status: "error",
-        errors: @recipe.errors.full_messages
-      }, status: :unprocessable_entity
-    end
-  end
-
-  def destroy
-    @recipe.destroy
-    render json: {
-      status: "success",
-      message: "Recipe was successfully deleted."
-    }
   end
 
   def mark_completed

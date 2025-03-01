@@ -12,7 +12,7 @@ module RecipeServices
     def create
       # Step 1: Determine the category for the recipe
       category_id = get_category_id
-      return { success: false, errors: ["Failed to create category"] } if category_id.nil? && new_category_params.present?
+      return { success: false, errors: [ "Failed to create category" ] } if category_id.nil? && new_category_params.present?
 
       # Step 2: Set up recipe attributes (just instructions, not ingredients)
       recipe_data = {
@@ -47,9 +47,9 @@ module RecipeServices
 
             updated_notes = if existing_notes.present?
                               "#{existing_notes}\n\n#{note_text}"
-                            else
+            else
                               note_text
-                            end
+            end
 
             recipe.update(notes: updated_notes)
           end
