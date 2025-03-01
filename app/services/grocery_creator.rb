@@ -59,6 +59,8 @@ class GroceryCreator
   end
 
   def create_grocery
+    grocery_attributes[:name] = grocery_attributes[:name]&.downcase
+
     grocery = user.groceries.build(grocery_attributes)
 
     if grocery.save
