@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 
 const ScrollableContainer = ({
                                  category,
@@ -7,7 +7,7 @@ const ScrollableContainer = ({
                                  categoryIndex,
                                  isOpen,
                                  onToggle,
-                                 handleGroceryClick,
+                                 handleItemClick,
                                  unicodeToEmoji
                              }) => {
     const scrollContainerRef = useRef(null);
@@ -97,13 +97,20 @@ const ScrollableContainer = ({
                                 {items.map((item, index) => (
                                     <div
                                         key={item.id}
-                                        className="flex-shrink-0 snap-start w-36 bg-gray-800/90 backdrop-blur-sm rounded-lg p-3 border border-gray-700 hover:border-amber-500 hover:scale-105 transition-all duration-200 cursor-pointer"
-                                        onClick={() => handleGroceryClick(item.id)}
+                                        className="flex-shrink-0 snap-start w-36 bg-gray-800/90 backdrop-blur-sm rounded-lg p-3 border border-gray-700 hover:border-amber-500 hover:scale-105 transition-all duration-200 cursor-pointer relative"
+                                        onClick={() => handleItemClick(item.id)}
                                         style={{
                                             scrollSnapAlign: 'start',
                                             animationDelay: `${(categoryIndex * 50) + (index * 20)}ms`
                                         }}
                                     >
+                                        {/* Availability Indicator - only shown if can_make property exists and is true */}
+                                        {item.can_make && (
+                                            <div className="absolute top-1 right-1 z-10">
+                                                <CheckCircle size={18} className="text-green-500 fill-green-500/20" />
+                                            </div>
+                                        )}
+
                                         <div className="flex flex-col items-center">
                                             {item.emoji && (
                                                 <span className="text-2xl mb-2" title={item.emoji}>
@@ -113,9 +120,11 @@ const ScrollableContainer = ({
                                             <span className="font-medium text-sm text-center truncate w-full">
                                                 {item.name}
                                             </span>
-                                            <div className="mt-2 px-2 py-1 bg-amber-500 text-black rounded-full text-xs font-bold">
-                                                {item.quantity} {item.unit}
-                                            </div>
+                                            {item.quantity && item.unit && (
+                                                <div className="mt-2 px-2 py-1 bg-amber-500 text-black rounded-full text-xs font-bold">
+                                                    {item.quantity} {item.unit}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

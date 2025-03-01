@@ -109,7 +109,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                                     categoryIndex={categoryIndex}
                                     isOpen={containerToggleState[category]}
                                     onToggle={handleContainerToggle}
-                                    handleGroceryClick={handleGroceryClick}
+                                    handleItemClick={handleGroceryClick}
                                     unicodeToEmoji={unicodeToEmoji}
                                 />
                             ))}

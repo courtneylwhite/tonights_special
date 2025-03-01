@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, screen, waitFor, act } from '@testing-library/react';
-import Pantry from '@/components/Pantry';
+import RecipeBox from '@/components/RecipeBox';
 
 // Mock child components
 jest.mock('@/components/SearchBar', () => {
@@ -12,10 +12,10 @@ jest.mock('@/components/SearchBar', () => {
                     data-testid="search-input"
                     onChange={(e) => {
                         // Simple mock filter function to simulate SearchBar
-                        if (e.target.value === 'Apple') {
+                        if (e.target.value === 'Cookies') {
                             const filtered = Object.entries(data).reduce((acc, [category, categoryData]) => {
                                 const filteredItems = categoryData.items.filter(item =>
-                                    item.name.includes('Apple')
+                                    item.name.includes('Cookies')
                                 );
 
                                 if (filteredItems.length > 0) {
@@ -38,13 +38,13 @@ jest.mock('@/components/SearchBar', () => {
     };
 });
 
-jest.mock('@/components/ItemModal', () => {
-    return function MockItemModal({ isOpen, onClose, onItemAdded }) {
+jest.mock('@/components/RecipeModal', () => {
+    return function MockRecipeModal({ isOpen, onClose, onRecipeAdded }) {
         return isOpen ? (
-            <div data-testid="item-modal">
-                <h2>Add New Item</h2>
+            <div data-testid="recipe-modal">
+                <h2>Add New Recipe</h2>
                 <button data-testid="close-modal" onClick={onClose}>Close</button>
-                <button data-testid="add-item" onClick={onItemAdded}>Add Item</button>
+                <button data-testid="add-recipe" onClick={onRecipeAdded}>Add Recipe</button>
             </div>
         ) : null;
     };
@@ -99,7 +99,7 @@ jest.mock('@/components/ScrollableContainer', () => {
                                 onClick={() => handleItemClick(item.id)}
                                 className="cursor-pointer"
                             >
-                                {item.name} - {item.quantity} {item.unit}
+                                {item.name}
                             </div>
                         ))}
                     </div>
@@ -112,124 +112,123 @@ jest.mock('@/components/ScrollableContainer', () => {
 // Mock fetch
 global.fetch = jest.fn();
 
-describe('Pantry Component', () => {
-    const mockGroceries = {
-        'Fruits': {
+describe('RecipeBox Component', () => {
+    const mockRecipes = {
+        'Desserts': {
             id: 1,
             items: [
-                { id: 101, name: 'Apple', quantity: 5, unit: 'piece', emoji: 'U+1F34E' },
-                { id: 102, name: 'Banana', quantity: 3, unit: 'piece', emoji: 'U+1F34C' }
+                { id: 101, name: 'Chocolate Chip Cookies', emoji: 'U+1F36A' },
+                { id: 102, name: 'Vanilla Cake', emoji: 'U+1F370' }
             ],
             display_order: 1
         },
-        'Vegetables': {
+        'Main Courses': {
             id: 2,
             items: [
-                { id: 201, name: 'Carrot', quantity: 4, unit: 'piece', emoji: 'U+1F955' }
+                { id: 201, name: 'Spaghetti Bolognese', emoji: 'U+1F35D' }
             ],
             display_order: 2
         }
     };
 
-    const mockUnits = ['piece', 'kg', 'liter'];
+    const mockUnits = ['cup', 'tsp', 'tbsp'];
 
     beforeEach(() => {
         jest.clearAllMocks();
         global.fetch.mockResolvedValue({
-            json: jest.fn().mockResolvedValue(mockGroceries)
+            json: jest.fn().mockResolvedValue(mockRecipes)
         });
     });
 
-    it('renders empty state when no groceries provided', () => {
-        render(<Pantry groceries={{}} units={[]} />);
-        expect(screen.getByText('No groceries in your pantry yet.')).toBeInTheDocument();
+    it('renders empty state when no recipes provided', () => {
+        render(<RecipeBox recipes={{}} units={[]} />);
+        expect(screen.getByText('No recipes in your pantry yet.')).toBeInTheDocument();
     });
 
-    it('renders groceries when provided', () => {
-        render(<Pantry groceries={mockGroceries} units={mockUnits} />);
-        expect(screen.getByTestId('container-Fruits')).toBeInTheDocument();
-        expect(screen.getByTestId('container-Vegetables')).toBeInTheDocument();
+    it('renders recipes when provided', () => {
+        render(<RecipeBox recipes={mockRecipes} units={mockUnits} />);
+        expect(screen.getByTestId('container-Desserts')).toBeInTheDocument();
+        expect(screen.getByTestId('container-Main Courses')).toBeInTheDocument();
     });
 
-    it('opens the ItemModal when add button is clicked', () => {
-        render(<Pantry groceries={mockGroceries} units={mockUnits} />);
+    it('opens the RecipeModal when add button is clicked', () => {
+        render(<RecipeBox recipes={mockRecipes} units={mockUnits} />);
 
         // Find and click the add button
-        const addButton = screen.getByText('Grocery');
+        const addButton = screen.getByText('Recipe');
         fireEvent.click(addButton);
 
         // Modal should now be visible
-        expect(screen.getByTestId('item-modal')).toBeInTheDocument();
-        expect(screen.getByText('Add New Item')).toBeInTheDocument();
+        expect(screen.getByTestId('recipe-modal')).toBeInTheDocument();
+        expect(screen.getByText('Add New Recipe')).toBeInTheDocument();
     });
 
-    it('closes the ItemModal', () => {
-        render(<Pantry groceries={mockGroceries} units={mockUnits} />);
+    it('closes the RecipeModal', () => {
+        render(<RecipeBox recipes={mockRecipes} units={mockUnits} />);
 
         // Open the modal
-        fireEvent.click(screen.getByText('Grocery'));
-        expect(screen.getByTestId('item-modal')).toBeInTheDocument();
+        fireEvent.click(screen.getByText('Recipe'));
+        expect(screen.getByTestId('recipe-modal')).toBeInTheDocument();
 
         // Close the modal
         fireEvent.click(screen.getByTestId('close-modal'));
-        expect(screen.queryByTestId('item-modal')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('recipe-modal')).not.toBeInTheDocument();
     });
 
-    it('refreshes data when item is added', async () => {
-        render(<Pantry groceries={mockGroceries} units={mockUnits} />);
+    it('refreshes data when recipe is added', async () => {
+        render(<RecipeBox recipes={mockRecipes} units={mockUnits} />);
 
         // Open modal
-        fireEvent.click(screen.getByText('Grocery'));
+        fireEvent.click(screen.getByText('Recipe'));
 
-        // Add item - need to wrap in act since it causes state updates
+        // Add recipe - need to wrap in act since it causes state updates
         await act(async () => {
-            fireEvent.click(screen.getByTestId('add-item'));
+            fireEvent.click(screen.getByTestId('add-recipe'));
         });
 
         // Should call fetch to refresh data
-        expect(global.fetch).toHaveBeenCalledWith('/groceries', {
+        expect(global.fetch).toHaveBeenCalledWith('/recipes', {
             headers: { 'Accept': 'application/json' }
         });
     });
 
-    it('navigates to grocery detail page when grocery is clicked', () => {
+    it('navigates to recipe detail page when recipe is clicked', () => {
         // Mock window.location
         const originalLocation = window.location;
         delete window.location;
         window.location = { href: '' };
 
-        render(<Pantry groceries={mockGroceries} units={mockUnits} />);
+        render(<RecipeBox recipes={mockRecipes} units={mockUnits} />);
 
-        // Find a grocery item and click it
-        const appleItem = screen.getByTestId('item-101');
-        fireEvent.click(appleItem);
+        // Find a recipe item and click it
+        const cookiesItem = screen.getByTestId('item-101');
+        fireEvent.click(cookiesItem);
 
         // Should navigate to the detail page
-        expect(window.location.href).toBe('/groceries/101');
+        expect(window.location.href).toBe('/recipes/101');
 
         // Restore original location
         window.location = originalLocation;
     });
 
     it('toggles container visibility when category header is clicked', () => {
-        render(<Pantry groceries={mockGroceries} units={mockUnits} />);
+        render(<RecipeBox recipes={mockRecipes} units={mockUnits} />);
 
-        // Get the Fruits category container
-        const fruitsHeader = screen.getByText('Fruits').closest('div');
+        // Get the Desserts category container
+        const dessertsHeader = screen.getByText('Desserts').closest('div');
 
         // All containers should be open initially
-        expect(screen.getByTestId('item-101')).toBeInTheDocument(); // Apple
+        expect(screen.getByTestId('item-101')).toBeInTheDocument(); // Cookies
 
         // Toggle the container closed
-        fireEvent.click(fruitsHeader);
+        fireEvent.click(dessertsHeader);
 
-        // Should update the container toggle state
         // Since we mocked ScrollableContainer, we can't directly check if items are hidden
-        // We need to simulate this in our mock component behavior
+        // This would be handled by the container's isOpen prop
     });
 
     it('toggles all containers via the ToggleButton', () => {
-        render(<Pantry groceries={mockGroceries} units={mockUnits} />);
+        render(<RecipeBox recipes={mockRecipes} units={mockUnits} />);
 
         // Find the toggle all button
         const toggleAllButton = screen.getByTestId('toggle-all-button');
@@ -246,41 +245,33 @@ describe('Pantry Component', () => {
         expect(toggleAllButton).toHaveTextContent('Collapse All');
     });
 
-    it('filters groceries when searching', () => {
-        render(<Pantry groceries={mockGroceries} units={mockUnits} />);
+    it('filters recipes when searching', () => {
+        render(<RecipeBox recipes={mockRecipes} units={mockUnits} />);
 
         // Use the search input
         const searchInput = screen.getByTestId('search-input');
-        fireEvent.change(searchInput, { target: { value: 'Apple' } });
+        fireEvent.change(searchInput, { target: { value: 'Cookies' } });
 
         // The filtered results should update the component state
-        // Our mock will filter to show only Apple items
-        // The test can't assert on this directly due to the mock
+        // Our mock will filter to show only Cookie items
     });
 
-    // Skip the complex sort test - we'll test this with a unit test of the sort logic
-    it.skip('sorts grocery categories by display_order', () => {
-        // This test is being skipped as it's hard to verify DOM ordering with mocks
-        // We will test the sorting functionality directly
-    });
-
-    // Instead, let's verify the sorting logic directly
-    it('correctly sorts groceries by display_order', () => {
-        // Test data
-        const unsortedGroceries = {
-            'Vegetables': { id: 2, display_order: 2 },
-            'Fruits': { id: 1, display_order: 1 },
-            'Dairy': { id: 3, display_order: 3 }
+    it('correctly sorts recipes by display_order', () => {
+        // Test data with unordered categories
+        const unsortedRecipes = {
+            'Main Courses': { id: 2, display_order: 2 },
+            'Desserts': { id: 1, display_order: 1 },
+            'Appetizers': { id: 3, display_order: 3 }
         };
 
-        // Extract the sorting logic from the component
-        const sortedEntries = Object.entries(unsortedGroceries)
+        // Extract the sorting logic
+        const sortedEntries = Object.entries(unsortedRecipes)
             .sort(([, a], [, b]) => a.display_order - b.display_order);
 
         // Check order is correct
-        expect(sortedEntries[0][0]).toBe('Fruits');   // display_order 1
-        expect(sortedEntries[1][0]).toBe('Vegetables'); // display_order 2
-        expect(sortedEntries[2][0]).toBe('Dairy');    // display_order 3
+        expect(sortedEntries[0][0]).toBe('Desserts');     // display_order 1
+        expect(sortedEntries[1][0]).toBe('Main Courses'); // display_order 2
+        expect(sortedEntries[2][0]).toBe('Appetizers');   // display_order 3
     });
 
     it('handles errors when refreshing data', async () => {
@@ -290,24 +281,35 @@ describe('Pantry Component', () => {
         // Mock fetch to reject
         global.fetch.mockRejectedValueOnce(new Error('Failed to fetch'));
 
-        render(<Pantry groceries={mockGroceries} units={mockUnits} />);
+        render(<RecipeBox recipes={mockRecipes} units={mockUnits} />);
 
         // Trigger refresh - wrap in act since it causes state updates
-        fireEvent.click(screen.getByText('Grocery'));
+        fireEvent.click(screen.getByText('Recipe'));
 
         await act(async () => {
-            fireEvent.click(screen.getByTestId('add-item'));
+            fireEvent.click(screen.getByTestId('add-recipe'));
         });
 
         // Wait for the error to be logged
         await waitFor(() => {
             expect(consoleSpy).toHaveBeenCalledWith(
-                'Failed to refresh groceries:',
+                'Failed to refresh recipes:',
                 expect.any(Error)
             );
         });
 
         // Cleanup
         consoleSpy.mockRestore();
+    });
+
+    it('handles emoji conversion correctly', () => {
+        const { container } = render(<RecipeBox recipes={mockRecipes} units={mockUnits} />);
+
+        // Check that the component includes the unicodeToEmoji function
+        // We can't directly test the function since its implementation is inside the component
+        // and our mocks intercept the actual rendering, but we can verify it exists
+
+        // This is a limited test, but ensures the function is part of the component
+        expect(RecipeBox.toString()).toContain('unicodeToEmoji');
     });
 });

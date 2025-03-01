@@ -1,11 +1,14 @@
 # == Schema Information
 # id :integer, not null
 # recipe_id :integer, not null
-# grocery_id :integer, not null
-# quantity :decimal, nullable
+# grocery_id :integer, nullable
+# quantity :decimal, not null
 # unit_id :integer, not null
 # created_at :datetime, not null
 # updated_at :datetime, not null
+# name :string, not null
+# preparation :string, nullable
+# size :string, nullable
 class RecipeIngredient < ApplicationRecord
   belongs_to :recipe
   belongs_to :grocery, optional: true
