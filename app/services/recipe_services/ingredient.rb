@@ -44,13 +44,19 @@ module RecipeServices
         # Find the correct unit
         unit = find_unit(ingredient_data[:unit_name])
 
-        # Create the recipe_ingredient
-        ingredient = recipe.recipe_ingredients.create!(
+        # Create the recipe_ingredient with preparation and size if available
+        ingredient_attributes = {
           grocery_id: grocery&.id,  # May be nil if no matching grocery was found
           quantity: ingredient_data[:quantity] || 1,
           unit_id: unit&.id,
           name: ingredient_name
-        )
+        }
+
+        # Add preparation and size if they exist
+        ingredient_attributes[:preparation] = ingredient_data[:preparation] if ingredient_data[:preparation].present?
+        ingredient_attributes[:size] = ingredient_data[:size] if ingredient_data[:size].present?
+
+        ingredient = recipe.recipe_ingredients.create!(ingredient_attributes)
 
         { success: true, ingredient: ingredient }
       rescue => e

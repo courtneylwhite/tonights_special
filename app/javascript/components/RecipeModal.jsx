@@ -15,6 +15,7 @@ const RecipeModal = ({
                      }) => {
     const initialFormState = {
         name: '',
+        ingredients: '',
         instructions: '',
         notes: '',
         recipe_category_id: '',
@@ -25,7 +26,6 @@ const RecipeModal = ({
     const [error, setError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [parsedIngredients, setParsedIngredients] = useState([]);
-    const [parsedInstructions, setParsedInstructions] = useState([]);
     const [showPreview, setShowPreview] = useState(false);
     const [isAddingCategoryMode, setIsAddingCategoryMode] = useState(false);
 
@@ -34,74 +34,39 @@ const RecipeModal = ({
             setFormData(initialFormState);
             setError(null);
             setParsedIngredients([]);
-            setParsedInstructions([]);
             setShowPreview(false);
             setIsAddingCategoryMode(false);
         }
     }, [isOpen]);
 
-    // Basic frontend parser for preview
+    // Simple frontend parser for ingredients preview
     useEffect(() => {
-        if (formData.instructions.trim() === '') {
+        if (formData.ingredients.trim() === '') {
             setParsedIngredients([]);
-            setParsedInstructions([]);
             return;
         }
 
-        // Simple parsing logic for preview
-        const lines = formData.instructions.split('\n').filter(line => line.trim() !== '');
-
-        // Try to identify ingredients section and instructions section
-        let ingredientsSection = false;
-        let instructionsSection = false;
+        // Simple parsing logic for ingredient preview
+        const lines = formData.ingredients.split('\n').filter(line => line.trim() !== '');
         const ingredients = [];
-        const instructions = [];
 
         for (const line of lines) {
-            const trimmedLine = line.trim().toLowerCase();
-
-            if (trimmedLine === 'ingredients' || trimmedLine.includes('ingredients:')) {
-                ingredientsSection = true;
-                instructionsSection = false;
-                continue;
-            } else if (
-                trimmedLine === 'instructions' ||
-                trimmedLine === 'directions' ||
-                trimmedLine.includes('instructions:') ||
-                trimmedLine.includes('directions:') ||
-                trimmedLine.includes('steps:')
-            ) {
-                ingredientsSection = false;
-                instructionsSection = true;
-                continue;
-            }
-
-            if (ingredientsSection) {
-                // Very basic ingredient parsing for preview
-                const quantityMatch = line.match(/^(\d+\/\d+|\d+\.\d+|\d+)?\s*([a-zA-Z]+)?\s*(.+)/);
-                if (quantityMatch) {
-                    const [_, quantity, unit, name] = quantityMatch;
-                    ingredients.push({
-                        quantity: quantity || '',
-                        unit: unit || '',
-                        name: name.trim()
-                    });
-                } else {
-                    ingredients.push({ name: line.trim(), quantity: '', unit: '' });
-                }
-            } else if (instructionsSection) {
-                // Extract instruction text, removing step numbers if present
-                const instructionText = line.replace(/^\d+[\.\)]\s*/, '').trim();
-                instructions.push(instructionText);
+            // Very basic ingredient parsing for preview
+            const quantityMatch = line.match(/^(\d+\/\d+|\d+\.\d+|\d+)?\s*([a-zA-Z]+)?\s*(.+)/);
+            if (quantityMatch) {
+                const [_, quantity, unit, name] = quantityMatch;
+                ingredients.push({
+                    quantity: quantity || '',
+                    unit: unit || '',
+                    name: name.trim()
+                });
             } else {
-                // If no section defined yet, assume ingredients
                 ingredients.push({ name: line.trim(), quantity: '', unit: '' });
             }
         }
 
         setParsedIngredients(ingredients);
-        setParsedInstructions(instructions);
-    }, [formData.instructions]);
+    }, [formData.ingredients]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -110,12 +75,13 @@ const RecipeModal = ({
         const token = document.querySelector('meta[name="csrf-token"]')?.content;
 
         try {
+            // Send ingredients and instructions as separate fields
             const requestData = {
                 recipe: {
                     name: formData.name,
+                    ingredients: formData.ingredients,
                     instructions: formData.instructions,
                     notes: formData.notes,
-                    // We'll let the recipe_ingredients be created separately
                 }
             };
 
@@ -278,37 +244,44 @@ const RecipeModal = ({
                     )}
 
                     <div>
+                        <label htmlFor="ingredients" className="block text-sm font-medium text-gray-300 mb-1">
+                            Ingredients
+                        </label>
+                        <textarea
+                            id="ingredients"
+                            name="ingredients"
+                            value={formData.ingredients}
+                            onChange={handleChange}
+                            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-white h-36"
+                            required
+                            disabled={isSubmitting}
+                            placeholder="Enter ingredients, one per line
+e.g., 2 cups flour
+1 tsp salt
+1/2 cup sugar"
+                        />
+                        <div className="text-gray-400 text-xs mt-1 ml-1">
+                            List one ingredient per line with quantity, unit, and ingredient name.
+                        </div>
+                    </div>
+
+                    <div>
                         <label htmlFor="instructions" className="block text-sm font-medium text-gray-300 mb-1">
-                            Recipe Content
+                            Instructions
                         </label>
                         <textarea
                             id="instructions"
                             name="instructions"
                             value={formData.instructions}
                             onChange={handleChange}
-                            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-white h-48"
+                            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-white h-36"
                             required
                             disabled={isSubmitting}
-                            placeholder="Paste or type your recipe here. Include sections for ingredients and instructions."
-                        />
-                        <div className="text-gray-400 text-xs mt-1 ml-1">
-                            <strong>Format:</strong> Include clear "Ingredients:" and "Instructions:" sections.
-                            Ingredients will be extracted and saved separately.
-                        </div>
-                        <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-2 mt-2 text-gray-300 text-xs">
-                            <p className="font-medium text-amber-400">Example format:</p>
-                            <pre className="mt-1 text-gray-300 whitespace-pre-wrap">
-Ingredients:
-2 cups flour
-1 tsp salt
-1/2 cup sugar
-
-Instructions:
-1. Mix dry ingredients
+                            placeholder="Enter recipe instructions step by step
+e.g., 1. Mix dry ingredients
 2. Add wet ingredients
-3. Bake at 350°F for 25 minutes
-                            </pre>
-                        </div>
+3. Bake at 350°F for 25 minutes"
+                        />
                     </div>
 
                     <div>
@@ -326,48 +299,35 @@ Instructions:
                         />
                     </div>
 
-                    {(parsedIngredients.length > 0 || parsedInstructions.length > 0) && (
+                    {parsedIngredients.length > 0 && (
                         <div>
                             <button
                                 type="button"
                                 onClick={togglePreview}
                                 className="text-amber-400 hover:text-amber-300 text-sm font-medium flex items-center"
                             >
-                                {showPreview ? "Hide Preview" : "Show Recipe Preview"}
+                                {showPreview ? "Hide Ingredients Preview" : "Show Ingredients Preview"}
                             </button>
 
                             {showPreview && (
                                 <div className="mt-2 bg-gray-800/50 border border-gray-700 rounded-lg p-4 text-gray-300">
-                                    <h3 className="font-medium text-amber-400 mb-2">Preview (How your recipe will be parsed)</h3>
+                                    <h3 className="font-medium text-amber-400 mb-2">Preview (How your ingredients will be parsed)</h3>
 
-                                    {parsedIngredients.length > 0 && (
-                                        <div className="mb-4">
-                                            <h4 className="text-white font-medium mb-2">Ingredients</h4>
-                                            <ul className="list-disc pl-5 space-y-1">
-                                                {parsedIngredients.map((ingredient, index) => (
-                                                    <li key={index}>
-                                                        {ingredient.quantity && <span>{ingredient.quantity} </span>}
-                                                        {ingredient.unit && <span>{ingredient.unit} </span>}
-                                                        <span>{ingredient.name}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-
-                                    {parsedInstructions.length > 0 && (
-                                        <div>
-                                            <h4 className="text-white font-medium mb-2">Instructions</h4>
-                                            <ol className="list-decimal pl-5 space-y-1">
-                                                {parsedInstructions.map((instruction, index) => (
-                                                    <li key={index}>{instruction}</li>
-                                                ))}
-                                            </ol>
-                                        </div>
-                                    )}
+                                    <div className="mb-4">
+                                        <h4 className="text-white font-medium mb-2">Ingredients</h4>
+                                        <ul className="list-disc pl-5 space-y-1">
+                                            {parsedIngredients.map((ingredient, index) => (
+                                                <li key={index}>
+                                                    {ingredient.quantity && <span>{ingredient.quantity} </span>}
+                                                    {ingredient.unit && <span>{ingredient.unit} </span>}
+                                                    <span>{ingredient.name}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
 
                                     <div className="text-xs italic text-gray-500 mt-3">
-                                        Note: This preview shows how the ingredients might be parsed. You'll be able to add them to the recipe after creation.
+                                        Note: This preview shows how the ingredients might be parsed. The actual parsing on the server may be more accurate.
                                     </div>
                                 </div>
                             )}
