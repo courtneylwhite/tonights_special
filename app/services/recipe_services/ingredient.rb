@@ -44,10 +44,13 @@ module RecipeServices
         # Find the correct unit
         unit = find_unit(ingredient_data[:unit_name])
 
+        # Format quantity to have at most 2 decimal places
+        quantity = format_quantity(ingredient_data[:quantity] || 1)
+
         # Create the recipe_ingredient with preparation and size if available
         ingredient_attributes = {
           grocery_id: grocery&.id,  # May be nil if no matching grocery was found
-          quantity: ingredient_data[:quantity] || 1,
+          quantity: quantity,
           unit_id: unit&.id,
           name: ingredient_name
         }
@@ -62,6 +65,17 @@ module RecipeServices
       rescue => e
         { success: false, errors: [ "Error creating ingredient #{ingredient_data[:name]}: #{e.message}" ] }
       end
+    end
+
+    # Format quantity to have at most 2 decimal places
+    def format_quantity(quantity)
+      return quantity unless quantity.is_a?(Numeric)
+
+      # Convert to a decimal with 2 decimal places (rounds to nearest)
+      quantity = (quantity * 100).round / 100.0
+
+      # If it's a whole number, convert to integer
+      quantity.to_i == quantity ? quantity.to_i : quantity
     end
 
     def find_grocery_by_name(name)
