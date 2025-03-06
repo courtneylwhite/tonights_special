@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import RecipeViewer from './RecipeViewer';
-import RecipeEditor from './RecipeEditor';
+import RecipeViewer from '../recipe/RecipeViewer';
+import RecipeEditor from '../recipe/RecipeEditor';
 
 const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories = [] }) => {
     const [isEditing, setIsEditing] = useState(false);

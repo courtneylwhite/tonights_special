@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
-import GroceryItem from '@/components/GroceryItem';
+import GroceryItem from '@/components/grocery/GroceryItem';
 
 describe('GroceryItem', () => {
     const mockGrocery = {

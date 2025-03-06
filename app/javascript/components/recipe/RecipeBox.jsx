@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import RecipeModal from './RecipeModal';
-import SearchBar from './SearchBar';
-import ToggleButton from './ToggleButton';
-import ScrollableContainer from './ScrollableContainer';
+import SearchBar from '../SearchBar';
+import ToggleButton from '../ToggleButton';
+import ScrollableContainer from '../ScrollableContainer';
 
 const Recipes = ({ recipes = {}, units = [] }) => {
     const [recipeData, setRecipeData] = useState(recipes);

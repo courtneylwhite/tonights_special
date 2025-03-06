@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
-import ItemModal from './ItemModal';
-import SearchBar from './SearchBar';
-import ToggleButton from './ToggleButton';
-import ScrollableContainer from './ScrollableContainer';
+import ItemModal from '../ItemModal';
+import SearchBar from '../SearchBar';
+import ToggleButton from '../ToggleButton';
+import ScrollableContainer from '../ScrollableContainer';
 
 const Pantry = ({ groceries = {}, units = [] }) => {
     const [groceryData, setGroceryData] = useState(groceries);
