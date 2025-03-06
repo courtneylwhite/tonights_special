@@ -44,9 +44,9 @@ module RecipeServices
         # Find the correct unit - prioritize unit_id if provided
         unit = if ingredient_data[:unit_id].present?
                  Unit.find_by(id: ingredient_data[:unit_id])
-               else
+        else
                  find_unit(ingredient_data[:unit_name])
-               end
+        end
 
         # Fallback to default unit if not found or not provided
         unit ||= Unit.find_by(name: 'whole') || Unit.first

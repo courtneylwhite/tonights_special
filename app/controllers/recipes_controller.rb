@@ -45,7 +45,7 @@ class RecipesController < ApplicationController
   def show
     @recipe = current_user.recipes
                           .includes(:recipe_category,
-                                    recipe_ingredients: [:grocery, :unit])
+                                    recipe_ingredients: [ :grocery, :unit ])
                           .find(params[:id])
 
     # Load all available units for dropdown options

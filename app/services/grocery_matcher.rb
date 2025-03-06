@@ -41,17 +41,17 @@ class GroceryMatcher
 
     def match_by_plural_singular(user, name_downcase)
       # Existing plural/singular logic
-      singular_name = name_downcase.gsub(/ies$/, 'y')
-                                   .gsub(/es$/, '')
-                                   .gsub(/s$/, '')
+      singular_name = name_downcase.gsub(/ies$/, "y")
+                                   .gsub(/es$/, "")
+                                   .gsub(/s$/, "")
 
-      plural_name = if name_downcase.end_with?('y')
-                      name_downcase.chomp('y') + 'ies'
-                    elsif name_downcase.end_with?('ch', 'sh', 'ss', 'x', 'z')
-                      name_downcase + 'es'
-                    else
-                      name_downcase + 's'
-                    end
+      plural_name = if name_downcase.end_with?("y")
+                      name_downcase.chomp("y") + "ies"
+      elsif name_downcase.end_with?("ch", "sh", "ss", "x", "z")
+                      name_downcase + "es"
+      else
+                      name_downcase + "s"
+      end
 
       Grocery.where(user_id: user.id)
              .where("LOWER(name) = ? OR LOWER(name) = ?", singular_name, plural_name)
@@ -78,7 +78,7 @@ class GroceryMatcher
 
       # If we have other descriptive words, use them to narrow down
       if words.length > 1
-        descriptors = words - [meat_type]
+        descriptors = words - [ meat_type ]
 
         best_matches = meat_groceries.select do |g|
           descriptors.any? { |d| g.name.downcase.include?(d) }
