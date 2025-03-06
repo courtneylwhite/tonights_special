@@ -91,6 +91,10 @@ const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories 
     // Handle saving recipe changes
     const handleSaveChanges = async (editedRecipe, editedIngredients) => {
         try {
+            // Separate existing ingredients from new ones (new ones have negative IDs)
+            const existingIngredients = editedIngredients.filter(ing => ing.id > 0);
+            const newIngredients = editedIngredients.filter(ing => ing.id < 0);
+
             // Prepare data for submission with deleted ingredients tracking
             const formData = {
                 recipe: {
@@ -102,7 +106,7 @@ const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories 
                     cook_time: editedRecipe.cook_time || "",
                     servings: editedRecipe.servings || null
                 },
-                recipe_ingredients: editedIngredients.map(ingredient => ({
+                recipe_ingredients: existingIngredients.map(ingredient => ({
                     id: ingredient.id,
                     grocery_id: ingredient.grocery_id,
                     quantity: ingredient.quantity,
@@ -111,8 +115,18 @@ const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories 
                     size: ingredient.size || "",
                     name: ingredient.name
                 })),
+                // New ingredients don't have server-side IDs yet, so we don't include id
+                new_recipe_ingredients: newIngredients.map(ingredient => ({
+                    grocery_id: ingredient.grocery_id,
+                    quantity: ingredient.quantity,
+                    unit_id: ingredient.unit_id,
+                    unit_name: units.find(u => u.id === ingredient.unit_id)?.name,  // Add this line
+                    preparation: ingredient.preparation || "",
+                    size: ingredient.size || "",
+                    name: ingredient.name
+                })),
                 deleted_ingredient_ids: currentIngredients
-                    .filter(ri => !editedIngredients.find(ei => ei.id === ri.id))
+                    .filter(ri => !existingIngredients.find(ei => ei.id === ri.id))
                     .map(ri => ri.id)
             };
 

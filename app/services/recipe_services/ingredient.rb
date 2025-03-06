@@ -41,8 +41,15 @@ module RecipeServices
 
         grocery = find_grocery_by_name(ingredient_name)
 
-        # Find the correct unit
-        unit = find_unit(ingredient_data[:unit_name])
+        # Find the correct unit - prioritize unit_id if provided
+        unit = if ingredient_data[:unit_id].present?
+                 Unit.find_by(id: ingredient_data[:unit_id])
+               else
+                 find_unit(ingredient_data[:unit_name])
+               end
+
+        # Fallback to default unit if not found or not provided
+        unit ||= Unit.find_by(name: 'whole') || Unit.first
 
         # Format quantity to have at most 2 decimal places
         quantity = format_quantity(ingredient_data[:quantity] || 1)
@@ -79,17 +86,8 @@ module RecipeServices
     end
 
     def find_grocery_by_name(name)
-      # Convert to lowercase for comparison
-      name_downcase = name.downcase.strip
-
-      # Find exact match using lowercase comparison
-      grocery = Grocery.where(user_id: user.id)
-                       .where("LOWER(name) = ?", name_downcase)
-                       .first
-
-      # Don't create a new grocery if none found - just return nil
-      # The recipe_ingredient will be created without a grocery_id
-      grocery
+      # Use the new GroceryMatcher service to find a matching grocery
+      GroceryMatcher.find_grocery_by_name(user, name)
     end
 
     def find_unit(unit_name)

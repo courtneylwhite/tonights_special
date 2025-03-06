@@ -1,14 +1,17 @@
 # app/services/recipe_services/updater.rb
 module RecipeServices
   class Updater
-    attr_reader :user, :recipe, :recipe_attributes, :ingredients_attributes, :deleted_ingredient_ids
+    attr_reader :user, :recipe, :recipe_attributes, :ingredients_attributes,
+                :deleted_ingredient_ids, :new_ingredients_attributes
 
-    def initialize(user, recipe, recipe_attributes, ingredients_attributes = [], deleted_ingredient_ids = [])
+    def initialize(user, recipe, recipe_attributes, ingredients_attributes = [],
+                   deleted_ingredient_ids = [], new_ingredients_attributes = [])
       @user = user
       @recipe = recipe
       @recipe_attributes = recipe_attributes || {}
       @ingredients_attributes = ingredients_attributes || []
       @deleted_ingredient_ids = deleted_ingredient_ids || []
+      @new_ingredients_attributes = new_ingredients_attributes || []
       @errors = []
       @warnings = []
     end
@@ -26,6 +29,9 @@ module RecipeServices
 
           # Update recipe ingredients if provided
           update_recipe_ingredients if @ingredients_attributes.present?
+
+          # Create new ingredients if provided
+          create_new_ingredients if @new_ingredients_attributes.present?
 
           # If we get here without errors, mark as successful
           success = true
@@ -115,9 +121,20 @@ module RecipeServices
         update_attrs[:quantity] = ingredient_attr[:quantity] if ingredient_attr.key?(:quantity)
         update_attrs[:unit_id] = ingredient_attr[:unit_id] if ingredient_attr.key?(:unit_id)
 
-        # Handle text fields that could be empty
+        # Check if name is being updated
         if ingredient_attr.key?(:name)
-          update_attrs[:name] = ingredient_attr[:name].present? ? ingredient_attr[:name].downcase : ""
+          new_name = ingredient_attr[:name].present? ? ingredient_attr[:name].downcase : ""
+          update_attrs[:name] = new_name
+
+          # If name has changed and grocery_id isn't explicitly being set, look for a match
+          if new_name != ingredient.name && !ingredient_attr.key?(:grocery_id)
+            # Use the ingredient service to find matching grocery
+            ingredient_helper = RecipeServices::Ingredient.new(@recipe, @user)
+            matching_grocery = ingredient_helper.send(:find_grocery_by_name, new_name)
+
+            # Update grocery_id if a match was found
+            update_attrs[:grocery_id] = matching_grocery.id if matching_grocery
+          end
         end
 
         if ingredient_attr.key?(:preparation)
@@ -133,6 +150,41 @@ module RecipeServices
         # Update the ingredient
         unless ingredient.update(update_attrs)
           @errors += ingredient.errors.full_messages
+          raise ActiveRecord::Rollback
+        end
+      end
+    end
+
+    def create_new_ingredients
+      return if @new_ingredients_attributes.empty?
+
+      # Convert the new ingredient attributes to the format expected by RecipeServices::Ingredient
+      ingredients_data = @new_ingredients_attributes.map do |ingredient_attr|
+        {
+          name: ingredient_attr[:name].present? ? ingredient_attr[:name].strip : "",
+          quantity: ingredient_attr[:quantity] || 1,
+          # RecipeServices::Ingredient expects unit_name but can work without it
+          # It will look up the unit by ID if we pass it directly
+          unit_id: ingredient_attr[:unit_id],
+          preparation: ingredient_attr[:preparation],
+          size: ingredient_attr[:size]
+        }
+      end
+
+      # Use the existing ingredient creation service
+      ingredient_result = RecipeServices::Ingredient.new(
+        @recipe,
+        @user,
+        ingredients_data
+      ).create_ingredients
+
+      # Handle any errors
+      unless ingredient_result[:success]
+        @warnings << "Some ingredients could not be created: #{ingredient_result[:errors].join(', ')}"
+
+        # If there are significant errors that should trigger a rollback
+        if ingredient_result[:errors].any? { |e| e.include?("Error creating ingredient") }
+          @errors += ingredient_result[:errors]
           raise ActiveRecord::Rollback
         end
       end

@@ -101,6 +101,9 @@ class RecipesController < ApplicationController
     # Extract the recipe ingredients attributes from params
     ingredients_attributes = params[:recipe_ingredients] || []
 
+    # Extract new recipe ingredients attributes from params
+    new_ingredients_attributes = params[:new_recipe_ingredients] || []
+
     # Extract deleted ingredient IDs
     deleted_ingredient_ids = params[:deleted_ingredient_ids] || []
 
@@ -110,7 +113,8 @@ class RecipesController < ApplicationController
       @recipe,
       recipe_attributes,
       ingredients_attributes,
-      deleted_ingredient_ids
+      deleted_ingredient_ids,
+      new_ingredients_attributes
     )
 
     # Call the update method

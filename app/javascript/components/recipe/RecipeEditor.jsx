@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Save, X, Trash2 } from 'lucide-react';
+import { Save, X, Trash2, Plus } from 'lucide-react';
 
 const RecipeEditor = ({
                           recipe,
@@ -14,6 +14,7 @@ const RecipeEditor = ({
     const [editedRecipe, setEditedRecipe] = useState(recipe);
     const [editedIngredients, setEditedIngredients] = useState(recipeIngredients);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [nextTempId, setNextTempId] = useState(-1); // Used for temporary IDs of new ingredients
 
     // Handle recipe field changes in edit mode
     const handleRecipeChange = (field, value) => {
@@ -40,9 +41,49 @@ const RecipeEditor = ({
         setEditedIngredients(updatedIngredients);
     };
 
+    // Handle adding a new ingredient
+    const handleAddIngredient = () => {
+        // Create a new ingredient with default values and a temporary ID
+        const newIngredient = {
+            id: nextTempId, // Temporary ID (negative to avoid conflicts with server IDs)
+            name: "",
+            quantity: 1,
+            unit_id: units.length > 0 ? units[0].id : "", // Default to first unit if available
+            size: "",
+            preparation: "",
+            grocery_id: null
+        };
+
+        // Add the new ingredient to the list
+        setEditedIngredients([...editedIngredients, newIngredient]);
+
+        // Decrement the temp ID for next new ingredient
+        setNextTempId(prevId => prevId - 1);
+    };
+
+    // Check if all required fields are filled
+    const isFormValid = () => {
+        // Check recipe name
+        if (!editedRecipe.name.trim()) return false;
+
+        // Check ingredients (must have at least one valid ingredient)
+        if (editedIngredients.length === 0) return false;
+
+        // All ingredients must have names and valid quantities
+        return editedIngredients.every(ing =>
+            ing.name.trim() &&
+            ing.quantity > 0
+        );
+    };
+
     // Handle saving changes
     const handleSaveClick = () => {
-        onSave(editedRecipe, editedIngredients);
+        if (isFormValid()) {
+            onSave(editedRecipe, editedIngredients);
+        } else {
+            // Could add an error message here if needed
+            alert("Please fill in all required fields before saving");
+        }
     };
 
     // Handle delete confirmation
@@ -183,7 +224,16 @@ const RecipeEditor = ({
 
                     {/* Edit mode for ingredients */}
                     <div className="mb-8">
-                        <h2 className="text-xl font-semibold mb-4 text-amber-400 border-b border-gray-700 pb-2">Ingredients</h2>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-semibold text-amber-400 border-b border-gray-700 pb-2">Ingredients</h2>
+                            <button
+                                onClick={handleAddIngredient}
+                                className="inline-flex items-center px-3 py-1 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors text-sm"
+                            >
+                                <Plus size={16} className="mr-1" />
+                                Add Ingredient
+                            </button>
+                        </div>
                         <div className="space-y-4">
                             {editedIngredients.map((ingredient, index) => (
                                 <div key={ingredient.id} className="bg-gray-800 rounded-lg p-4 relative">
@@ -203,8 +253,13 @@ const RecipeEditor = ({
                                                 type="text"
                                                 value={ingredient.name}
                                                 onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                                                className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                                                className={`px-3 py-2 bg-gray-700 border ${
+                                                    !ingredient.name ? 'border-red-500' : 'border-gray-600'
+                                                } rounded text-white`}
                                             />
+                                            {!ingredient.name && (
+                                                <span className="text-red-500 text-xs mt-1">Required</span>
+                                            )}
                                         </div>
                                         <div className="flex gap-2">
                                             <div className="flex flex-col w-1/3">
@@ -286,7 +341,14 @@ const RecipeEditor = ({
             <div className="mt-8 text-center space-x-4">
                 <button
                     onClick={handleSaveClick}
-                    className="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400"
+                    disabled={!isFormValid()}
+                    className={`inline-flex items-center px-4 py-2 ${
+                        isFormValid()
+                            ? 'bg-amber-500 hover:bg-amber-600 text-black'
+                            : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                    } rounded-lg transition-colors duration-200 border ${
+                        isFormValid() ? 'border-amber-400' : 'border-gray-600'
+                    }`}
                 >
                     <Save size={18} className="mr-1" />
                     Save Recipe
