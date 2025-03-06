@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
-import RecipeModal from '@/components/RecipeModal';
+import RecipeModal from '@/components/recipe/RecipeModal';
 
 describe('RecipeModal', () => {
     const mockProps = {

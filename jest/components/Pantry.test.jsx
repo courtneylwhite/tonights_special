@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, screen, waitFor, act } from '@testing-library/react';
-import Pantry from '@/components/Pantry';
+import Pantry from '@/components/grocery/Pantry';
 
 // Mock child components
 jest.mock('@/components/SearchBar', () => {
