@@ -42,6 +42,43 @@ class RecipesController < ApplicationController
     end
   end
 
+  def show
+    @recipe = current_user.recipes
+                          .includes(:recipe_category,
+                                    recipe_ingredients: [:grocery, :unit])
+                          .find(params[:id])
+
+    # Load all available units for dropdown options
+    @units = Unit.all.order(:category, :name)
+
+    # Format recipe ingredients for the React component
+    # This ensures all necessary data is available
+    @recipe_ingredients = @recipe.recipe_ingredients.map do |ri|
+      {
+        id: ri.id,
+        recipe_id: @recipe.id,
+        grocery_id: ri.grocery_id,
+        name: ri.name,
+        quantity: ri.quantity,
+        unit_id: ri.unit_id,
+        unit_name: ri.unit.name,
+        unit_abbreviation: ri.unit.abbreviation,  # Add this line to include the abbreviation
+        preparation: ri.preparation,
+        size: ri.size
+      }
+    end
+
+    respond_to do |format|
+      format.html
+      format.json { render json: { recipe: @recipe, recipe_ingredients: @recipe_ingredients, units: @units } }
+    end
+  rescue ActiveRecord::RecordNotFound
+    respond_to do |format|
+      format.html { redirect_to recipes_path, alert: "Recipe not found." }
+      format.json { render json: { error: "Recipe not found." }, status: :not_found }
+    end
+  end
+
   def mark_completed
     @recipe.update(completed: true, completed_at: Time.current)
     render json: {
