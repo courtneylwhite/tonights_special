@@ -1,5 +1,6 @@
 <%= react_component("RecipeDetail", {
   recipe: @recipe.as_json(include: { recipe_category: { only: [:id, :name] } }),
   recipeIngredients: @recipe_ingredients,
-  units: @units
+  units: @units,
+  recipeCategories: @recipe_categories
 }) %>

@@ -71,11 +71,11 @@ const Recipes = ({ recipes = {}, units = [] }) => {
             <div className="min-h-screen bg-black text-white relative">
                 <div className="bg-black/80 backdrop-blur-sm border-b border-gray-800 p-8 sticky top-0 z-10">
                     <h1 className="text-center mb-8">
-                        Culinary Inventory
+                        Recipe Box
                     </h1>
                     <div className="flex items-center gap-4 max-w-3xl mx-auto">
                         <SearchBar
-                            placeholder="Search your pantry..."
+                            placeholder="Search your recipes..."
                             data={recipeData}
                             searchKeys={['name']}
                             onFilteredDataChange={setFilteredRecipeData}
