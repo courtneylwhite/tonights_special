@@ -6,26 +6,21 @@ class RecipesController < ApplicationController
     @recipes = current_user.recipes.includes(:recipe_category, recipe_ingredients: [ :grocery, :unit ])
                            .order(created_at: :desc)
     @recipe_categories = current_user.recipe_categories.order(display_order: :asc)
-
-    # Uses the optimized grouped_recipes_with_availability which preloads groceries once
     @grouped_recipes = RecipePresenter.grouped_recipes_with_availability(@recipes, @recipe_categories, current_user)
 
     respond_to do |format|
-      format.html # Renders the index page with React components
+      format.html
       format.json { render json: @grouped_recipes }
     end
   end
 
   def create
-    # Create a new RecipeServices::Creator instance with the recipe params
     creator = ::RecipeServices::Creator.new(current_user, recipe_params)
 
-    # If there's a new category being created, pass that data to the creator
     if params[:new_category].present?
       creator.new_category_params = params[:new_category]
     end
 
-    # Call the create method
     result = creator.create
 
     if result[:success]
@@ -48,14 +43,8 @@ class RecipesController < ApplicationController
                                     recipe_ingredients: [ :grocery, :unit ])
                           .find(params[:id])
 
-    # Load all available units for dropdown options
     @units = Unit.all.order(:category, :name)
-
-    # Load all recipe categories for the user
     @recipe_categories = current_user.recipe_categories.order(display_order: :asc)
-
-    # Format recipe ingredients for the React component
-    # This ensures all necessary data is available
     @recipe_ingredients = @recipe.recipe_ingredients.map do |ri|
       {
         id: ri.id,
@@ -89,25 +78,13 @@ class RecipesController < ApplicationController
     end
   end
 
-  # app/controllers/recipes_controller.rb
-  # Update action using the revised service object
-
   def update
     @recipe = current_user.recipes.find(params[:id])
-
-    # Extract the recipe attributes from params
     recipe_attributes = params[:recipe] || {}
-
-    # Extract the recipe ingredients attributes from params
     ingredients_attributes = params[:recipe_ingredients] || []
-
-    # Extract new recipe ingredients attributes from params
     new_ingredients_attributes = params[:new_recipe_ingredients] || []
-
-    # Extract deleted ingredient IDs
     deleted_ingredient_ids = params[:deleted_ingredient_ids] || []
 
-    # Create a new updater service with the extracted attributes
     updater = RecipeServices::Updater.new(
       current_user,
       @recipe,
@@ -117,14 +94,10 @@ class RecipesController < ApplicationController
       new_ingredients_attributes
     )
 
-    # Call the update method
     result = updater.update
 
     if result[:success]
-      # Reload associations to ensure we have the latest data
       @recipe.reload
-
-      # Format ingredients for the response
       recipe_ingredients = @recipe.recipe_ingredients.map do |ri|
         {
           id: ri.id,
@@ -156,11 +129,7 @@ class RecipesController < ApplicationController
 
   def destroy
     @recipe = current_user.recipes.find(params[:id])
-
-    # Delete associated recipe ingredients first
     @recipe.recipe_ingredients.destroy_all
-
-    # Then delete the recipe
     @recipe.destroy
 
     respond_to do |format|
@@ -187,7 +156,6 @@ class RecipesController < ApplicationController
     }
   end
 
-  # For testing the parser
   def parse_test
     if request.post? && params[:recipe_text].present?
       @parsed_data = RecipeServices::Parser.new(params[:recipe_text]).parse
@@ -223,7 +191,6 @@ class RecipesController < ApplicationController
     end
   end
 
-  # Helper method to downcase text parameters
   def downcase_params(params)
     result = params.dup
 
@@ -236,7 +203,6 @@ class RecipesController < ApplicationController
     result
   end
 
-  # Helper method to downcase ingredient parameters
   def downcase_ingredient_params(params)
     result = params.dup
 

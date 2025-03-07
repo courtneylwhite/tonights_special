@@ -1,15 +1,21 @@
 class GroceryMatcher
   class << self
     def find_grocery_by_name(user, name)
-      # Initialize configuration
-      GroceryMatcherConfig.default_config if GroceryMatcherConfig.ignore_words.nil?
-
       # Convert to lowercase for comparison
       name_downcase = name.downcase.strip
 
-      # Apply configured matching strategies
-      GroceryMatcherConfig.matching_strategies.each do |strategy|
-        result = send("match_by_#{strategy}", user, name_downcase)
+      # Define matching strategies to try in order
+      matching_strategies = [
+        :match_by_exact_match,
+        :match_by_plural_singular,
+        :match_by_prefix_containment,
+        :match_by_meat_type_matching,
+        :match_by_multi_word_matching
+      ]
+
+      # Try each strategy in order
+      matching_strategies.each do |strategy|
+        result = send(strategy, user, name_downcase)
         return result if result
       end
 
@@ -47,11 +53,11 @@ class GroceryMatcher
 
       plural_name = if name_downcase.end_with?("y")
                       name_downcase.chomp("y") + "ies"
-      elsif name_downcase.end_with?("ch", "sh", "ss", "x", "z")
+                    elsif name_downcase.end_with?("ch", "sh", "ss", "x", "z")
                       name_downcase + "es"
-      else
+                    else
                       name_downcase + "s"
-      end
+                    end
 
       Grocery.where(user_id: user.id)
              .where("LOWER(name) = ? OR LOWER(name) = ?", singular_name, plural_name)
@@ -68,8 +74,12 @@ class GroceryMatcher
     end
 
     def match_by_meat_type_matching(user, name_downcase)
+      # Define meat types inline
+      meat_types = ['chicken', 'beef', 'pork', 'lamb', 'turkey', 'fish',
+                    'shrimp', 'salmon', 'tuna', 'veal', 'duck']
+
       words = name_downcase.split(/[\s,\-\/]+/)
-      meat_type = words.find { |w| GroceryMatcherConfig.meat_types.include?(w) }
+      meat_type = words.find { |w| meat_types.include?(w) }
 
       return nil unless meat_type
 
@@ -78,7 +88,7 @@ class GroceryMatcher
 
       # If we have other descriptive words, use them to narrow down
       if words.length > 1
-        descriptors = words - [ meat_type ]
+        descriptors = words - [meat_type]
 
         best_matches = meat_groceries.select do |g|
           descriptors.any? { |d| g.name.downcase.include?(d) }
@@ -91,11 +101,15 @@ class GroceryMatcher
     end
 
     def match_by_multi_word_matching(user, name_downcase)
+      # Define ignore words inline
+      ignore_words = ['and', 'or', 'the', 'of', 'for', 'with', 'without',
+                      'in', 'on', 'at', 'to', 'from', 'by', 'as']
+
       words = name_downcase.split(/[\s,\-\/]+/)
       return nil unless words.length > 1 && words.any? { |w| w.length > 2 }
 
       # Filter out common words
-      filtered_words = words.reject { |w| w.length <= 2 || GroceryMatcherConfig.ignore_words.include?(w) }
+      filtered_words = words.reject { |w| w.length <= 2 || ignore_words.include?(w) }
 
       return nil unless filtered_words.any?
 
