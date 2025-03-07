@@ -1,6 +1,135 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Save, X, Trash2, Plus } from 'lucide-react';
 
+/**
+ * Ingredient form component to reduce complexity of main component
+ */
+const IngredientForm = React.memo(({
+                                       ingredient,
+                                       units,
+                                       onIngredientChange,
+                                       onDeleteIngredient
+                                   }) => {
+    const handleChange = useCallback((field, value) => {
+        onIngredientChange(field, value);
+    }, [onIngredientChange]);
+
+    const handleDelete = useCallback(() => {
+        onDeleteIngredient(ingredient.id);
+    }, [onDeleteIngredient, ingredient.id]);
+
+    return (
+        <div className="bg-gray-800 rounded-lg p-4 relative">
+            {/* Delete ingredient button */}
+            <button
+                onClick={handleDelete}
+                className="absolute top-2 right-2 text-red-500 hover:text-red-400 p-1 rounded-full hover:bg-gray-700"
+                aria-label="Delete ingredient"
+            >
+                <X size={16} />
+            </button>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                    <label className="text-gray-400 mb-1">Name</label>
+                    <input
+                        type="text"
+                        value={ingredient.name}
+                        onChange={(e) => handleChange('name', e.target.value)}
+                        className={`px-3 py-2 bg-gray-700 border ${
+                            !ingredient.name ? 'border-red-500' : 'border-gray-600'
+                        } rounded text-white`}
+                    />
+                    {!ingredient.name && (
+                        <span className="text-red-500 text-xs mt-1">Required</span>
+                    )}
+                </div>
+                <div className="flex gap-2">
+                    <div className="flex flex-col w-1/3">
+                        <label className="text-gray-400 mb-1">Quantity</label>
+                        <input
+                            type="number"
+                            value={ingredient.quantity}
+                            onChange={(e) => handleChange('quantity', parseFloat(e.target.value))}
+                            className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                            min="0.1"
+                            step="0.1"
+                        />
+                    </div>
+                    <div className="flex flex-col w-2/3">
+                        <label className="text-gray-400 mb-1">Unit</label>
+                        <select
+                            value={ingredient.unit_id}
+                            onChange={(e) => handleChange('unit_id', e.target.value)}
+                            className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                        >
+                            {units.map(unit => (
+                                <option key={unit.id} value={unit.id}>
+                                    {unit.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                <div className="flex flex-col">
+                    <label className="text-gray-400 mb-1">Size</label>
+                    <input
+                        type="text"
+                        value={ingredient.size || ''}
+                        onChange={(e) => handleChange('size', e.target.value)}
+                        className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                        placeholder="e.g., large, small, medium"
+                    />
+                </div>
+                <div className="flex flex-col">
+                    <label className="text-gray-400 mb-1">Preparation</label>
+                    <input
+                        type="text"
+                        value={ingredient.preparation || ''}
+                        onChange={(e) => handleChange('preparation', e.target.value)}
+                        className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
+                        placeholder="e.g., chopped, diced, minced"
+                    />
+                </div>
+            </div>
+        </div>
+    );
+});
+
+/**
+ * Delete confirmation dialog component
+ */
+const DeleteConfirmationDialog = React.memo(({ onConfirm, onCancel }) => {
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+            <div className="bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full">
+                <h3 className="text-xl font-bold text-white mb-4">Delete Recipe</h3>
+                <p className="text-gray-300 mb-6">
+                    Are you sure you want to delete this recipe? This action cannot be undone.
+                </p>
+                <div className="flex justify-end space-x-4">
+                    <button
+                        onClick={onCancel}
+                        className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={onConfirm}
+                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center"
+                    >
+                        <Trash2 size={16} className="mr-2" />
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+});
+
+/**
+ * RecipeEditor component - handles the editing of a recipe
+ */
 const RecipeEditor = ({
                           recipe,
                           recipeIngredients,
@@ -17,32 +146,39 @@ const RecipeEditor = ({
     const [nextTempId, setNextTempId] = useState(-1); // Used for temporary IDs of new ingredients
 
     // Handle recipe field changes in edit mode
-    const handleRecipeChange = (field, value) => {
+    const handleRecipeChange = useCallback((field, value) => {
         setEditedRecipe(prev => ({
             ...prev,
             [field]: value
         }));
-    };
+    }, []);
 
     // Handle ingredient changes in edit mode
-    const handleIngredientChange = (index, field, value) => {
-        const updatedIngredients = [...editedIngredients];
-        updatedIngredients[index] = {
-            ...updatedIngredients[index],
-            [field]: value
-        };
-        setEditedIngredients(updatedIngredients);
-    };
+    const handleIngredientChange = useCallback((index, field, value) => {
+        setEditedIngredients(prevIngredients => {
+            const updatedIngredients = [...prevIngredients];
+            updatedIngredients[index] = {
+                ...updatedIngredients[index],
+                [field]: value
+            };
+            return updatedIngredients;
+        });
+    }, []);
+
+    // Create a wrapper function to pass to IngredientForm
+    const handleIngredientFieldChange = useCallback((index) => {
+        return (field, value) => handleIngredientChange(index, field, value);
+    }, [handleIngredientChange]);
 
     // Handle ingredient deletion
-    const handleDeleteIngredient = (id) => {
-        // Filter out the ingredient with the given id
-        const updatedIngredients = editedIngredients.filter(ingredient => ingredient.id !== id);
-        setEditedIngredients(updatedIngredients);
-    };
+    const handleDeleteIngredient = useCallback((id) => {
+        setEditedIngredients(prevIngredients =>
+            prevIngredients.filter(ingredient => ingredient.id !== id)
+        );
+    }, []);
 
     // Handle adding a new ingredient
-    const handleAddIngredient = () => {
+    const handleAddIngredient = useCallback(() => {
         // Create a new ingredient with default values and a temporary ID
         const newIngredient = {
             id: nextTempId, // Temporary ID (negative to avoid conflicts with server IDs)
@@ -55,14 +191,14 @@ const RecipeEditor = ({
         };
 
         // Add the new ingredient to the list
-        setEditedIngredients([...editedIngredients, newIngredient]);
+        setEditedIngredients(prev => [...prev, newIngredient]);
 
         // Decrement the temp ID for next new ingredient
         setNextTempId(prevId => prevId - 1);
-    };
+    }, [nextTempId, units]);
 
-    // Check if all required fields are filled
-    const isFormValid = () => {
+    // Check if all required fields are filled - memoized for performance
+    const isFormValid = useMemo(() => {
         // Check recipe name
         if (!editedRecipe.name.trim()) return false;
 
@@ -74,30 +210,40 @@ const RecipeEditor = ({
             ing.name.trim() &&
             ing.quantity > 0
         );
-    };
+    }, [editedRecipe.name, editedIngredients]);
 
     // Handle saving changes
-    const handleSaveClick = () => {
-        if (isFormValid()) {
+    const handleSaveClick = useCallback(() => {
+        if (isFormValid) {
             onSave(editedRecipe, editedIngredients);
         } else {
             // Could add an error message here if needed
             alert("Please fill in all required fields before saving");
         }
-    };
+    }, [isFormValid, editedRecipe, editedIngredients, onSave]);
 
     // Handle delete confirmation
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = useCallback(() => {
         setShowDeleteConfirm(false);
         onDelete();
-    };
+    }, [onDelete]);
+
+    // Handle cancel delete confirmation
+    const handleCancelDelete = useCallback(() => {
+        setShowDeleteConfirm(false);
+    }, []);
+
+    // Open delete confirmation dialog
+    const handleDeleteClick = useCallback(() => {
+        setShowDeleteConfirm(true);
+    }, []);
 
     return (
         <div className="relative mb-20 mt-16">
             {/* Header section with delete button */}
             <div className="mb-8 flex justify-end items-center">
                 <button
-                    onClick={() => setShowDeleteConfirm(true)}
+                    onClick={handleDeleteClick}
                     className="inline-flex items-center px-4 py-2 bg-gray-900/90 backdrop-blur-sm text-red-500 rounded-lg transition-colors duration-200 border border-gray-700 hover:border-red-500 hover:bg-red-500/10"
                 >
                     <Trash2 size={18} className="mr-1" />
@@ -197,29 +343,10 @@ const RecipeEditor = ({
                 <div className="p-8 space-y-8">
                     {/* Delete confirmation popup */}
                     {showDeleteConfirm && (
-                        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-                            <div className="bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full">
-                                <h3 className="text-xl font-bold text-white mb-4">Delete Recipe</h3>
-                                <p className="text-gray-300 mb-6">
-                                    Are you sure you want to delete this recipe? This action cannot be undone.
-                                </p>
-                                <div className="flex justify-end space-x-4">
-                                    <button
-                                        onClick={() => setShowDeleteConfirm(false)}
-                                        className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={handleDeleteConfirm}
-                                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center"
-                                    >
-                                        <Trash2 size={16} className="mr-2" />
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                        <DeleteConfirmationDialog
+                            onConfirm={handleDeleteConfirm}
+                            onCancel={handleCancelDelete}
+                        />
                     )}
 
                     {/* Edit mode for ingredients */}
@@ -236,80 +363,13 @@ const RecipeEditor = ({
                         </div>
                         <div className="space-y-4">
                             {editedIngredients.map((ingredient, index) => (
-                                <div key={ingredient.id} className="bg-gray-800 rounded-lg p-4 relative">
-                                    {/* Delete ingredient button */}
-                                    <button
-                                        onClick={() => handleDeleteIngredient(ingredient.id)}
-                                        className="absolute top-2 right-2 text-red-500 hover:text-red-400 p-1 rounded-full hover:bg-gray-700"
-                                        aria-label="Delete ingredient"
-                                    >
-                                        <X size={16} />
-                                    </button>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="flex flex-col">
-                                            <label className="text-gray-400 mb-1">Name</label>
-                                            <input
-                                                type="text"
-                                                value={ingredient.name}
-                                                onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                                                className={`px-3 py-2 bg-gray-700 border ${
-                                                    !ingredient.name ? 'border-red-500' : 'border-gray-600'
-                                                } rounded text-white`}
-                                            />
-                                            {!ingredient.name && (
-                                                <span className="text-red-500 text-xs mt-1">Required</span>
-                                            )}
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <div className="flex flex-col w-1/3">
-                                                <label className="text-gray-400 mb-1">Quantity</label>
-                                                <input
-                                                    type="number"
-                                                    value={ingredient.quantity}
-                                                    onChange={(e) => handleIngredientChange(index, 'quantity', parseFloat(e.target.value))}
-                                                    className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
-                                                    min="0.1"
-                                                    step="0.1"
-                                                />
-                                            </div>
-                                            <div className="flex flex-col w-2/3">
-                                                <label className="text-gray-400 mb-1">Unit</label>
-                                                <select
-                                                    value={ingredient.unit_id}
-                                                    onChange={(e) => handleIngredientChange(index, 'unit_id', e.target.value)}
-                                                    className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
-                                                >
-                                                    {units.map(unit => (
-                                                        <option key={unit.id} value={unit.id}>
-                                                            {unit.name}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <label className="text-gray-400 mb-1">Size</label>
-                                            <input
-                                                type="text"
-                                                value={ingredient.size || ''}
-                                                onChange={(e) => handleIngredientChange(index, 'size', e.target.value)}
-                                                className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
-                                                placeholder="e.g., large, small, medium"
-                                            />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <label className="text-gray-400 mb-1">Preparation</label>
-                                            <input
-                                                type="text"
-                                                value={ingredient.preparation || ''}
-                                                onChange={(e) => handleIngredientChange(index, 'preparation', e.target.value)}
-                                                className="px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white"
-                                                placeholder="e.g., chopped, diced, minced"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                                <IngredientForm
+                                    key={ingredient.id}
+                                    ingredient={ingredient}
+                                    units={units}
+                                    onIngredientChange={handleIngredientFieldChange(index)}
+                                    onDeleteIngredient={handleDeleteIngredient}
+                                />
                             ))}
                         </div>
                     </div>
@@ -341,13 +401,13 @@ const RecipeEditor = ({
             <div className="mt-8 text-center space-x-4">
                 <button
                     onClick={handleSaveClick}
-                    disabled={!isFormValid()}
+                    disabled={!isFormValid}
                     className={`inline-flex items-center px-4 py-2 ${
-                        isFormValid()
+                        isFormValid
                             ? 'bg-amber-500 hover:bg-amber-600 text-black'
                             : 'bg-gray-500 text-gray-300 cursor-not-allowed'
                     } rounded-lg transition-colors duration-200 border ${
-                        isFormValid() ? 'border-amber-400' : 'border-gray-600'
+                        isFormValid ? 'border-amber-400' : 'border-gray-600'
                     }`}
                 >
                     <Save size={18} className="mr-1" />
@@ -365,4 +425,4 @@ const RecipeEditor = ({
     );
 };
 
-export default RecipeEditor;
+export default React.memo(RecipeEditor);

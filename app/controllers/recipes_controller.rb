@@ -156,17 +156,6 @@ class RecipesController < ApplicationController
     }
   end
 
-  def parse_test
-    if request.post? && params[:recipe_text].present?
-      @parsed_data = RecipeServices::Parser.new(params[:recipe_text]).parse
-    end
-
-    respond_to do |format|
-      format.html # Renders the parse_test view
-      format.json { render json: @parsed_data }
-    end
-  end
-
   private
 
   def set_recipe
@@ -177,44 +166,6 @@ class RecipesController < ApplicationController
     params.require(:recipe).permit(:name, :ingredients, :instructions, :notes, :size, :preparation, :recipe_category_id, :cook_time, :prep_time, :servings)
   end
 
-  def update_recipe_ingredients(recipe, ingredients_params)
-    # Process each ingredient
-    ingredients_params.each do |ingredient_param|
-      # Downcase text fields
-      downcased_ingredient = downcase_ingredient_params(ingredient_param)
-
-      # Find and update the ingredient or skip if ID is invalid
-      if ingredient_param[:id].present?
-        ingredient = recipe.recipe_ingredients.find_by(id: ingredient_param[:id])
-        ingredient&.update(downcased_ingredient)
-      end
-    end
-  end
-
-  def downcase_params(params)
-    result = params.dup
-
-    # Downcase text fields
-    result[:name] = params[:name].downcase if params[:name].present?
-    result[:notes] = params[:notes].downcase if params[:notes].present?
-
-    # Don't downcase instructions as they might have formatting that's important
-
-    result
-  end
-
-  def downcase_ingredient_params(params)
-    result = params.dup
-
-    # Downcase text fields
-    result[:name] = params[:name].downcase if params[:name].present?
-    result[:preparation] = params[:preparation].downcase if params[:preparation].present?
-    result[:size] = params[:size].downcase if params[:size].present?
-
-    result
-  end
-
-  # In RecipesController
   def format_recipe_for_json(recipe)
     {
       id: recipe.id,
@@ -222,7 +173,6 @@ class RecipesController < ApplicationController
       instructions: recipe.instructions,
       notes: recipe.notes,
       category: recipe.recipe_category&.name,
-      # Add these fields to include them in the response
       prep_time: recipe.prep_time,
       cook_time: recipe.cook_time,
       servings: recipe.servings,

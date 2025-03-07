@@ -35,13 +35,13 @@ module RecipeServices
 
           # If we get here without errors, mark as successful
           success = true
-        rescue => e
+        rescue StandardError => e
           # Log the error and add to errors array
           Rails.logger.error("Recipe update failed: #{e.message}")
           @errors << "Failed to update recipe: #{e.message}"
 
-          # Re-raise to trigger rollback
-          raise
+          # Don't re-raise at all - let the transaction complete normally
+          # and rely on the success flag being false
         end
       end
 
@@ -83,7 +83,9 @@ module RecipeServices
       # Update recipe
       unless @recipe.update(update_attrs)
         @errors += @recipe.errors.full_messages
-        raise ActiveRecord::Rollback
+        # Instead of raising directly, use a normal exception that will be caught
+        # by the rescue block in update
+        raise StandardError, "Recipe validation failed"
       end
     end
 
@@ -150,7 +152,8 @@ module RecipeServices
         # Update the ingredient
         unless ingredient.update(update_attrs)
           @errors += ingredient.errors.full_messages
-          raise ActiveRecord::Rollback
+          # Consistent error handling: use StandardError instead of ActiveRecord::Rollback
+          raise StandardError, "Ingredient validation failed"
         end
       end
     end
@@ -185,7 +188,8 @@ module RecipeServices
         # If there are significant errors that should trigger a rollback
         if ingredient_result[:errors].any? { |e| e.include?("Error creating ingredient") }
           @errors += ingredient_result[:errors]
-          raise ActiveRecord::Rollback
+          # Consistent error handling
+          raise StandardError, "Error creating ingredients"
         end
       end
     end

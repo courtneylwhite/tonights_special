@@ -1,13 +1,11 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { ChevronLeft, CheckCircle, Edit, Clock, Users } from 'lucide-react';
 
-const RecipeViewer = ({ recipe, recipeIngredients, borderClass, onEdit, onToggleCompletion }) => {
-    // Helper to check if an ingredient is available (has a grocery_id)
-    const isIngredientAvailable = (ingredient) => {
-        return ingredient.grocery_id !== null && ingredient.grocery_id !== undefined;
-    };
-
-    // Format quantity for display (remove .0 for whole numbers)
+/**
+ * IngredientLine component - renders a single ingredient line
+ */
+const IngredientLine = React.memo(({ ingredient }) => {
+    // Helper function to format quantity (convert decimals to fractions where possible)
     const formatQuantity = (quantity) => {
         if (Number.isInteger(quantity) || quantity % 1 === 0) {
             return Math.round(quantity);
@@ -57,9 +55,41 @@ const RecipeViewer = ({ recipe, recipeIngredients, borderClass, onEdit, onToggle
         }
     };
 
-    // Format the instruction text to handle bullets and numbered lists
-    const formatInstructions = (text) => {
-        if (!text) return "";
+    // Is the ingredient available in the pantry?
+    const isAvailable = ingredient.grocery_id !== null && ingredient.grocery_id !== undefined;
+
+    return (
+        <div className="flex items-center space-x-2">
+            {/* Check mark, tightly coupled with text */}
+            {isAvailable ? (
+                <div className="h-5 w-5 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle size={16} className="text-green-500" />
+                </div>
+            ) : (
+                <div className="w-5 h-5 rounded-full border border-gray-600 flex-shrink-0"></div>
+            )}
+
+            {/* Quantity and unit, immediately next to check */}
+            <span className="text-amber-400 font-medium whitespace-nowrap">
+                {formatQuantity(ingredient.quantity)} {ingredient.unit_abbreviation || ingredient.unit_name || 'ea'}
+            </span>
+
+            {/* Ingredient details, part of the same line */}
+            <span className="text-white">
+                {ingredient.size ? <span className="text-gray-400">{ingredient.size} </span> : ''}
+                {ingredient.name}
+                {ingredient.preparation ? <span className="text-gray-400 italic">, {ingredient.preparation}</span> : ''}
+            </span>
+        </div>
+    );
+});
+
+/**
+ * Instructions component - formats and renders the recipe instructions
+ */
+const Instructions = React.memo(({ text }) => {
+    const formattedInstructions = useMemo(() => {
+        if (!text) return [];
 
         // Split by newlines
         return text.split("\n").map((line, index) => {
@@ -84,16 +114,33 @@ const RecipeViewer = ({ recipe, recipeIngredients, borderClass, onEdit, onToggle
                 );
             }
         });
-    };
+    }, [text]);
 
+    return <>{formattedInstructions}</>;
+});
+
+/**
+ * RecipeViewer component - displays a recipe in read-only mode
+ */
+const RecipeViewer = ({ recipe, recipeIngredients, borderClass, onEdit, onToggleCompletion }) => {
     // Format servings value for display
-    const formatServings = (servings) => {
-        if (!servings) return null;
+    const formattedServings = useMemo(() => {
+        if (!recipe.servings) return null;
 
-        return Number.isInteger(servings) || servings % 1 === 0
-            ? `${Math.round(servings)} servings`
-            : `${Math.ceil(servings * 2) / 2} servings`;
-    };
+        return Number.isInteger(recipe.servings) || recipe.servings % 1 === 0
+            ? `${Math.round(recipe.servings)} servings`
+            : `${Math.ceil(recipe.servings * 2) / 2} servings`;
+    }, [recipe.servings]);
+
+    // Handle edit button click
+    const handleEditClick = useCallback(() => {
+        onEdit();
+    }, [onEdit]);
+
+    // Handle toggle completion status button click
+    const handleToggleCompletion = useCallback(() => {
+        onToggleCompletion();
+    }, [onToggleCompletion]);
 
     return (
         <div className="relative mb-20 mt-16">
@@ -131,10 +178,10 @@ const RecipeViewer = ({ recipe, recipeIngredients, borderClass, onEdit, onToggle
                         )}
 
                         {/* Servings */}
-                        {recipe.servings && (
+                        {formattedServings && (
                             <div className="px-3 py-1 bg-transparent text-white rounded-md text-sm inline-flex items-center border border-white">
                                 <Users size={16} className="mr-2 text-white" />
-                                {formatServings(recipe.servings)}
+                                {formattedServings}
                             </div>
                         )}
 
@@ -143,7 +190,7 @@ const RecipeViewer = ({ recipe, recipeIngredients, borderClass, onEdit, onToggle
                             className={`ml-auto px-3 py-1 rounded-md text-sm cursor-pointer inline-flex items-center ${
                                 recipe.completed ? 'bg-green-500 text-white' : 'bg-amber-500 text-gray-900'
                             }`}
-                            onClick={onToggleCompletion}
+                            onClick={handleToggleCompletion}
                         >
                             <CheckCircle size={16} className="mr-2" />
                             <span>{recipe.completed ? 'Completed' : 'Mark Complete'}</span>
@@ -165,28 +212,7 @@ const RecipeViewer = ({ recipe, recipeIngredients, borderClass, onEdit, onToggle
 
                             <div className="space-y-5">
                                 {recipeIngredients.map(ingredient => (
-                                    <div key={ingredient.id} className="flex items-center space-x-2">
-                                        {/* Check mark, tightly coupled with text */}
-                                        {isIngredientAvailable(ingredient) ? (
-                                            <div className="h-5 w-5 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0">
-                                                <CheckCircle size={16} className="text-green-500" />
-                                            </div>
-                                        ) : (
-                                            <div className="w-5 h-5 rounded-full border border-gray-600 flex-shrink-0"></div>
-                                        )}
-
-                                        {/* Quantity and unit, immediately next to check */}
-                                        <span className="text-amber-400 font-medium whitespace-nowrap">
-                                            {formatQuantity(ingredient.quantity)} {ingredient.unit_abbreviation || ingredient.unit_name || 'ea'}
-                                        </span>
-
-                                        {/* Ingredient details, part of the same line */}
-                                        <span className="text-white">
-                                            {ingredient.size ? <span className="text-gray-400">{ingredient.size} </span> : ''}
-                                            {ingredient.name}
-                                            {ingredient.preparation ? <span className="text-gray-400 italic">, {ingredient.preparation}</span> : ''}
-                                        </span>
-                                    </div>
+                                    <IngredientLine key={ingredient.id} ingredient={ingredient} />
                                 ))}
                             </div>
                         </div>
@@ -197,7 +223,7 @@ const RecipeViewer = ({ recipe, recipeIngredients, borderClass, onEdit, onToggle
                                 Instructions
                             </h2>
                             <div className="text-left text-gray-100">
-                                {formatInstructions(recipe.instructions)}
+                                <Instructions text={recipe.instructions} />
                             </div>
                         </div>
                     </div>
@@ -219,7 +245,7 @@ const RecipeViewer = ({ recipe, recipeIngredients, borderClass, onEdit, onToggle
             {/* Action buttons at the bottom */}
             <div className="mt-8 text-center">
                 <button
-                    onClick={onEdit}
+                    onClick={handleEditClick}
                     className="inline-flex items-center px-4 py-2 bg-gray-900/90 backdrop-blur-sm text-amber-400 rounded-lg transition-colors duration-200 border border-gray-700 hover:border-amber-500"
                 >
                     <Edit size={18} className="mr-1" />
@@ -230,4 +256,4 @@ const RecipeViewer = ({ recipe, recipeIngredients, borderClass, onEdit, onToggle
     );
 };
 
-export default RecipeViewer;
+export default React.memo(RecipeViewer);

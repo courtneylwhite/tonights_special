@@ -16,7 +16,7 @@ module RecipeServices
         # Step 1: Determine the category for the recipe
         category_id = get_category_id
         if category_id.nil? && new_category_params.present?
-          return { success: false, errors: ["Failed to create category"] }
+          return { success: false, errors: [ "Failed to create category" ] }
         end
 
         # Step 2: Set up recipe attributes
@@ -50,15 +50,14 @@ module RecipeServices
 
               updated_notes = if existing_notes.present?
                                 "#{existing_notes}\n\n#{note_text}"
-                              else
+              else
                                 note_text
-                              end
+              end
 
               recipe.update(notes: updated_notes)
             end
 
             # Create the ingredient records
-            binding.pry
             if parsed_data[:ingredients].present?
               ingredient_result = RecipeServices::Ingredient.new(
                 recipe,
@@ -72,7 +71,7 @@ module RecipeServices
 
                 # Important: Roll back the transaction if ingredient creation fails
                 if ingredient_result[:errors].any? { |e| e.include?("Error creating ingredient") }
-                  return { success: false, errors: [warning_message] }
+                  return { success: false, errors: [ warning_message ] }
                 end
               end
             else
@@ -85,7 +84,6 @@ module RecipeServices
             Rails.logger.error("Ingredient processing error: #{e.message}")
             error_message = "Error processing ingredients: #{e.message}"
             warnings << error_message
-            return { success: false, errors: [error_message] }
           end
         end
 

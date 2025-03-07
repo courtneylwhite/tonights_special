@@ -1,28 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import RecipeViewer from '../recipe/RecipeViewer';
 import RecipeEditor from '../recipe/RecipeEditor';
 
+/**
+ * Root component for displaying and editing a recipe
+ * Manages state and API interactions between RecipeViewer and RecipeEditor
+ */
 const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories = [] }) => {
+    // Component state
     const [isEditing, setIsEditing] = useState(false);
     const [currentRecipe, setCurrentRecipe] = useState(recipe);
     const [currentIngredients, setCurrentIngredients] = useState(recipeIngredients);
-    const [showSuccess, setShowSuccess] = useState(false);
-    const [showError, setShowError] = useState(false);
+    const [feedbackState, setFeedbackState] = useState({
+        showSuccess: false,
+        showError: false
+    });
     const [availableCategories, setAvailableCategories] = useState(recipeCategories);
 
-    // Handle showing success/error feedback
-    const showFeedback = (success) => {
+    // API helper - get CSRF token once
+    const csrfToken = useMemo(() =>
+            document.querySelector('[name="csrf-token"]')?.content,
+        []);
+
+    // Common API request headers for reuse
+    const requestHeaders = useMemo(() => ({
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken,
+        'Accept': 'application/json'
+    }), [csrfToken]);
+
+    // Show temporary feedback (success or error)
+    const showFeedback = useCallback((success) => {
         if (success) {
-            setShowSuccess(true);
-            setTimeout(() => setShowSuccess(false), 2000);
+            setFeedbackState({ showSuccess: true, showError: false });
+            setTimeout(() => setFeedbackState({ showSuccess: false, showError: false }), 2000);
         } else {
-            setShowError(true);
-            setTimeout(() => setShowError(false), 2000);
+            setFeedbackState({ showSuccess: false, showError: true });
+            setTimeout(() => setFeedbackState({ showSuccess: false, showError: false }), 2000);
         }
-    };
+    }, []);
 
     // Toggle recipe completion status
-    const toggleCompletion = async () => {
+    const toggleCompletion = useCallback(async () => {
         try {
             const endpoint = currentRecipe.completed
                 ? `/recipes/${currentRecipe.id}/mark_incomplete`
@@ -30,11 +49,7 @@ const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories 
 
             const response = await fetch(endpoint, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content,
-                    'Accept': 'application/json'
-                }
+                headers: requestHeaders
             });
 
             if (response.ok) {
@@ -46,22 +61,21 @@ const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories 
                 }));
                 showFeedback(true);
             } else {
+                console.error('Failed to update recipe');
                 showFeedback(false);
             }
         } catch (error) {
             console.error('Error toggling completion:', error);
             showFeedback(false);
         }
-    };
+    }, [currentRecipe.completed, currentRecipe.id, requestHeaders, showFeedback]);
 
-    // Fetch recipe categories from the server
-    const fetchRecipeCategories = async () => {
+    // Fetch recipe categories if needed
+    const fetchRecipeCategories = useCallback(async () => {
         try {
             const response = await fetch('/recipe_categories', {
                 method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
+                headers: { 'Accept': 'application/json' }
             });
 
             if (response.ok) {
@@ -73,23 +87,24 @@ const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories 
         } catch (error) {
             console.error('Error fetching recipe categories:', error);
         }
-    };
+    }, []);
 
-    // Handle switching to edit mode
-    const handleEditClick = () => {
+    // Handler for edit button click
+    const handleEditClick = useCallback(() => {
+        // Only fetch categories if we don't have any yet
         if (availableCategories.length === 0) {
             fetchRecipeCategories();
         }
         setIsEditing(true);
-    };
+    }, [availableCategories.length, fetchRecipeCategories]);
 
-    // Handle canceling edit mode
-    const handleCancelEdit = () => {
+    // Handler for cancel edit button click
+    const handleCancelEdit = useCallback(() => {
         setIsEditing(false);
-    };
+    }, []);
 
-    // Handle saving recipe changes
-    const handleSaveChanges = async (editedRecipe, editedIngredients) => {
+    // Handler for save changes button click
+    const handleSaveChanges = useCallback(async (editedRecipe, editedIngredients) => {
         try {
             // Separate existing ingredients from new ones (new ones have negative IDs)
             const existingIngredients = editedIngredients.filter(ing => ing.id > 0);
@@ -115,12 +130,11 @@ const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories 
                     size: ingredient.size || "",
                     name: ingredient.name
                 })),
-                // New ingredients don't have server-side IDs yet, so we don't include id
                 new_recipe_ingredients: newIngredients.map(ingredient => ({
                     grocery_id: ingredient.grocery_id,
                     quantity: ingredient.quantity,
                     unit_id: ingredient.unit_id,
-                    unit_name: units.find(u => u.id === ingredient.unit_id)?.name,  // Add this line
+                    unit_name: units.find(u => u.id === parseInt(ingredient.unit_id))?.name,
                     preparation: ingredient.preparation || "",
                     size: ingredient.size || "",
                     name: ingredient.name
@@ -130,20 +144,14 @@ const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories 
                     .map(ri => ri.id)
             };
 
-            // Submit to Rails controller
             const response = await fetch(`/recipes/${recipe.id}`, {
                 method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content,
-                    'Accept': 'application/json'
-                },
+                headers: requestHeaders,
                 body: JSON.stringify(formData)
             });
 
             if (response.ok) {
                 const updatedData = await response.json();
-                // Update local state with response data
                 setCurrentRecipe(updatedData.recipe);
                 setCurrentIngredients(updatedData.recipe_ingredients);
                 showFeedback(true);
@@ -156,21 +164,17 @@ const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories 
             console.error('Error updating recipe:', error);
             showFeedback(false);
         }
-    };
+    }, [currentIngredients, recipe.id, requestHeaders, showFeedback, units]);
 
-    // Handle recipe deletion
-    const handleDeleteRecipe = async () => {
+    // Handler for delete recipe button click
+    const handleDeleteRecipe = useCallback(async () => {
         try {
             const response = await fetch(`/recipes/${recipe.id}`, {
                 method: 'DELETE',
-                headers: {
-                    'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.content,
-                    'Accept': 'application/json'
-                }
+                headers: requestHeaders
             });
 
             if (response.ok) {
-                // Redirect to recipes index page
                 window.location.href = '/recipes';
             } else {
                 console.error('Failed to delete recipe');
@@ -180,14 +184,16 @@ const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories 
             console.error('Error deleting recipe:', error);
             showFeedback(false);
         }
-    };
+    }, [recipe.id, requestHeaders, showFeedback]);
 
     // Border class that shows feedback when saving/error
-    const borderClass = showSuccess
-        ? 'border-2 border-green-500 border-opacity-100'
-        : showError
-            ? 'border-2 border-red-500 border-opacity-100'
-            : 'border-2 border-amber-500';
+    const borderClass = useMemo(() =>
+            feedbackState.showSuccess
+                ? 'border-2 border-green-500 border-opacity-100'
+                : feedbackState.showError
+                    ? 'border-2 border-red-500 border-opacity-100'
+                    : 'border-2 border-amber-500',
+        [feedbackState.showSuccess, feedbackState.showError]);
 
     return (
         <div className="min-h-screen bg-black text-white">
@@ -219,4 +225,4 @@ const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories 
     );
 };
 
-export default RecipeDetail;
+export default React.memo(RecipeDetail);
