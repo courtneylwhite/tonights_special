@@ -9,6 +9,9 @@
 # created_at :datetime, not null
 # updated_at :datetime, not null
 # recipe_category_id :integer, not null
+# prep_time :string, nullable
+# cook_time :string, nullable
+# servings :float, nullable
 class Recipe < ApplicationRecord
   belongs_to :user
   belongs_to :recipe_category, dependent: :destroy

@@ -6,26 +6,21 @@ class RecipesController < ApplicationController
     @recipes = current_user.recipes.includes(:recipe_category, recipe_ingredients: [ :grocery, :unit ])
                            .order(created_at: :desc)
     @recipe_categories = current_user.recipe_categories.order(display_order: :asc)
-
-    # Uses the optimized grouped_recipes_with_availability which preloads groceries once
     @grouped_recipes = RecipePresenter.grouped_recipes_with_availability(@recipes, @recipe_categories, current_user)
 
     respond_to do |format|
-      format.html # Renders the index page with React components
+      format.html
       format.json { render json: @grouped_recipes }
     end
   end
 
   def create
-    # Create a new RecipeServices::Creator instance with the recipe params
     creator = ::RecipeServices::Creator.new(current_user, recipe_params)
 
-    # If there's a new category being created, pass that data to the creator
     if params[:new_category].present?
       creator.new_category_params = params[:new_category]
     end
 
-    # Call the create method
     result = creator.create
 
     if result[:success]
@@ -39,6 +34,107 @@ class RecipesController < ApplicationController
         status: "error",
         errors: result[:errors]
       }, status: :unprocessable_entity
+    end
+  end
+
+  def show
+    @recipe = current_user.recipes
+                          .includes(:recipe_category,
+                                    recipe_ingredients: [ :grocery, :unit ])
+                          .find(params[:id])
+
+    @units = Unit.all.order(:category, :name)
+    @recipe_categories = current_user.recipe_categories.order(display_order: :asc)
+    @recipe_ingredients = @recipe.recipe_ingredients.map do |ri|
+      {
+        id: ri.id,
+        recipe_id: @recipe.id,
+        grocery_id: ri.grocery_id,
+        name: ri.name,
+        quantity: ri.quantity,
+        unit_id: ri.unit_id,
+        unit_name: ri.unit.name,
+        unit_abbreviation: ri.unit.abbreviation,
+        preparation: ri.preparation,
+        size: ri.size
+      }
+    end
+
+    respond_to do |format|
+      format.html
+      format.json {
+        render json: {
+          recipe: @recipe,
+          recipe_ingredients: @recipe_ingredients,
+          units: @units,
+          recipe_categories: @recipe_categories
+        }
+      }
+    end
+  rescue ActiveRecord::RecordNotFound
+    respond_to do |format|
+      format.html { redirect_to recipes_path, alert: "Recipe not found." }
+      format.json { render json: { error: "Recipe not found." }, status: :not_found }
+    end
+  end
+
+  def update
+    @recipe = current_user.recipes.find(params[:id])
+    recipe_attributes = params[:recipe] || {}
+    ingredients_attributes = params[:recipe_ingredients] || []
+    new_ingredients_attributes = params[:new_recipe_ingredients] || []
+    deleted_ingredient_ids = params[:deleted_ingredient_ids] || []
+
+    updater = RecipeServices::Updater.new(
+      current_user,
+      @recipe,
+      recipe_attributes,
+      ingredients_attributes,
+      deleted_ingredient_ids,
+      new_ingredients_attributes
+    )
+
+    result = updater.update
+
+    if result[:success]
+      @recipe.reload
+      recipe_ingredients = @recipe.recipe_ingredients.map do |ri|
+        {
+          id: ri.id,
+          recipe_id: @recipe.id,
+          grocery_id: ri.grocery_id,
+          name: ri.name,
+          quantity: ri.quantity,
+          unit_id: ri.unit_id,
+          unit_name: ri.unit&.name,
+          unit_abbreviation: ri.unit&.abbreviation,
+          preparation: ri.preparation,
+          size: ri.size
+        }
+      end
+
+      render json: {
+        recipe: @recipe,
+        recipe_ingredients: recipe_ingredients,
+        status: "success",
+        message: result[:warnings].present? ? result[:warnings].join(", ") : "Recipe was successfully updated."
+      }
+    else
+      render json: {
+        status: "error",
+        errors: result[:errors]
+      }, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @recipe = current_user.recipes.find(params[:id])
+    @recipe.recipe_ingredients.destroy_all
+    @recipe.destroy
+
+    respond_to do |format|
+      format.html { redirect_to recipes_path, notice: "Recipe was successfully deleted." }
+      format.json { render json: { status: "success", message: "Recipe was successfully deleted." } }
     end
   end
 
@@ -60,18 +156,6 @@ class RecipesController < ApplicationController
     }
   end
 
-  # For testing the parser
-  def parse_test
-    if request.post? && params[:recipe_text].present?
-      @parsed_data = RecipeServices::Parser.new(params[:recipe_text]).parse
-    end
-
-    respond_to do |format|
-      format.html # Renders the parse_test view
-      format.json { render json: @parsed_data }
-    end
-  end
-
   private
 
   def set_recipe
@@ -79,7 +163,7 @@ class RecipesController < ApplicationController
   end
 
   def recipe_params
-    params.require(:recipe).permit(:name, :ingredients, :instructions, :notes, :recipe_category_id)
+    params.require(:recipe).permit(:name, :ingredients, :instructions, :notes, :size, :preparation, :recipe_category_id, :cook_time, :prep_time, :servings)
   end
 
   def format_recipe_for_json(recipe)
@@ -89,6 +173,11 @@ class RecipesController < ApplicationController
       instructions: recipe.instructions,
       notes: recipe.notes,
       category: recipe.recipe_category&.name,
+      prep_time: recipe.prep_time,
+      cook_time: recipe.cook_time,
+      servings: recipe.servings,
+      completed: recipe.completed,
+      completed_at: recipe.completed_at,
       ingredients: recipe.recipe_ingredients.includes(:grocery, :unit).map do |ri|
         {
           id: ri.id,

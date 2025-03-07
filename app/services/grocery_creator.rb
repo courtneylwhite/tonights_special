@@ -64,6 +64,8 @@ class GroceryCreator
     grocery = user.groceries.build(grocery_attributes)
 
     if grocery.save
+      # Update related ingredients after saving the grocery
+      GroceryMatcher.update_related_ingredients(grocery)
       grocery
     else
       @errors += grocery.errors.full_messages

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, screen, waitFor, act } from '@testing-library/react';
-import RecipeBox from '@/components/RecipeBox';
+import RecipeBox from '@/components/recipe/RecipeBox';
 
 // Mock child components
 jest.mock('@/components/SearchBar', () => {
@@ -38,7 +38,7 @@ jest.mock('@/components/SearchBar', () => {
     };
 });
 
-jest.mock('@/components/RecipeModal', () => {
+jest.mock('@/components/recipe/RecipeModal', () => {
     return function MockRecipeModal({ isOpen, onClose, onRecipeAdded }) {
         return isOpen ? (
             <div data-testid="recipe-modal">

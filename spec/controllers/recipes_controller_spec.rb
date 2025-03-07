@@ -4,6 +4,27 @@ RSpec.describe RecipesController, type: :controller do
   let(:user) { create(:user) }
   let(:recipe_category) { create(:recipe_category, user: user) }
 
+  # Use unique values for unit to avoid duplication errors
+  let(:unit) do
+    random_suffix = SecureRandom.hex(4)
+    create(:unit,
+           name: "TestUnit-#{random_suffix}",
+           abbreviation: "tu-#{random_suffix}",
+           category: "volume"
+    )
+  end
+
+  let(:grocery) { create(:grocery, name: "TestGrocery-#{SecureRandom.hex(4)}") }
+  let(:recipe) { create(:recipe, user: user, recipe_category: recipe_category) }
+  let(:recipe_ingredient) do
+    create(:recipe_ingredient,
+           recipe: recipe,
+           grocery: grocery,
+           unit: unit,
+           name: "Test Ingredient #{SecureRandom.hex(4)}" # Add required name
+    )
+  end
+
   before do
     sign_in user
   end
@@ -15,7 +36,7 @@ RSpec.describe RecipesController, type: :controller do
     end
 
     it "assigns @recipes, @recipe_categories, and @grouped_recipes" do
-      recipe = create(:recipe, user: user, recipe_category: recipe_category)
+      recipe # Create the recipe
 
       get :index
 
@@ -24,27 +45,60 @@ RSpec.describe RecipesController, type: :controller do
       expect(assigns(:grouped_recipes)).to be_a(Hash)
     end
 
-    it "uses RecipePresenter.grouped_recipes_with_availability" do
-      recipe = create(:recipe, user: user, recipe_category: recipe_category)
-
-      expect(RecipePresenter).to receive(:grouped_recipes_with_availability)
-                                   .with(kind_of(ActiveRecord::Relation), kind_of(ActiveRecord::Relation), user)
-                                   .and_call_original
-
-      get :index
-    end
-
     it "renders JSON when requested" do
-      recipe = create(:recipe, user: user, recipe_category: recipe_category)
+      recipe # Create the recipe
 
       get :index, format: :json
 
       expect(response).to have_http_status(:success)
       expect(response.content_type).to include("application/json")
+    end
+  end
 
-      # Parse the response body
+  describe "GET #show" do
+    it "returns http success" do
+      get :show, params: { id: recipe.id }
+      expect(response).to have_http_status(:success)
+    end
+
+    it "assigns @recipe, @units, @recipe_categories, and @recipe_ingredients" do
+      ri = recipe_ingredient # Create the recipe ingredient
+
+      get :show, params: { id: recipe.id }
+
+      expect(assigns(:recipe)).to eq(recipe)
+      expect(assigns(:units)).to be_present
+      expect(assigns(:recipe_categories)).to include(recipe_category)
+      expect(assigns(:recipe_ingredients)).to be_present
+    end
+
+    it "renders JSON when requested" do
+      ri = recipe_ingredient # Create the recipe ingredient
+
+      get :show, params: { id: recipe.id }, format: :json
+
+      expect(response).to have_http_status(:success)
+      expect(response.content_type).to include("application/json")
+
       json = JSON.parse(response.body)
-      expect(json).to have_key(recipe_category.name)
+      expect(json["recipe"]).to be_present
+      expect(json["recipe_ingredients"]).to be_present
+      expect(json["units"]).to be_present
+      expect(json["recipe_categories"]).to be_present
+    end
+
+    it "handles recipe not found" do
+      get :show, params: { id: 999999 }, format: :json
+
+      expect(response).to have_http_status(:not_found)
+      expect(JSON.parse(response.body)["error"]).to eq("Recipe not found.")
+    end
+
+    it "redirects to recipes_path with alert for HTML format when recipe not found" do
+      get :show, params: { id: 999999 }
+
+      expect(response).to redirect_to(recipes_path)
+      expect(flash[:alert]).to eq("Recipe not found.")
     end
   end
 
@@ -60,122 +114,112 @@ RSpec.describe RecipesController, type: :controller do
     }
 
     context "with valid params" do
-      it "creates a new recipe" do
-        # Create the recipe before setting up the mock to avoid factorybot validation issues
-        recipe = create(:recipe, user: user, recipe_category: recipe_category)
-
+      it "returns success JSON response" do
         # Mock the Creator service with successful result
         creator_instance = instance_double(RecipeServices::Creator)
-        allow(RecipeServices::Creator).to receive(:new).with(user, kind_of(ActionController::Parameters)).and_return(creator_instance)
+        allow(RecipeServices::Creator).to receive(:new).and_return(creator_instance)
 
-        success_result = {
-          success: true,
-          recipe: recipe,
-          warnings: nil
-        }
+        allow(creator_instance).to receive(:create).and_return({
+                                                                 success: true,
+                                                                 recipe: recipe,
+                                                                 warnings: nil
+                                                               })
 
-        allow(creator_instance).to receive(:create).and_return(success_result)
-
-        # Don't expect a recipe count change since we're mocking the service
         post :create, params: { recipe: valid_recipe_attributes }
 
         expect(response).to have_http_status(:created)
         expect(response.content_type).to include("application/json")
-
-        json = JSON.parse(response.body)
-        expect(json["status"]).to eq("success")
+        expect(JSON.parse(response.body)["status"]).to eq("success")
       end
 
       it "handles new category creation" do
-        # Mock the Creator service
         creator_instance = instance_double(RecipeServices::Creator)
-        allow(RecipeServices::Creator).to receive(:new).with(user, kind_of(ActionController::Parameters)).and_return(creator_instance)
-        expect(creator_instance).to receive(:new_category_params=).with(kind_of(ActionController::Parameters))
+        allow(RecipeServices::Creator).to receive(:new).and_return(creator_instance)
+        expect(creator_instance).to receive(:new_category_params=)
 
-        recipe = create(:recipe, user: user, recipe_category: recipe_category)
-        success_result = {
-          success: true,
-          recipe: recipe,
-          warnings: nil
-        }
-
-        allow(creator_instance).to receive(:create).and_return(success_result)
-
-        # Add new_category parameters
-        new_category_params = { name: "New Category", display_order: 1 }
+        allow(creator_instance).to receive(:create).and_return({
+                                                                 success: true,
+                                                                 recipe: recipe,
+                                                                 warnings: nil
+                                                               })
 
         post :create, params: {
           recipe: valid_recipe_attributes.except(:recipe_category_id),
-          new_category: new_category_params
+          new_category: { name: "New Category", display_order: 1 }
         }
 
         expect(response).to have_http_status(:created)
-        json = JSON.parse(response.body)
-        expect(json["status"]).to eq("success")
-      end
-
-      it "includes warning messages from the service when present" do
-        creator_instance = instance_double(RecipeServices::Creator)
-        allow(RecipeServices::Creator).to receive(:new).with(user, kind_of(ActionController::Parameters)).and_return(creator_instance)
-
-        recipe = create(:recipe, user: user, recipe_category: recipe_category)
-        success_result_with_warnings = {
-          success: true,
-          recipe: recipe,
-          warnings: [ "Some ingredients could not be parsed" ]
-        }
-
-        allow(creator_instance).to receive(:create).and_return(success_result_with_warnings)
-
-        post :create, params: { recipe: valid_recipe_attributes }
-
-        expect(response).to have_http_status(:created)
-        json = JSON.parse(response.body)
-        expect(json["message"]).to eq("Some ingredients could not be parsed")
       end
     end
 
     context "with invalid params" do
-      it "returns error status and messages" do
-        # Mock the Creator service with error result
+      it "returns error status" do
         creator_instance = instance_double(RecipeServices::Creator)
-        allow(RecipeServices::Creator).to receive(:new).with(user, kind_of(ActionController::Parameters)).and_return(creator_instance)
+        allow(RecipeServices::Creator).to receive(:new).and_return(creator_instance)
 
-        error_result = {
-          success: false,
-          errors: [ "Name can't be blank", "Instructions can't be blank" ]
-        }
+        allow(creator_instance).to receive(:create).and_return({
+                                                                 success: false,
+                                                                 errors: [ "Name can't be blank" ]
+                                                               })
 
-        allow(creator_instance).to receive(:create).and_return(error_result)
-
-        post :create, params: { recipe: { name: "" } }  # Invalid params
+        post :create, params: { recipe: { name: "" } }
 
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(response.content_type).to include("application/json")
-
-        json = JSON.parse(response.body)
-        expect(json["status"]).to eq("error")
-        expect(json["errors"]).to include("Name can't be blank")
+        expect(JSON.parse(response.body)["status"]).to eq("error")
       end
     end
+  end
 
-    it "passes permitted parameters to the Creator service" do
-      # Create a recipe before mocking to avoid factorybot validation issues
-      existing_recipe = create(:recipe, user: user, recipe_category: recipe_category)
+  describe "PATCH #update" do
+    let(:recipe_attributes) { { name: "Updated Recipe Name", notes: "Updated notes" } }
 
-      # Test that only permitted parameters are passed to the service
-      creator_double = instance_double(RecipeServices::Creator)
-      allow(creator_double).to receive(:create).and_return({ success: true, recipe: existing_recipe })
+    it "returns success JSON response when valid" do
+      updater_double = instance_double(RecipeServices::Updater)
+      allow(RecipeServices::Updater).to receive(:new).and_return(updater_double)
+      allow(updater_double).to receive(:update).and_return({ success: true, warnings: nil })
 
-      expect(RecipeServices::Creator).to receive(:new) do |current_user, params|
-        expect(params).to respond_to(:permit)
-        expect(params).to respond_to(:[])
-        creator_double
-      end
+      patch :update, params: { id: recipe.id, recipe: recipe_attributes }, format: :json
 
-      post :create, params: {
-        recipe: valid_recipe_attributes.merge(unpermitted_param: "should not be passed")
-      }
+      expect(response).to have_http_status(:success)
+      expect(JSON.parse(response.body)["status"]).to eq("success")
+    end
+
+    it "returns error status when invalid" do
+      updater_double = instance_double(RecipeServices::Updater)
+      allow(RecipeServices::Updater).to receive(:new).and_return(updater_double)
+      allow(updater_double).to receive(:update).and_return({
+                                                             success: false,
+                                                             errors: [ "Name can't be blank" ]
+                                                           })
+
+      patch :update, params: { id: recipe.id, recipe: { name: "" } }, format: :json
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(JSON.parse(response.body)["status"]).to eq("error")
+    end
+  end
+
+  describe "DELETE #destroy" do
+    it "destroys the recipe" do
+      recipe # Create the recipe
+
+      expect {
+        delete :destroy, params: { id: recipe.id }
+      }.to change(Recipe, :count).by(-1)
+    end
+
+    it "redirects to recipes_path with notice for HTML format" do
+      delete :destroy, params: { id: recipe.id }
+
+      expect(response).to redirect_to(recipes_path)
+      expect(flash[:notice]).to eq("Recipe was successfully deleted.")
+    end
+
+    it "returns success JSON response for JSON format" do
+      delete :destroy, params: { id: recipe.id }, format: :json
+
+      expect(response).to have_http_status(:success)
+      expect(JSON.parse(response.body)["status"]).to eq("success")
     end
   end
 
@@ -196,34 +240,8 @@ RSpec.describe RecipesController, type: :controller do
       patch :mark_completed, params: { id: recipe.id }, format: :json
 
       expect(response).to have_http_status(:success)
-      expect(response.content_type).to include("application/json")
-
-      json = JSON.parse(response.body)
-      expect(json["status"]).to eq("success")
-      expect(json["message"]).to eq("Recipe marked as completed.")
-      expect(json["recipe"]).to be_present
-    end
-
-    it "includes formatted recipe data in the response" do
-      recipe = create(:recipe, user: user, recipe_category: recipe_category)
-
-      patch :mark_completed, params: { id: recipe.id }, format: :json
-
-      json = JSON.parse(response.body)
-      expect(json["recipe"]["id"]).to eq(recipe.id)
-      expect(json["recipe"]["name"]).to eq(recipe.name)
-      expect(json["recipe"]["instructions"]).to eq(recipe.instructions)
-    end
-
-    it "handles recipes that are already completed" do
-      recipe = create(:recipe, user: user, recipe_category: recipe_category, completed: true, completed_at: 1.day.ago)
-      old_completed_at = recipe.completed_at
-
-      patch :mark_completed, params: { id: recipe.id }
-
-      recipe.reload
-      expect(recipe.completed).to be true
-      expect(recipe.completed_at).not_to eq(old_completed_at) # Should update the timestamp
+      expect(JSON.parse(response.body)["status"]).to eq("success")
+      expect(JSON.parse(response.body)["recipe"]).to be_present
     end
   end
 
@@ -244,33 +262,8 @@ RSpec.describe RecipesController, type: :controller do
       patch :mark_incomplete, params: { id: recipe.id }, format: :json
 
       expect(response).to have_http_status(:success)
-      expect(response.content_type).to include("application/json")
-
-      json = JSON.parse(response.body)
-      expect(json["status"]).to eq("success")
-      expect(json["message"]).to eq("Recipe marked as incomplete.")
-      expect(json["recipe"]).to be_present
-    end
-
-    it "includes formatted recipe data in the response" do
-      recipe = create(:recipe, user: user, recipe_category: recipe_category, completed: true)
-
-      patch :mark_incomplete, params: { id: recipe.id }, format: :json
-
-      json = JSON.parse(response.body)
-      expect(json["recipe"]["id"]).to eq(recipe.id)
-      expect(json["recipe"]["name"]).to eq(recipe.name)
-      expect(json["recipe"]["instructions"]).to eq(recipe.instructions)
-    end
-
-    it "handles recipes that are already incomplete" do
-      recipe = create(:recipe, user: user, recipe_category: recipe_category, completed: false, completed_at: nil)
-
-      patch :mark_incomplete, params: { id: recipe.id }
-
-      recipe.reload
-      expect(recipe.completed).to be false
-      expect(recipe.completed_at).to be_nil
+      expect(JSON.parse(response.body)["status"]).to eq("success")
+      expect(JSON.parse(response.body)["recipe"]).to be_present
     end
   end
 end

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
-import ItemModal from './ItemModal';
-import SearchBar from './SearchBar';
-import ToggleButton from './ToggleButton';
-import ScrollableContainer from './ScrollableContainer';
+import ItemModal from '../ItemModal';
+import SearchBar from '../SearchBar';
+import ToggleButton from '../ToggleButton';
+import ScrollableContainer from '../ScrollableContainer';
 
 const Pantry = ({ groceries = {}, units = [] }) => {
     const [groceryData, setGroceryData] = useState(groceries);
@@ -71,7 +71,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
             <div className="min-h-screen bg-black text-white relative">
                 <div className="bg-black/80 backdrop-blur-sm border-b border-gray-800 p-8 sticky top-0 z-10">
                     <h1 className="text-center mb-8">
-                        Culinary Inventory
+                        Pantry Inventory
                     </h1>
                         <div className="flex items-center gap-4 max-w-3xl mx-auto">
                             <SearchBar

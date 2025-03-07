@@ -9,6 +9,8 @@
 # updated_at :datetime, not null
 # emoji :string, nullable
 class Grocery < ApplicationRecord
+  include GroceryIngredientMatcher
+
   belongs_to :user
   belongs_to :grocery_section
   belongs_to :unit
