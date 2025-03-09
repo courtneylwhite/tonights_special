@@ -163,7 +163,7 @@ RSpec.describe RecipeServices::Creator do
         }
 
         allow(RecipeServices::Parser).to receive(:new).with(recipe_attributes[:ingredients]).and_return(parser)
-        allow(parser).to receive(:parse_ingredients_only).and_return(parsed_data)
+        allow(parser).to receive(:parse_ingredients).and_return(parsed_data)
 
         # Mock the ingredient service
         ingredient_service = instance_double(RecipeServices::Ingredient)
@@ -194,7 +194,7 @@ RSpec.describe RecipeServices::Creator do
         }
 
         allow(RecipeServices::Parser).to receive(:new).with(recipe_attributes[:ingredients]).and_return(parser)
-        allow(parser).to receive(:parse_ingredients_only).and_return(parsed_data)
+        allow(parser).to receive(:parse_ingredients).and_return(parsed_data)
 
         # Mock the ingredient service to fail
         ingredient_service = instance_double(RecipeServices::Ingredient)
@@ -224,7 +224,7 @@ RSpec.describe RecipeServices::Creator do
         }
 
         allow(RecipeServices::Parser).to receive(:new).with(recipe_attributes[:ingredients]).and_return(parser)
-        allow(parser).to receive(:parse_ingredients_only).and_return(parsed_data)
+        allow(parser).to receive(:parse_ingredients).and_return(parsed_data)
 
         # Mock the ingredient service
         ingredient_service = instance_double(RecipeServices::Ingredient)
@@ -387,7 +387,7 @@ RSpec.describe RecipeServices::Creator do
         }
 
         allow(RecipeServices::Parser).to receive(:new).with(recipe_attributes[:ingredients]).and_return(parser)
-        allow(parser).to receive(:parse_ingredients_only).and_return(parsed_data)
+        allow(parser).to receive(:parse_ingredients).and_return(parsed_data)
 
         # Mock the ingredient service
         ingredient_service = instance_double(RecipeServices::Ingredient)

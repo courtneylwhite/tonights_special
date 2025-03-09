@@ -10,7 +10,6 @@ module RecipeServices
     def create_new_category
       return nil unless params[:name].present?
 
-      # Check if display_order is unique for this user
       existing_display_order = RecipeCategory.where(
         user_id: user.id,
         display_order: params[:display_order] || RecipeCategory.where(user_id: user.id).count + 1
@@ -23,7 +22,6 @@ module RecipeServices
                         params[:display_order] || RecipeCategory.where(user_id: user.id).count + 1
       end
 
-      # Create the category
       category = RecipeCategory.new(
         name: params[:name],
         display_order: display_order,

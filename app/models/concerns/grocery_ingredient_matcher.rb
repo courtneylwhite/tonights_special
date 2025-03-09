@@ -2,13 +2,19 @@ module GroceryIngredientMatcher
   extend ActiveSupport::Concern
 
   included do
-    after_save :update_related_ingredients
+    include PgSearch::Model
+
+    after_save :match_with_recipe_ingredients
+
+    pg_search_scope :similar_to,
+                    against: :name,
+                    using: {
+                      tsearch: { dictionary: "english", prefix: true },
+                      trigram: { threshold: 0.3 }
+                    }
   end
 
-  private
-
-  def update_related_ingredients
-    # Use the GroceryMatcher to update related ingredients
-    GroceryMatcher.update_related_ingredients(self)
+  def match_with_recipe_ingredients
+    MatchingService.match_grocery_to_ingredients(self)
   end
 end

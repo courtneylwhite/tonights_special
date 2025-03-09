@@ -10,12 +10,12 @@ RSpec.describe RecipeServices::Parser do
     end
   end
 
-  describe '#parse_ingredients_only' do
+  describe '#parse_ingredients' do
     it 'parses a simple list of ingredients' do
       text = "2 cups flour\n1 tsp salt\n1/2 cup sugar"
       parser = RecipeServices::Parser.new(text)
 
-      result = parser.parse_ingredients_only
+      result = parser.parse_ingredients
       expect(result[:ingredients].size).to eq(3)
       expect(result[:ingredients][0][:name]).to eq("flour")
       expect(result[:ingredients][0][:quantity]).to eq(2.0)
@@ -32,7 +32,7 @@ RSpec.describe RecipeServices::Parser do
       text = "2 cups flour, sifted\n1 onion, diced\n3 cloves garlic, minced"
       parser = RecipeServices::Parser.new(text)
 
-      result = parser.parse_ingredients_only
+      result = parser.parse_ingredients
       expect(result[:ingredients].size).to eq(3)
       expect(result[:ingredients][1][:name]).to eq("onion")
       expect(result[:ingredients][1][:preparation]).to eq("diced")
@@ -44,7 +44,7 @@ RSpec.describe RecipeServices::Parser do
       text = "1 large onion\n2 medium potatoes\n3 small carrots"
       parser = RecipeServices::Parser.new(text)
 
-      result = parser.parse_ingredients_only
+      result = parser.parse_ingredients
       expect(result[:ingredients].size).to eq(3)
       expect(result[:ingredients][0][:name]).to eq("onion")
       expect(result[:ingredients][0][:size]).to eq("large")
@@ -58,7 +58,7 @@ RSpec.describe RecipeServices::Parser do
       text = "1 cup honey or maple syrup\n2 tbsp butter or coconut oil"
       parser = RecipeServices::Parser.new(text)
 
-      result = parser.parse_ingredients_only
+      result = parser.parse_ingredients
       expect(result[:ingredients].size).to eq(2)
       expect(result[:notes].size).to eq(2)
       expect(result[:notes].first).to include("maple syrup instead of cup honey")
@@ -69,7 +69,7 @@ RSpec.describe RecipeServices::Parser do
       text = "½ cup sugar\n¼ cup flour\n⅔ cup milk"
       parser = RecipeServices::Parser.new(text)
 
-      result = parser.parse_ingredients_only
+      result = parser.parse_ingredients
       expect(result[:ingredients].size).to eq(3)
       expect(result[:ingredients][0][:quantity]).to eq(0.5)
       expect(result[:ingredients][1][:quantity]).to eq(0.25)
@@ -80,7 +80,7 @@ RSpec.describe RecipeServices::Parser do
       text = "2 cups freshly milled flour\n1 tsp freshly ground black pepper\n3 tbsp fresh chopped parsley"
       parser = RecipeServices::Parser.new(text)
 
-      result = parser.parse_ingredients_only
+      result = parser.parse_ingredients
       expect(result[:ingredients][0][:name]).to eq("milled flour")
       expect(result[:ingredients][0][:name]).not_to include("freshly")
       expect(result[:ingredients][1][:name]).to eq("black pepper")
@@ -94,7 +94,7 @@ RSpec.describe RecipeServices::Parser do
       text = "2 cups flour\n\n1 tsp salt\n\n1/2 cup sugar"
       parser = RecipeServices::Parser.new(text)
 
-      result = parser.parse_ingredients_only
+      result = parser.parse_ingredients
       expect(result[:ingredients].size).to eq(3)
     end
 
@@ -106,7 +106,7 @@ RSpec.describe RecipeServices::Parser do
       # Mock the Ingreedy failure
       allow(Ingreedy).to receive(:parse).and_raise(StandardError.new("Ingreedy error"))
 
-      result = parser.parse_ingredients_only
+      result = parser.parse_ingredients
       expect(result[:ingredients].size).to eq(1)
       # Default values when parsing fails
       expect(result[:ingredients][0][:quantity]).to eq(1.0)
@@ -114,83 +114,19 @@ RSpec.describe RecipeServices::Parser do
     end
   end
 
-  describe '#parse' do
-    it 'parses a complete recipe with ingredients and instructions sections' do
-      # The Parser#parse method seems to only extract sections that have explicit headers
-      # Let's create a mock that allows us to test just the method behavior
-      parser = RecipeServices::Parser.new("")
-
-      # Mock the extract_sections method to return what we expect
-      allow(parser).to receive(:extract_sections).and_return({
-                                                               ingredients: "2 cups flour\n1 tsp salt\n1/2 cup sugar",
-                                                               instructions: "1. Mix dry ingredients\n2. Add wet ingredients\n3. Bake at 350°F for 25 minutes"
-                                                             })
-
-      result = parser.parse
-      expect(result[:ingredients].size).to eq(3)
-      expect(result[:instructions]).to include("Mix dry ingredients")
-      expect(result[:instructions]).to include("Add wet ingredients")
-      expect(result[:instructions]).to include("Bake at 350°F for 25 minutes")
-    end
-
-    it 'handles a recipe with no clear sections' do
-      text = "2 cups flour\n1 tsp salt\n1/2 cup sugar\nMix everything together and bake."
-      parser = RecipeServices::Parser.new(text)
-
-      result = parser.parse
-      # Since there are no clear sections, this should use default behavior
-      expect(result[:ingredients]).to be_empty
-      expect(result[:instructions]).to be_empty
-    end
-
-    it 'processes instructions formatting' do
-      parser = RecipeServices::Parser.new("")
-
-      # Mock extract_sections to return what we want to test
-      allow(parser).to receive(:extract_sections).and_return({
-                                                               ingredients: "2 cups flour",
-                                                               instructions: "1. Mix flour\n2. Add water\n\n3. Knead dough"
-                                                             })
-
-      result = parser.parse
-      # Formatting should remove the numbers and join with double newlines
-      expect(result[:instructions]).to eq("Mix flour\n\nAdd water\n\nKnead dough")
-    end
-
-    it 'extracts and consolidates notes from ingredients' do
-      parser = RecipeServices::Parser.new("")
-
-      # Mock extract_sections to return what we want to test
-      allow(parser).to receive(:extract_sections).and_return({
-                                                               ingredients: "1 cup honey or maple syrup\n2 tbsp butter or coconut oil",
-                                                               instructions: "Mix and serve."
-                                                             })
-
-      result = parser.parse
-      expect(result[:notes].size).to eq(2)
-      expect(result[:notes].first).to include("maple syrup instead of cup honey")
-      expect(result[:notes].last).to include("coconut oil instead of tbsp butter")
-    end
-  end
-
   describe 'edge cases' do
     it 'handles completely empty input' do
       parser = RecipeServices::Parser.new("")
 
-      result = parser.parse_ingredients_only
+      result = parser.parse_ingredients
       expect(result[:ingredients]).to be_empty
-      expect(result[:notes]).to be_empty
-
-      result = parser.parse
-      expect(result[:ingredients]).to be_empty
-      expect(result[:instructions]).to be_empty
       expect(result[:notes]).to be_empty
     end
 
     it 'handles input with only whitespace' do
       parser = RecipeServices::Parser.new("  \n  \t  ")
 
-      result = parser.parse_ingredients_only
+      result = parser.parse_ingredients
       expect(result[:ingredients]).to be_empty
       expect(result[:notes]).to be_empty
     end
