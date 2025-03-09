@@ -14,16 +14,13 @@ class GroceryCreator
     result = false
 
     ActiveRecord::Base.transaction do
-      # Create section if needed
       if section_attributes.present?
         @section = create_section
         return false unless @section
 
-        # Assign the section id to the grocery
         grocery_attributes[:grocery_section_id] = @section.id
       end
 
-      # Create the grocery
       @grocery = create_grocery
 
       if @grocery
@@ -43,7 +40,6 @@ class GroceryCreator
   private
 
   def create_section
-    # Set a default display order if not provided
     if !section_attributes.key?(:display_order) || section_attributes[:display_order].nil?
       section_attributes[:display_order] = user.grocery_sections.count + 1
     end
@@ -64,8 +60,7 @@ class GroceryCreator
     grocery = user.groceries.build(grocery_attributes)
 
     if grocery.save
-      # Update related ingredients after saving the grocery
-      GroceryMatcher.update_related_ingredients(grocery)
+      MatchingService.match_grocery_to_ingredients(grocery)
       grocery
     else
       @errors += grocery.errors.full_messages
