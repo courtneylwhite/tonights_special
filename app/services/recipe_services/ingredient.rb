@@ -5,7 +5,7 @@ module RecipeServices
     def initialize(recipe, user, ingredients_data = [])
       @recipe = recipe
       @user = user
-      @ingredients_data = ingredients_data
+      @ingredients_data = ingredients_data || [] # Handle nil explicitly
     end
 
     def create_ingredients
@@ -15,6 +15,16 @@ module RecipeServices
       errors = []
 
       ingredients_data.each do |ingredient_data|
+        if ingredient_data.blank?
+          errors << "Empty ingredient data provided"
+          next
+        end
+
+        if ingredient_data[:name].blank?
+          errors << "Error creating ingredient: Name can't be blank"
+          next
+        end
+
         result = create_single_ingredient(ingredient_data)
 
         if result[:success]
@@ -34,39 +44,26 @@ module RecipeServices
     private
 
     def create_single_ingredient(ingredient_data)
-      # Try to find an existing grocery with this name
       begin
-        # Standardize the name to lowercase
-        ingredient_name = ingredient_data[:name].strip.downcase
+        ingredient_name = UtilityService.normalize_text(ingredient_data[:name])
+        unit = find_unit_for_ingredient(ingredient_data)
+        quantity = UtilityService.format_quantity(ingredient_data[:quantity] || 1)
 
-        grocery = find_grocery_by_name(ingredient_name)
-
-        # Find the correct unit - prioritize unit_id if provided
-        unit = if ingredient_data[:unit_id].present?
-                 Unit.find_by(id: ingredient_data[:unit_id])
-        else
-                 find_unit(ingredient_data[:unit_name])
-        end
-
-        # Fallback to default unit if not found or not provided
-        unit ||= Unit.find_by(name: 'whole') || Unit.first
-
-        # Format quantity to have at most 2 decimal places
-        quantity = format_quantity(ingredient_data[:quantity] || 1)
-
-        # Create the recipe_ingredient with preparation and size if available
         ingredient_attributes = {
-          grocery_id: grocery&.id,  # May be nil if no matching grocery was found
+          name: ingredient_name,
           quantity: quantity,
-          unit_id: unit&.id,
-          name: ingredient_name
+          unit_id: unit&.id
         }
 
-        # Add preparation and size if they exist
         ingredient_attributes[:preparation] = ingredient_data[:preparation] if ingredient_data[:preparation].present?
         ingredient_attributes[:size] = ingredient_data[:size] if ingredient_data[:size].present?
-
         ingredient = recipe.recipe_ingredients.create!(ingredient_attributes)
+
+        begin
+          match_with_grocery(ingredient)
+        rescue => e
+          Rails.logger.error("Error matching grocery for #{ingredient.name}: #{e.message}")
+        end
 
         { success: true, ingredient: ingredient }
       rescue => e
@@ -74,126 +71,59 @@ module RecipeServices
       end
     end
 
-    # Format quantity to have at most 2 decimal places
-    def format_quantity(quantity)
-      return quantity unless quantity.is_a?(Numeric)
-
-      # Convert to a decimal with 2 decimal places (rounds to nearest)
-      quantity = (quantity * 100).round / 100.0
-
-      # If it's a whole number, convert to integer
-      quantity.to_i == quantity ? quantity.to_i : quantity
+    def match_with_grocery(ingredient)
+      grocery = MatchingService.match_ingredient_to_grocery(user, ingredient.name)
+      ingredient.update(grocery_id: grocery.id) if grocery
     end
 
-    def find_grocery_by_name(name)
-      # Use the new GroceryMatcher service to find a matching grocery
-      GroceryMatcher.find_grocery_by_name(user, name)
-    end
-
-    def find_unit(unit_name)
-      if unit_name.present?
-        # Normalize the unit name first
-        normalized_unit_name = normalize_unit_name(unit_name)
-
-        # Try to find by exact name match first
-        unit = Unit.find_by("LOWER(name) = ?", normalized_unit_name.downcase)
-
-        # If not found, try to find by abbreviation
-        unless unit
-          unit = Unit.find_by("LOWER(abbreviation) = ?", unit_name.downcase)
-        end
-
-        # If still not found, try to match the beginning of the unit name
-        # This helps with cases like "tbsp" matching "tablespoon"
-        unless unit
-          unit = Unit.where("LOWER(name) LIKE ?", "#{normalized_unit_name.downcase}%").first
-        end
-
-        # If not found, create a new unit
-        unless unit
-          unit = create_new_unit(normalized_unit_name)
-        end
-
-        # Return the found or created unit or default to 'whole'
-        unit || Unit.find_by(name: 'whole') || Unit.first
-      else
-        # Default to 'whole' unit for countable items
-        Unit.find_by(name: 'whole') || Unit.first
+    def find_unit_for_ingredient(ingredient_data)
+      if ingredient_data[:unit_id].present?
+        unit = Unit.find_by(id: ingredient_data[:unit_id])
+        return unit if unit
       end
+
+      if ingredient_data[:unit_name].present?
+        return find_unit_by_name(ingredient_data[:unit_name])
+      end
+
+      Unit.find_by(name: 'whole') || Unit.first
     end
 
-    def normalize_unit_name(unit_name)
-      # Remove trailing periods and normalize common abbreviations
-      clean_name = unit_name.downcase.gsub(/\.$/, '')
+    def find_unit_by_name(unit_name)
+      normalized_name = UtilityService.normalize_unit_name(unit_name)
 
-      case clean_name
-      when 'tbsp', 'tbsps', 'tbs', 'tblsp'
-        'tablespoon'
-      when 'tsp', 'tsps'
-        'teaspoon'
-      when 'c'
-        'cup'
-      when 'oz', 'ozs'
-        'ounce'
-      when 'lb', 'lbs'
-        'pound'
-      when 'g'
-        'gram'
-      when 'kg'
-        'kilogram'
-      when 'ml'
-        'milliliter'
-      when 'l'
-        'liter'
-      when 'pt'
-        'pint'
-      when 'qt'
-        'quart'
-      when 'gal'
-        'gallon'
-      else
-        unit_name.strip
-      end
+      # First try direct case-insensitive match
+      unit = Unit.find_by("LOWER(name) = ?", normalized_name.downcase)
+      return unit if unit
+
+      # Then try abbreviation match
+      unit = Unit.find_by("LOWER(abbreviation) = ?", unit_name.downcase)
+      return unit if unit
+
+      # Try partial name match
+      unit = Unit.where("LOWER(name) LIKE ?", "#{normalized_name.downcase}%").first
+      return unit if unit
+
+      # Create new unit as last resort
+      unit = create_new_unit(normalized_name)
+      return unit if unit
+
+      # Fallback to whole unit
+      Unit.find_by(name: 'whole') || Unit.first
     end
 
     def create_new_unit(unit_name)
-      # Try to determine the category based on the unit name
-      category = determine_unit_category(unit_name)
+      category = UtilityService.determine_unit_category(unit_name)
+      abbreviation = unit_name.length > 3 ? unit_name[0..2] : unit_name
 
-      # Downcase and clean the unit name
-      normalized_name = unit_name.downcase.strip
-
-      # Create abbreviation based on first letter or first few letters
-      abbreviation = normalized_name.length > 3 ? normalized_name[0..2] : normalized_name
-
-      # Create the new unit
       Unit.create!(
-        name: normalized_name,
+        name: unit_name,
         category: category,
         abbreviation: abbreviation.strip
       )
     rescue => e
-      # Log the error but don't crash the process
       Rails.logger.error("Error creating new unit '#{unit_name}': #{e.message}")
       nil
-    end
-
-    def determine_unit_category(unit_name)
-      volume_units = [ 'cup', 'tablespoon', 'teaspoon', 'pint', 'quart', 'gallon', 'liter', 'milliliter', 'fluid' ]
-      weight_units = [ 'pound', 'ounce', 'gram', 'kilogram' ]
-      length_units = [ 'inch', 'centimeter', 'millimeter', 'meter' ]
-
-      unit_downcase = unit_name.downcase
-
-      if volume_units.any? { |u| unit_downcase.include?(u) }
-        'volume'
-      elsif weight_units.any? { |u| unit_downcase.include?(u) }
-        'weight'
-      elsif length_units.any? { |u| unit_downcase.include?(u) }
-        'length'
-      else
-        'other'
-      end
     end
   end
 end

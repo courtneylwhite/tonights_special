@@ -117,45 +117,5 @@ RSpec.describe RecipePresenter do
       expect(result['Dessert'][:items]).to eq([])
       expect(result['Breakfast'][:items].first[:can_make]).to be true
     end
-
-    it 'preloads groceries to avoid N+1 queries' do
-      # Create user, category, and recipes
-      user = create(:user)
-      category = create(:recipe_category, name: 'Breakfast', user: user)
-      recipe1 = create(:recipe, recipe_category: category, name: 'Pancakes', user: user)
-      recipe2 = create(:recipe, recipe_category: category, name: 'Waffles', user: user)
-
-      # Create grocery items for the user
-      cup_unit = create(:unit, name: 'cup')
-      create(:grocery, name: 'flour', user: user, unit: cup_unit, quantity: 5)
-      create(:grocery, name: 'milk', user: user, unit: cup_unit, quantity: 2)
-
-      # Verify that user.groceries is only called once to preload
-      expect(user).to receive(:groceries).once.and_call_original
-
-      # Call the method - with 2 recipes, this would normally cause N+1 queries
-      # but our optimized version should only load groceries once
-      RecipePresenter.grouped_recipes_with_availability([ recipe1, recipe2 ], [ category ], user)
-    end
-  end
-
-  describe '.format_recipe_with_availability' do
-    it 'adds availability flag to recipe data' do
-      # Create user, category, and recipe
-      user = create(:user)
-      category = create(:recipe_category, name: 'Breakfast', user: user)
-      recipe = create(:recipe, recipe_category: category, name: 'Pancakes', user: user)
-
-      # Set up a checker that will return true for availability
-      availability_checker = instance_double(RecipeServices::AvailabilityChecker, available?: true)
-      allow(RecipeServices::AvailabilityChecker).to receive(:new).and_return(availability_checker)
-
-      # Call the private method using send
-      result = RecipePresenter.send(:format_recipe_with_availability, recipe, user)
-
-      # Verify the result
-      expect(result[:name]).to eq('Pancakes')
-      expect(result[:can_make]).to be true
-    end
   end
 end

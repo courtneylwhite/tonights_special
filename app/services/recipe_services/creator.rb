@@ -13,13 +13,11 @@ module RecipeServices
       warnings = []
 
       result = ActiveRecord::Base.transaction do
-        # Step 1: Determine the category for the recipe
         category_id = get_category_id
         if category_id.nil? && new_category_params.present?
           return { success: false, errors: [ "Failed to create category" ] }
         end
 
-        # Step 2: Set up recipe attributes
         recipe_data = {
           name: recipe_attributes[:name],
           instructions: recipe_attributes[:instructions],
@@ -28,7 +26,6 @@ module RecipeServices
           user_id: user.id
         }
 
-        # Step 3: Create and save the recipe
         recipe = Recipe.new(recipe_data)
 
         unless recipe.save
@@ -36,14 +33,11 @@ module RecipeServices
           return { success: false, errors: recipe.errors.full_messages }
         end
 
-        # Step 4: Parse the ingredients and create recipe_ingredients records
         if recipe_attributes[:ingredients].present?
           begin
-            # Parse the ingredients
             parser = RecipeServices::Parser.new(recipe_attributes[:ingredients])
-            parsed_data = parser.parse_ingredients_only
+            parsed_data = parser.parse_ingredients
 
-            # Add any extracted notes to the recipe
             if parsed_data[:notes].present?
               existing_notes = recipe.notes.to_s.strip
               note_text = parsed_data[:notes].join("\n")
@@ -57,7 +51,6 @@ module RecipeServices
               recipe.update(notes: updated_notes)
             end
 
-            # Create the ingredient records
             if parsed_data[:ingredients].present?
               ingredient_result = RecipeServices::Ingredient.new(
                 recipe,
@@ -87,11 +80,9 @@ module RecipeServices
           end
         end
 
-        # Return success result with the recipe and any warnings
         { success: true, recipe: recipe, warnings: warnings.presence }
       end
 
-      # The transaction will return our result hash
       result
     end
 
