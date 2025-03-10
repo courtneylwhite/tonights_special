@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :unit do
-    name { "cup" }
+    sequence(:name) { |n| "Unit#{n}" }
+    sequence(:abbreviation) { |n| "u#{n}" }
     category { "volume" }
-    abbreviation { "c." }
   end
 end
