@@ -22,6 +22,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :grocery_sections, only: [ :index ]
+
   resources :recipes do
     member do
       post :mark_completed

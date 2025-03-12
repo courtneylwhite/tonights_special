@@ -8,5 +8,12 @@ module.exports = {
     transform: {
         '^.+\\.(js|jsx)$': 'babel-jest'
     },
-    transformIgnorePatterns: ['node_modules/(?!(@babel/runtime|lucide-react)/)']
+    transformIgnorePatterns: ['node_modules/(?!(@babel/runtime|lucide-react)/)'],
+    
+    collectCoverage: true,
+    coverageReporters: ['text', 'lcov'],
+    coveragePathIgnorePatterns: [
+        '/node_modules/',
+        '.*console\\.log\\(.*\\).*'
+    ]
 };

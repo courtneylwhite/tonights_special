@@ -17,11 +17,24 @@ class GroceriesController < ApplicationController
   end
 
   def show
-    @grocery = current_user.groceries.includes(:unit).find(params[:id])
-    @grocery_data = @grocery.as_json(include: { unit: { only: [ :name ] } })
+    @grocery = current_user.groceries.includes(:unit, :grocery_section).find(params[:id])
+    @grocery_sections = current_user.grocery_sections.order(display_order: :asc)
+    @units = Unit.all
+
+    @grocery_data = @grocery.as_json(include: {
+      unit: { only: [ :id, :name ] },
+      grocery_section: { only: [ :id, :name ] }
+    })
+
     respond_to do |format|
       format.html
-      format.json { render json: @grocery }
+      format.json {
+        render json: {
+          grocery: @grocery_data,
+          grocery_sections: @grocery_sections,
+          units: @units
+        }
+      }
     end
   rescue ActiveRecord::RecordNotFound
     respond_to do |format|
@@ -53,7 +66,12 @@ class GroceriesController < ApplicationController
 
   def update
     if @grocery.update(grocery_params)
-      render json: @grocery
+      # Return full grocery data with associated objects, just like in the show method
+      grocery_data = @grocery.as_json(include: {
+        unit: { only: [ :id, :name ] },
+        grocery_section: { only: [ :id, :name ] }
+      })
+      render json: grocery_data
     else
       render_error(@grocery.errors)
     end
