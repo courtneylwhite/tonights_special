@@ -1,7 +1,6 @@
 # == Schema Information
 # id :integer, not null
 # user_id :integer, not null
-# store_section_id :integer, not null
 # grocery_section_id :integer, not null
 # name :string, not null
 # quantity :decimal, not null
@@ -10,6 +9,8 @@
 # updated_at :datetime, not null
 # emoji :string, nullable
 class Grocery < ApplicationRecord
+  include GroceryIngredientMatcher
+
   belongs_to :user
   belongs_to :grocery_section
   belongs_to :unit

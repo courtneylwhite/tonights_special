@@ -13,7 +13,6 @@ const ItemModal = ({
                        grocerySections = [],
                        units = [],
                        onItemAdded = () => {},
-                       onSectionAdded = () => {}
                    }) => {
     const initialFormState = {
         name: '',
@@ -100,7 +99,9 @@ const ItemModal = ({
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: name === 'quantity' ? Math.max(0, Number(value)) || '' : value
+            [name]: name === 'quantity'
+                ? (value === '' ? '' : Math.max(0.1, Number(parseFloat(value).toFixed(2))) || '')
+                : value
         }));
 
         // If they select "Add New Section" option
@@ -162,6 +163,7 @@ const ItemModal = ({
                                 id="quantity"
                                 name="quantity"
                                 min="0"
+                                step="0.01"
                                 value={formData.quantity}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-white"

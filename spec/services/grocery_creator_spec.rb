@@ -21,7 +21,7 @@ RSpec.describe GroceryCreator do
         creator = GroceryCreator.new(user, grocery_attributes)
 
         expect { creator.call }.to change(Grocery, :count).by(1)
-        expect(creator.grocery.name).to eq('Test Grocery')
+        expect(creator.grocery.name).to eq('test grocery')
         expect(creator.grocery.user).to eq(user)
         expect(creator.errors).to be_empty
       end
