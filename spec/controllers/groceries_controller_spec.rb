@@ -19,6 +19,7 @@ RSpec.describe GroceriesController, type: :controller do
     sign_in user
   end
 
+  # Original tests from the previous spec file
   describe 'GET #index' do
     it 'returns a success response' do
       get :index
@@ -29,6 +30,17 @@ RSpec.describe GroceriesController, type: :controller do
       get :index, format: :json
       expect(response).to be_successful
       expect(response.content_type).to include('application/json')
+    end
+
+    # New test for grouped groceries
+    it 'returns groceries grouped by sections' do
+      get :index, format: :json
+      response_body = JSON.parse(response.body)
+
+      expect(response_body).to be_a(Hash)
+      expect(response_body[grocery_section.name]).to be_a(Hash)
+      expect(response_body[grocery_section.name]['items']).to be_an(Array)
+      expect(response_body[grocery_section.name]['items'].first['name']).to eq('Apple')
     end
   end
 
@@ -42,6 +54,18 @@ RSpec.describe GroceriesController, type: :controller do
       get :show, params: { id: grocery.id }, format: :json
       expect(response).to be_successful
       expect(response.content_type).to include('application/json')
+    end
+
+    # New test for comprehensive details
+    it 'returns full grocery details with associated objects' do
+      get :show, params: { id: grocery.id }, format: :json
+
+      response_body = JSON.parse(response.body)
+      expect(response_body['grocery']['name']).to eq('Apple')
+      expect(response_body['grocery']['unit']['name']).to eq('pieces')
+      expect(response_body['grocery']['grocery_section']['name']).to eq('Produce')
+      expect(response_body['grocery_sections']).to be_an(Array)
+      expect(response_body['units']).to be_an(Array)
     end
   end
 
@@ -153,6 +177,110 @@ RSpec.describe GroceriesController, type: :controller do
         expect(new_grocery.grocery_section).to eq(new_section)
       end
     end
+
+    # New tests for boundary and edge cases
+    context 'with boundary values' do
+      it 'handles zero quantity' do
+        zero_quantity_attributes = {
+          name: 'Zero Quantity Item',
+          quantity: 0,
+          unit_id: unit.id,
+          grocery_section_id: grocery_section.id
+        }
+
+        expect {
+          post :create, params: { grocery: zero_quantity_attributes }
+        }.to change(Grocery, :count).by(1)
+
+        expect(response).to have_http_status(:created)
+        created_grocery = JSON.parse(response.body)
+        expect(created_grocery['name'].downcase).to eq('zero quantity item')
+      end
+
+      it 'allows creating a grocery with emoji' do
+        emoji_attributes = {
+          name: 'Emoji Grocery',
+          quantity: 1,
+          unit_id: unit.id,
+          grocery_section_id: grocery_section.id,
+          emoji: 'U+1F34F'
+        }
+
+        expect {
+          post :create, params: { grocery: emoji_attributes }
+        }.to change(Grocery, :count).by(1)
+
+        created_grocery = Grocery.last
+        expect(created_grocery.emoji).to eq('U+1F34F')
+      end
+    end
+
+    context 'with duplicate validation' do
+      it 'prevents creating a grocery with duplicate name for the same user (case-insensitive)' do
+        # Create the first grocery using factory
+        first_grocery = create(:grocery,
+                               name: 'duplicate apple',
+                               user: user,
+                               grocery_section: grocery_section,
+                               unit: unit
+        )
+
+        # Prepare duplicate attributes with different casing
+        duplicate_attributes = {
+          grocery: {
+            name: 'DUPLICATE APPLE',  # Different casing
+            quantity: 3,
+            unit_id: unit.id,
+            grocery_section_id: grocery_section.id
+          }
+        }
+
+        # Try to create the duplicate via controller
+        expect {
+          post :create, params: duplicate_attributes
+        }.not_to change(Grocery, :count)
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        error_response = JSON.parse(response.body)
+        expect(error_response['error']).to include('Name has already been taken')
+      end
+
+      it 'allows creating a grocery with the same name for a different user' do
+        # Create a grocery for the first user
+        first_grocery = create(:grocery,
+                               name: 'duplicate apple',
+                               user: user,
+                               grocery_section: grocery_section,
+                               unit: unit
+        )
+
+        # Create another user and their associated objects
+        other_user = create(:user)
+        other_grocery_section = create(:grocery_section, user: other_user)
+        other_unit = create(:unit)
+
+        # Prepare duplicate attributes for other user
+        duplicate_attributes = {
+          grocery: {
+            name: 'Duplicate Apple',
+            quantity: 3,
+            unit_id: other_unit.id,
+            grocery_section_id: other_grocery_section.id
+          }
+        }
+
+        # Sign in the other user
+        sign_out user
+        sign_in other_user
+
+        # Try to create the duplicate for other user
+        expect {
+          post :create, params: duplicate_attributes
+        }.to change(Grocery, :count).by(1)
+
+        expect(response).to have_http_status(:created)
+      end
+    end
   end
 
   describe 'PUT #update' do
@@ -175,6 +303,32 @@ RSpec.describe GroceriesController, type: :controller do
         put :update, params: { id: grocery.id, **new_attributes }
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to include('application/json')
+      end
+
+      # New comprehensive update test
+      it 'updates all attributes of a grocery' do
+        new_section = create(:grocery_section, name: 'Fruits', user: user)
+        new_unit = create(:unit, name: 'kilograms', abbreviation: 'kg')
+
+        update_attributes = {
+          grocery: {
+            name: 'Updated Apple',
+            quantity: 10,
+            grocery_section_id: new_section.id,
+            unit_id: new_unit.id,
+            emoji: 'U+1F34F'
+          }
+        }
+
+        put :update, params: { id: grocery.id, **update_attributes }
+
+        grocery.reload
+        expect(response).to have_http_status(:ok)
+        expect(grocery.name).to eq('Updated Apple')
+        expect(grocery.quantity).to eq(10)
+        expect(grocery.grocery_section).to eq(new_section)
+        expect(grocery.unit).to eq(new_unit)
+        expect(grocery.emoji).to eq('U+1F34F')
       end
     end
 
@@ -235,6 +389,36 @@ RSpec.describe GroceriesController, type: :controller do
 
         expect(response).to have_http_status(:internal_server_error)
         expect(JSON.parse(response.body)['error']).to eq('An unexpected error occurred')
+      end
+    end
+
+    # New authentication tests
+    describe 'Authentication' do
+      before { sign_out user }
+
+      it 'requires authentication for index' do
+        get :index
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it 'requires authentication for show' do
+        get :show, params: { id: grocery.id }
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it 'requires authentication for create' do
+        post :create, params: { grocery: { name: 'Test Grocery' } }
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it 'requires authentication for update' do
+        put :update, params: { id: grocery.id, grocery: { name: 'Updated' } }
+        expect(response).to redirect_to(new_user_session_path)
+      end
+
+      it 'requires authentication for destroy' do
+        delete :destroy, params: { id: grocery.id }
+        expect(response).to redirect_to(new_user_session_path)
       end
     end
   end

@@ -11,6 +11,14 @@ class GrocerySectionsController < ApplicationController
     end
   end
 
+  def index
+    @grocery_sections = current_user.grocery_sections.order(display_order: :asc)
+
+    respond_to do |format|
+      format.json { render json: @grocery_sections }
+    end
+  end
+
   private
 
   def set_grocery_section
@@ -18,6 +26,6 @@ class GrocerySectionsController < ApplicationController
   end
 
   def grocery_section_params
-    params.require(:grocery_section).permit(:name, :display_order,)
+    params.require(:grocery_section).permit(:name, :display_order)
   end
 end
