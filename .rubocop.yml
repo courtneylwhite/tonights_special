@@ -8,3 +8,6 @@ Style/StringLiterals:
   Exclude:
     - 'app/services/recipe_services/parser.rb'
     - 'app/services/recipe_services/ingredient.rb'
+
+AllCops:
+  UseCache: false
