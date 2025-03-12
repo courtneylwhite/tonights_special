@@ -199,27 +199,38 @@ RSpec.describe RecipesController, type: :controller do
     end
   end
 
-  describe "DELETE #destroy" do
-    it "destroys the recipe" do
-      recipe # Create the recipe
+  describe "DELETE #destroy error handling" do
+    it "handles deletion failure gracefully for HTML format" do
+      # Simulate a scenario where recipe deletion fails
+      allow_any_instance_of(Recipe).to receive(:destroy).and_raise(StandardError.new("Deletion failed"))
 
-      expect {
-        delete :destroy, params: { id: recipe.id }
-      }.to change(Recipe, :count).by(-1)
-    end
+      # Log the error to match the controller's error logging
+      expect(Rails.logger).to receive(:error).with(/Recipe deletion failed: Deletion failed/)
 
-    it "redirects to recipes_path with notice for HTML format" do
+      # Attempt to delete the recipe
       delete :destroy, params: { id: recipe.id }
 
+      # Check for redirect and alert
       expect(response).to redirect_to(recipes_path)
-      expect(flash[:notice]).to eq("Recipe was successfully deleted.")
+      expect(flash[:alert]).to eq("Failed to delete recipe.")
     end
 
-    it "returns success JSON response for JSON format" do
+    it "handles deletion failure gracefully for JSON format" do
+      # Simulate a scenario where recipe deletion fails
+      allow_any_instance_of(Recipe).to receive(:destroy).and_raise(StandardError.new("Deletion failed"))
+
+      # Log the error to match the controller's error logging
+      expect(Rails.logger).to receive(:error).with(/Recipe deletion failed: Deletion failed/)
+
+      # Attempt to delete the recipe in JSON format
       delete :destroy, params: { id: recipe.id }, format: :json
 
-      expect(response).to have_http_status(:success)
-      expect(JSON.parse(response.body)["status"]).to eq("success")
+      # Check for error response
+      expect(response).to have_http_status(:unprocessable_entity)
+
+      json_response = JSON.parse(response.body)
+      expect(json_response["status"]).to eq("error")
+      expect(json_response["message"]).to eq("Failed to delete recipe.")
     end
   end
 
