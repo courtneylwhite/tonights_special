@@ -10,18 +10,17 @@ This takes some mental gymnastics on my part to parse the current groceries we h
 _Did I use the rest of the parmesan when I made meatballs last week? Better get some more to be safe (repeat 4 more times)_
 
 The core features of this app will allow a user to
-- Create groceries and add them
-- Create recipes and add them
-- View suggested recipes they can make from their current groceries
-- View suggested recipes they are close to having all of the ingredients for
-- Create grocery lists based on missing ingredients from recipes
+- CRUD a grocery
+- CRUD a recipe
 - Flag recipes as "made"
+- See an indicator that they have all the ingredients to make a recipe
+- See an indicator for each recipe ingredient that they have
+- Organize groceries by custom categories
+- Organize recipes by custom categories
 
 The app should automatically
-- Aggregate quantities of duplicate grocery items in grocery lists
-- Organize grocery list items by section at my favorite supermarket
-- Auto-clear the "made" flag after 3 days (my limit for eating leftovers)
-- Deplete current pantry inventories in correlation with the quantities used in "made" recipes
+- Match ingredients in recipes to groceries the user has
+- Match groceries to ingredients called for in a user's recipes
 
 This app has one user in mind &ndash; me
 
@@ -30,11 +29,21 @@ I have made this repository public as a way to display my work but this is not a
 ## Key Features
 
 - 🥬 Grocery Inventory Tracking
+    - Currently manual entry
 - 📖 Recipe Management
+    - Manual entry with parsing:
+        - Ingredients and Instructions are entered into 2 separate form fields
+            - I wanted to be able to copy and paste my favorite recipes with minimal effort
 - 🔍 Ingredient Matching
+    - Ingredients are parsed using Ingreedy gem and saved
+    - Ingredients are then matched to a user's current groceries using a variety of searching patterns
+    - Groceries are matched to ingredients upon creation
 - 🛒 Smart Grocery List Generation
     - Organized by store sections (Produce, Dairy, Meat, Pantry, etc.)
 - 🍳 Recipe Feasibility Indicator
+    - AvailabilityChecker checks to see if a user has no missing ingredients for a recipe
+    - Stop checking after 1 missing ingredient is found
+    - Shows missing and found ingredients on Recipe#Show view
 
 ## Prerequisites
 
@@ -79,11 +88,16 @@ Coverage reports are automatically generated and uploaded to CodeCov during CI/C
 ## Future Planned Features
 
 - [ ] Ingredient conversions
-- [ ] Recipe notes
-- [ ] Barcode scanning for grocery intake
+- [ ] View suggested recipes they can make from their current groceries
+- [ ] Aggregate quantities of duplicate grocery items in grocery lists
+- [ ] Organize grocery list items by section at my favorite supermarket
+- [ ] Auto-clear the "made" flag after 3 days (my limit for eating leftovers)
+- [ ] Deplete current pantry inventories in correlation with the quantities used in "made" recipes
+- [ ] View recipes from recipe box that you are close to having all of the ingredients for
+- [ ] Create grocery lists based on missing ingredients from recipes
 - [ ] Grocery store receipt parsing for grocery intake
-- [ ] Recipe suggestions based on ingredients expiring soon
-- [ ] Grocery list suggestions based on expired ingredients
+- [ ] View recipes from recipe box based on current groceries that are expiring soon
+- [ ] Grocery list suggestions based on expired groceries
 - [ ] Add aisle numbers to grocery items in grocery list
 
 ## Contact
