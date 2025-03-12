@@ -30,6 +30,8 @@ I have made this repository public as a way to display my work but this is not a
 
 - 🥬 Grocery Inventory Tracking
     - Currently manual entry
+- ⚖️ Grocery Depletion (Future Feature)
+    - Marking a recipe as "made" depletes grocery inventory by comparable amounts
 - 📖 Recipe Management
     - Manual entry with parsing:
         - Ingredients and Instructions are entered into 2 separate form fields
@@ -38,8 +40,6 @@ I have made this repository public as a way to display my work but this is not a
     - Ingredients are parsed using Ingreedy gem and saved
     - Ingredients are then matched to a user's current groceries using a variety of searching patterns
     - Groceries are matched to ingredients upon creation
-- 🛒 Smart Grocery List Generation
-    - Organized by store sections (Produce, Dairy, Meat, Pantry, etc.)
 - 🍳 Recipe Feasibility Indicator
     - AvailabilityChecker checks to see if a user has no missing ingredients for a recipe
     - Stop checking after 1 missing ingredient is found
