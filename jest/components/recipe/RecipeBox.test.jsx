@@ -142,7 +142,7 @@ describe('RecipeBox Component', () => {
 
     it('renders empty state when no recipes provided', () => {
         render(<RecipeBox recipes={{}} units={[]} />);
-        expect(screen.getByText('No recipes in your pantry yet.')).toBeInTheDocument();
+        expect(screen.getByText('No recipes in here yet.')).toBeInTheDocument();
     });
 
     it('renders recipes when provided', () => {

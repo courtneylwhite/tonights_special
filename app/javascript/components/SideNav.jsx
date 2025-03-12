@@ -79,16 +79,16 @@ const SideNav = () => {
                             </a>
                         )}
 
-                        {currentPath !== '/grocery_lists' && (
-                            <a
-                                href="/grocery_lists"
-                                data-turbo="false"
-                                className="flex items-center gap-3 text-white hover:bg-amber-500 hover:text-black p-3 rounded-lg transition-colors duration-200"
-                            >
-                                <ShoppingCart size={20}/>
-                                <span>Grocery Lists</span>
-                            </a>
-                        )}
+                        {/*{currentPath !== '/grocery_lists' && (*/}
+                        {/*    <a*/}
+                        {/*        href="/grocery_lists"*/}
+                        {/*        data-turbo="false"*/}
+                        {/*        className="flex items-center gap-3 text-white hover:bg-amber-500 hover:text-black p-3 rounded-lg transition-colors duration-200"*/}
+                        {/*    >*/}
+                        {/*        <ShoppingCart size={20}/>*/}
+                        {/*        <span>Grocery Lists</span>*/}
+                        {/*    </a>*/}
+                        {/*)}*/}
 
                         {currentPath !== '/groceries' && (
                             <a
@@ -97,7 +97,7 @@ const SideNav = () => {
                                 className="flex items-center gap-3 text-white hover:bg-amber-500 hover:text-black p-3 rounded-lg transition-colors duration-200"
                             >
                                 <Archive size={20}/>
-                                <span>Pantry</span>
+                                <span>Groceries</span>
                             </a>
                         )}
 

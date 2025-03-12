@@ -71,11 +71,11 @@ const Pantry = ({ groceries = {}, units = [] }) => {
             <div className="min-h-screen bg-black text-white relative">
                 <div className="bg-black/80 backdrop-blur-sm border-b border-gray-800 p-8 sticky top-0 z-10">
                     <h1 className="text-center mb-8">
-                        Pantry Inventory
+                        Grocery Inventory
                     </h1>
                         <div className="flex items-center gap-4 max-w-3xl mx-auto">
                             <SearchBar
-                                placeholder="Search your pantry..."
+                                placeholder="Search your groceries..."
                                 data={groceryData}
                                 searchKeys={['name']}
                                 onFilteredDataChange={setFilteredGroceryData}
@@ -97,7 +97,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                 <div className="max-w-5xl mx-auto p-6 relative z-0">
                     {!hasGroceries ? (
                         <div className="text-center text-gray-400 py-12">
-                            <p>No groceries in your pantry yet.</p>
+                            <p>No groceries in here yet.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">

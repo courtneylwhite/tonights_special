@@ -71,7 +71,7 @@ const Recipes = ({ recipes = {}, units = [] }) => {
             <div className="min-h-screen bg-black text-white relative">
                 <div className="bg-black/80 backdrop-blur-sm border-b border-gray-800 p-8 sticky top-0 z-10">
                     <h1 className="text-center mb-8">
-                        Recipe Box
+                        Recipe Inventory
                     </h1>
                     <div className="flex items-center gap-4 max-w-3xl mx-auto">
                         <SearchBar
@@ -97,7 +97,7 @@ const Recipes = ({ recipes = {}, units = [] }) => {
                 <div className="max-w-5xl mx-auto p-6 relative z-0">
                     {!hasRecipes ? (
                         <div className="text-center text-gray-400 py-12">
-                            <p>No recipes in your pantry yet.</p>
+                            <p>No recipes in here yet.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
