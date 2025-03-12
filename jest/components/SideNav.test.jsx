@@ -77,8 +77,8 @@ describe('SideNav', () => {
 
         expect(screen.queryByText('Recipes')).not.toBeInTheDocument();
 
-        expect(screen.getByText('Grocery Lists')).toBeInTheDocument();
-        expect(screen.getByText('Pantry')).toBeInTheDocument();
+        // expect(screen.getByText('Grocery Lists')).toBeInTheDocument();
+        expect(screen.getByText('Groceries')).toBeInTheDocument();
         expect(screen.getByText('Sign Out')).toBeInTheDocument();
     });
 

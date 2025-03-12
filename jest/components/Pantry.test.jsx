@@ -142,7 +142,7 @@ describe('Pantry Component', () => {
 
     it('renders empty state when no groceries provided', () => {
         render(<Pantry groceries={{}} units={[]} />);
-        expect(screen.getByText('No groceries in your pantry yet.')).toBeInTheDocument();
+        expect(screen.getByText('No groceries in here yet.')).toBeInTheDocument();
     });
 
     it('renders groceries when provided', () => {
