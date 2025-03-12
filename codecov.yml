@@ -4,6 +4,7 @@ coverage:
       default:
         target: auto
         threshold: 1%
+        if: "sender != 'dependabot[bot]'"
 
   ignore:
     - "^.*console\\.log.*$"
