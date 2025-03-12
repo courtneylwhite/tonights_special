@@ -60,6 +60,20 @@ const ScrollableContainer = ({
         });
     };
 
+    // Group items into columns with max 3 rows per column
+    const groupItemsIntoColumns = (items) => {
+        const columns = [];
+        const MAX_ROWS = 3;
+
+        for (let i = 0; i < items.length; i += MAX_ROWS) {
+            columns.push(items.slice(i, i + MAX_ROWS));
+        }
+
+        return columns;
+    };
+
+    const itemColumns = groupItemsIntoColumns(items);
+
     return (
         <div className="rounded-lg overflow-hidden border border-gray-800 transition-all duration-300">
             <div
@@ -86,7 +100,7 @@ const ScrollableContainer = ({
                             {/* Scroll Container */}
                             <div
                                 ref={scrollContainerRef}
-                                className="overflow-x-auto py-2 flex gap-3 hide-scrollbar snap-x"
+                                className="overflow-x-auto py-2 flex gap-6 hide-scrollbar"
                                 style={{
                                     scrollbarWidth: 'none',
                                     msOverflowStyle: 'none',
@@ -94,38 +108,42 @@ const ScrollableContainer = ({
                                     paddingRight: '4px'
                                 }}
                             >
-                                {items.map((item, index) => (
-                                    <div
-                                        key={item.id}
-                                        className="flex-shrink-0 snap-start w-36 bg-gray-800/90 backdrop-blur-sm rounded-lg p-3 border border-gray-700 hover:border-amber-500 hover:scale-105 transition-all duration-200 cursor-pointer relative"
-                                        onClick={() => handleItemClick(item.id)}
-                                        style={{
-                                            scrollSnapAlign: 'start',
-                                            animationDelay: `${(categoryIndex * 50) + (index * 20)}ms`
-                                        }}
-                                    >
-                                        {/* Availability Indicator - only shown if can_make property exists and is true */}
-                                        {item.can_make && (
-                                            <div className="absolute top-1 right-1 z-10">
-                                                <CheckCircle size={18} className="text-green-500 fill-green-500/20" />
-                                            </div>
-                                        )}
+                                {itemColumns.map((column, columnIndex) => (
+                                    <div key={columnIndex} className="flex-shrink-0 flex flex-col gap-2">
+                                        {column.map((item) => (
+                                            <div
+                                                key={item.id}
+                                                className="flex items-center gap-3 py-2 px-3 bg-gray-800/90 backdrop-blur-sm rounded-lg border border-gray-700 hover:border-amber-500 hover:bg-gray-700 transition-all duration-200 cursor-pointer"
+                                                onClick={() => handleItemClick(item.id)}
+                                                style={{
+                                                    minWidth: '240px'
+                                                }}
+                                            >
+                                                {/* Availability Indicator - only shown if can_make property exists and is true */}
+                                                {item.can_make && (
+                                                    <CheckCircle size={16} className="text-green-500 fill-green-500/20 flex-shrink-0" />
+                                                )}
 
-                                        <div className="flex flex-col items-center">
-                                            {item.emoji && (
-                                                <span className="text-2xl mb-2" title={item.emoji}>
-                                                    {unicodeToEmoji(item.emoji)}
+                                                {/* Emoji */}
+                                                {item.emoji && (
+                                                    <span className="text-xl flex-shrink-0" title={item.emoji}>
+                                                        {unicodeToEmoji(item.emoji)}
+                                                    </span>
+                                                )}
+
+                                                {/* Quantity Badge - for groceries */}
+                                                {item.quantity && item.unit && (
+                                                    <span className="px-2 py-0.5 bg-amber-500 text-black rounded-full text-xs font-bold flex-shrink-0">
+                                                        {item.quantity} {item.unit}
+                                                    </span>
+                                                )}
+
+                                                {/* Item Name */}
+                                                <span className="font-medium text-sm text-white">
+                                                    {item.name}
                                                 </span>
-                                            )}
-                                            <span className="font-medium text-sm text-center truncate w-full">
-                                                {item.name}
-                                            </span>
-                                            {item.quantity && item.unit && (
-                                                <div className="mt-2 px-2 py-1 bg-amber-500 text-black rounded-full text-xs font-bold">
-                                                    {item.quantity} {item.unit}
-                                                </div>
-                                            )}
-                                        </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 ))}
                             </div>
