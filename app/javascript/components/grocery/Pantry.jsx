@@ -73,25 +73,25 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                     <h1 className="text-center mb-8">
                         Grocery Inventory
                     </h1>
-                        <div className="flex items-center gap-4 max-w-3xl mx-auto">
-                            <SearchBar
-                                placeholder="Search your groceries..."
-                                data={groceryData}
-                                searchKeys={['name']}
-                                onFilteredDataChange={setFilteredGroceryData}
-                            />
-                            <button
-                                onClick={handleAddItem}
-                                className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
-                            >
-                                <Plus size={18}/>
-                                <span className="text-sm font-medium">Grocery</span>
-                            </button>
-                            <ToggleButton
-                                initialToggleState={containerToggleState}
-                                onToggleChange={setContainerToggleState}
-                            />
-                        </div>
+                    <div className="flex items-center gap-4 max-w-3xl mx-auto">
+                        <SearchBar
+                            placeholder="Search your groceries..."
+                            data={groceryData}
+                            searchKeys={['name']}
+                            onFilteredDataChange={setFilteredGroceryData}
+                        />
+                        <button
+                            onClick={handleAddItem}
+                            className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
+                        >
+                            <Plus size={18}/>
+                            <span className="text-sm font-medium">Grocery</span>
+                        </button>
+                        <ToggleButton
+                            initialToggleState={containerToggleState}
+                            onToggleChange={setContainerToggleState}
+                        />
+                    </div>
                 </div>
 
                 <div className="max-w-5xl mx-auto p-6 relative z-0">
