@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import GroceryViewer from './GroceryViewer';
 import GroceryEditor from './GroceryEditor';
+import { ChevronLeft } from 'lucide-react';
 
 /**
  * Root component for displaying and editing a grocery item
@@ -72,6 +73,11 @@ const GroceryDetail = ({ grocery = {}, units = [], grocerySections = [] }) => {
         setIsEditing(false);
     }, []);
 
+    // Handle back button click
+    const handleBackClick = useCallback(() => {
+        window.location.href = "/groceries";
+    }, []);
+
     // Handle increment button click
     const handleIncrement = useCallback(async () => {
         try {
@@ -118,7 +124,7 @@ const GroceryDetail = ({ grocery = {}, units = [], grocerySections = [] }) => {
         }
     }, [currentGrocery, requestHeaders, showFeedback]);
 
-// Handle decrement button click
+    // Handle decrement button click
     const handleDecrement = useCallback(async () => {
         if (currentGrocery.quantity <= 0) return;
 
@@ -165,7 +171,7 @@ const GroceryDetail = ({ grocery = {}, units = [], grocerySections = [] }) => {
             showFeedback(false);
         }
     }, [currentGrocery, requestHeaders, showFeedback]);
-    
+
     // Handler for save changes button click
     const handleSaveChanges = useCallback(async (editedGrocery) => {
         try {
@@ -248,7 +254,16 @@ const GroceryDetail = ({ grocery = {}, units = [], grocerySections = [] }) => {
 
     return (
         <div className="min-h-screen bg-black text-white flex items-center justify-center">
-            <div className="max-w-md w-full mx-auto">
+            <div className="max-w-md w-full mx-auto relative">
+                {/* Back Button positioned relative to the content div */}
+                <button
+                    onClick={handleBackClick}
+                    className="absolute -left-16 top-1/2 -translate-y-1/2 p-2 text-white hover:text-amber-500 transition-colors duration-200 focus:outline-none"
+                    aria-label="Go back"
+                >
+                    <ChevronLeft size={40} />
+                </button>
+
                 {isEditing ? (
                     <GroceryEditor
                         grocery={currentGrocery}

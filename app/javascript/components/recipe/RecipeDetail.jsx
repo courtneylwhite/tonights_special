@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import RecipeViewer from '../recipe/RecipeViewer';
-import RecipeEditor from '../recipe/RecipeEditor';
+import React, { useState, useCallback, useMemo } from 'react';
+import RecipeViewer from './RecipeViewer';
+import RecipeEditor from './RecipeEditor';
+import { ChevronLeft } from 'lucide-react';
 
 /**
  * Root component for displaying and editing a recipe
@@ -38,6 +39,11 @@ const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories 
             setFeedbackState({ showSuccess: false, showError: true });
             setTimeout(() => setFeedbackState({ showSuccess: false, showError: false }), 2000);
         }
+    }, []);
+
+    // Handle back button click
+    const handleBackClick = useCallback(() => {
+        window.location.href = "/recipes";
     }, []);
 
     // Toggle recipe completion status
@@ -198,7 +204,16 @@ const RecipeDetail = ({ recipe, recipeIngredients, units = [], recipeCategories 
     return (
         <div className="min-h-screen bg-black text-white">
             <div className="flex justify-center p-8">
-                <div className="max-w-4xl w-full">
+                <div className="max-w-4xl w-full relative">
+                    {/* Back Button positioned relative to the content div and vertically centered */}
+                    <button
+                        onClick={handleBackClick}
+                        className="absolute -left-16 top-1/2 -translate-y-1/2 p-2 text-white hover:text-amber-500 transition-colors duration-200 focus:outline-none"
+                        aria-label="Go back"
+                    >
+                        <ChevronLeft size={40} />
+                    </button>
+
                     {isEditing ? (
                         <RecipeEditor
                             recipe={currentRecipe}

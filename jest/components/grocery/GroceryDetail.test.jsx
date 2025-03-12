@@ -3,6 +3,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import GroceryDetail from '../../../app/javascript/components/grocery/GroceryDetail';
 
+// Mock lucide-react components
+jest.mock('lucide-react', () => ({
+    ChevronLeft: () => <div data-testid="mock-chevron-left">Back</div>
+}));
+
 // Mock child components
 jest.mock('../../../app/javascript/components/grocery/GroceryViewer', () => {
     return jest.fn(props => (
@@ -92,6 +97,19 @@ describe('GroceryDetail', () => {
         expect(screen.queryByTestId('grocery-editor')).not.toBeInTheDocument();
     });
 
+    test('renders back button', () => {
+        render(
+            <GroceryDetail
+                grocery={mockGrocery}
+                units={mockUnits}
+                grocerySections={mockGrocerySections}
+            />
+        );
+
+        expect(screen.getByTestId('mock-chevron-left')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /go back/i })).toBeInTheDocument();
+    });
+
     test('switches to edit mode when edit button is clicked', () => {
         render(
             <GroceryDetail
@@ -123,6 +141,22 @@ describe('GroceryDetail', () => {
 
         expect(screen.getByTestId('grocery-viewer')).toBeInTheDocument();
         expect(screen.queryByTestId('grocery-editor')).not.toBeInTheDocument();
+    });
+
+    test('back button navigates to groceries index', () => {
+        render(
+            <GroceryDetail
+                grocery={mockGrocery}
+                units={mockUnits}
+                grocerySections={mockGrocerySections}
+            />
+        );
+
+        // Click back button
+        fireEvent.click(screen.getByRole('button', { name: /go back/i }));
+
+        // Check if navigation occurred
+        expect(window.location.href).toBe('/groceries');
     });
 
     test('updates quantity when increment button is clicked', async () => {
