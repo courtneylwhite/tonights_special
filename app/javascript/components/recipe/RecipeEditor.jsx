@@ -240,16 +240,13 @@ const RecipeEditor = ({
 
     return (
         <div className="relative mb-20 mt-16">
-            {/* Header section with delete button */}
-            <div className="mb-8 flex justify-end items-center">
-                <button
-                    onClick={handleDeleteClick}
-                    className="inline-flex items-center px-4 py-2 bg-gray-900/90 backdrop-blur-sm text-red-500 rounded-lg transition-colors duration-200 border border-gray-700 hover:border-red-500 hover:bg-red-500/10"
-                >
-                    <Trash2 size={18} className="mr-1" />
-                    Delete Recipe
-                </button>
-            </div>
+            {/* Delete confirmation popup */}
+            {showDeleteConfirm && (
+                <DeleteConfirmationDialog
+                    onConfirm={handleDeleteConfirm}
+                    onCancel={handleCancelDelete}
+                />
+            )}
 
             {/* File Tab at the top */}
             <div className="absolute -top-8 left-8 z-10">
@@ -260,6 +257,17 @@ const RecipeEditor = ({
                         </span>
                     </div>
                 </div>
+            </div>
+
+            {/* Header section with delete button */}
+            <div className="absolute -top-16 right-0">
+                <button
+                    onClick={handleDeleteClick}
+                    className="inline-flex items-center px-4 py-2 bg-gray-900/90 backdrop-blur-sm text-red-500 rounded-lg transition-colors duration-200 border border-gray-700 hover:border-red-500 hover:bg-red-500/10"
+                >
+                    <Trash2 size={18} className="mr-1" />
+                    Delete Recipe
+                </button>
             </div>
 
             {/* Main Recipe Card with consistent border */}
@@ -341,14 +349,6 @@ const RecipeEditor = ({
 
                 {/* Edit mode for recipe content */}
                 <div className="p-8 space-y-8">
-                    {/* Delete confirmation popup */}
-                    {showDeleteConfirm && (
-                        <DeleteConfirmationDialog
-                            onConfirm={handleDeleteConfirm}
-                            onCancel={handleCancelDelete}
-                        />
-                    )}
-
                     {/* Edit mode for ingredients */}
                     <div className="mb-8">
                         <div className="flex justify-between items-center mb-4">

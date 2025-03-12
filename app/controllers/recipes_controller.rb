@@ -129,12 +129,22 @@ class RecipesController < ApplicationController
 
   def destroy
     @recipe = current_user.recipes.find(params[:id])
-    @recipe.recipe_ingredients.destroy_all
-    @recipe.destroy
+
+    # Use a transaction to ensure all related records are deleted together
+    ActiveRecord::Base.transaction do
+      # The dependent: :destroy association will handle the recipe_ingredients deletion
+      @recipe.destroy
+    end
 
     respond_to do |format|
       format.html { redirect_to recipes_path, notice: "Recipe was successfully deleted." }
       format.json { render json: { status: "success", message: "Recipe was successfully deleted." } }
+    end
+  rescue => e
+    Rails.logger.error("Recipe deletion failed: #{e.message}")
+    respond_to do |format|
+      format.html { redirect_to recipes_path, alert: "Failed to delete recipe." }
+      format.json { render json: { status: "error", message: "Failed to delete recipe." }, status: :unprocessable_entity }
     end
   end
 

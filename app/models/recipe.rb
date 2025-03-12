@@ -14,7 +14,7 @@
 # servings :float, nullable
 class Recipe < ApplicationRecord
   belongs_to :user
-  belongs_to :recipe_category, dependent: :destroy
+  belongs_to :recipe_category
 
   has_many :recipe_ingredients, dependent: :destroy
   has_many :groceries, through: :recipe_ingredients
