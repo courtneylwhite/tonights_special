@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import GroceryViewer from '../../../app/javascript/components/grocery/GroceryViewer';
 import { ChevronUp, ChevronDown, Edit } from 'lucide-react';
@@ -25,9 +25,15 @@ describe('GroceryViewer', () => {
     const mockOnEdit = jest.fn();
     const mockOnIncrement = jest.fn();
     const mockOnDecrement = jest.fn();
+    const mockOnQuantityChange = jest.fn();
 
     beforeEach(() => {
         jest.clearAllMocks();
+        jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+        jest.useRealTimers();
     });
 
     test('renders grocery information correctly', () => {
@@ -38,6 +44,7 @@ describe('GroceryViewer', () => {
                 onEdit={mockOnEdit}
                 onIncrement={mockOnIncrement}
                 onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
             />
         );
 
@@ -47,8 +54,8 @@ describe('GroceryViewer', () => {
         // Check section is displayed
         expect(screen.getByText(/Section: Produce/i)).toBeInTheDocument();
 
-        // Check quantity is displayed
-        expect(screen.getByText('5')).toBeInTheDocument();
+        // Check quantity is displayed (inside input field)
+        expect(screen.getByDisplayValue('5')).toBeInTheDocument();
 
         // Check unit is displayed (plural form since quantity > 1)
         expect(screen.getByText('pieces')).toBeInTheDocument();
@@ -67,6 +74,7 @@ describe('GroceryViewer', () => {
                 onEdit={mockOnEdit}
                 onIncrement={mockOnIncrement}
                 onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
             />
         );
 
@@ -86,6 +94,7 @@ describe('GroceryViewer', () => {
                 onEdit={mockOnEdit}
                 onIncrement={mockOnIncrement}
                 onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
             />
         );
 
@@ -100,6 +109,7 @@ describe('GroceryViewer', () => {
                 onEdit={mockOnEdit}
                 onIncrement={mockOnIncrement}
                 onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
             />
         );
 
@@ -116,6 +126,7 @@ describe('GroceryViewer', () => {
                 onEdit={mockOnEdit}
                 onIncrement={mockOnIncrement}
                 onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
             />
         );
 
@@ -133,6 +144,7 @@ describe('GroceryViewer', () => {
                 onEdit={mockOnEdit}
                 onIncrement={mockOnIncrement}
                 onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
             />
         );
 
@@ -151,6 +163,7 @@ describe('GroceryViewer', () => {
                 onEdit={mockOnEdit}
                 onIncrement={mockOnIncrement}
                 onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
             />
         );
 
@@ -174,6 +187,7 @@ describe('GroceryViewer', () => {
                 onEdit={mockOnEdit}
                 onIncrement={mockOnIncrement}
                 onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
             />
         );
 
@@ -197,6 +211,7 @@ describe('GroceryViewer', () => {
                 onEdit={mockOnEdit}
                 onIncrement={mockOnIncrement}
                 onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
             />
         );
 
@@ -220,6 +235,7 @@ describe('GroceryViewer', () => {
                 onEdit={mockOnEdit}
                 onIncrement={mockOnIncrement}
                 onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
             />
         );
 
@@ -242,6 +258,7 @@ describe('GroceryViewer', () => {
                 onEdit={mockOnEdit}
                 onIncrement={mockOnIncrement}
                 onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
             />
         );
 
@@ -259,11 +276,130 @@ describe('GroceryViewer', () => {
                 onEdit={mockOnEdit}
                 onIncrement={mockOnIncrement}
                 onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
             />
         );
 
         // Check that the specific emoji is rendered
         const emojiElement = screen.getByText('🍎');
         expect(emojiElement).toBeInTheDocument();
+    });
+
+    // New tests for the quantity input field
+    test('allows editing quantity through the input field', () => {
+        render(
+            <GroceryViewer
+                grocery={mockGrocery}
+                borderClass={mockBorderClass}
+                onEdit={mockOnEdit}
+                onIncrement={mockOnIncrement}
+                onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
+            />
+        );
+
+        const quantityInput = screen.getByDisplayValue('5');
+        fireEvent.change(quantityInput, { target: { value: '10' } });
+
+        // Fast-forward timers to trigger auto-save
+        act(() => {
+            jest.advanceTimersByTime(1000);
+        });
+
+        expect(mockOnQuantityChange).toHaveBeenCalledWith(10);
+    });
+
+    test('allows entering decimal values', () => {
+        render(
+            <GroceryViewer
+                grocery={mockGrocery}
+                borderClass={mockBorderClass}
+                onEdit={mockOnEdit}
+                onIncrement={mockOnIncrement}
+                onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
+            />
+        );
+
+        const quantityInput = screen.getByDisplayValue('5');
+        fireEvent.change(quantityInput, { target: { value: '3.5' } });
+
+        // Fast-forward timers to trigger auto-save
+        act(() => {
+            jest.advanceTimersByTime(1000);
+        });
+
+        expect(mockOnQuantityChange).toHaveBeenCalledWith(3.5);
+    });
+
+    test('saves changes on blur', () => {
+        render(
+            <GroceryViewer
+                grocery={mockGrocery}
+                borderClass={mockBorderClass}
+                onEdit={mockOnEdit}
+                onIncrement={mockOnIncrement}
+                onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
+            />
+        );
+
+        const quantityInput = screen.getByDisplayValue('5');
+        fireEvent.change(quantityInput, { target: { value: '7' } });
+        fireEvent.blur(quantityInput);
+
+        expect(mockOnQuantityChange).toHaveBeenCalledWith(7);
+    });
+
+    test('prevents invalid characters in quantity input', () => {
+        render(
+            <GroceryViewer
+                grocery={mockGrocery}
+                borderClass={mockBorderClass}
+                onEdit={mockOnEdit}
+                onIncrement={mockOnIncrement}
+                onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
+            />
+        );
+
+        const quantityInput = screen.getByDisplayValue('5');
+
+        // Try to enter invalid characters
+        fireEvent.change(quantityInput, { target: { value: '5a' } });
+
+        // Value should not change
+        expect(quantityInput).toHaveValue('5');
+    });
+
+    test('updates input value when grocery prop changes', () => {
+        const { rerender } = render(
+            <GroceryViewer
+                grocery={mockGrocery}
+                borderClass={mockBorderClass}
+                onEdit={mockOnEdit}
+                onIncrement={mockOnIncrement}
+                onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
+            />
+        );
+
+        // Initial quantity should be 5
+        expect(screen.getByDisplayValue('5')).toBeInTheDocument();
+
+        // Update the grocery prop
+        rerender(
+            <GroceryViewer
+                grocery={{...mockGrocery, quantity: 8}}
+                borderClass={mockBorderClass}
+                onEdit={mockOnEdit}
+                onIncrement={mockOnIncrement}
+                onDecrement={mockOnDecrement}
+                onQuantityChange={mockOnQuantityChange}
+            />
+        );
+
+        // Quantity input should now display 8
+        expect(screen.getByDisplayValue('8')).toBeInTheDocument();
     });
 });

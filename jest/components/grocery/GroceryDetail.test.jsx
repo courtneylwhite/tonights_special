@@ -17,6 +17,11 @@ jest.mock('../../../app/javascript/components/grocery/GroceryViewer', () => {
             <button data-testid="edit-button" onClick={props.onEdit}>Edit</button>
             <button data-testid="increment-button" onClick={props.onIncrement}>+</button>
             <button data-testid="decrement-button" onClick={props.onDecrement}>-</button>
+            <input
+                data-testid="quantity-input"
+                value={props.grocery.quantity}
+                onChange={(e) => props.onQuantityChange(parseFloat(e.target.value))}
+            />
         </div>
     ));
 });
@@ -366,6 +371,123 @@ describe('GroceryDetail', () => {
         // Verify the error handling
         await waitFor(() => {
             expect(console.error).toHaveBeenCalledWith('Failed to update quantity:', expect.any(String));
+        });
+    });
+
+    // New test for direct quantity input
+    test('does not update when quantity is the same', async () => {
+        render(
+            <GroceryDetail
+                grocery={mockGrocery}
+                units={mockUnits}
+                grocerySections={mockGrocerySections}
+            />
+        );
+
+        // Call onQuantityChange with the same value that's already set
+        fireEvent.change(screen.getByTestId('quantity-input'), { target: { value: '5' } });
+
+        // Wait a bit to ensure any async operations would have occurred
+        await waitFor(() => {
+            // Fetch should not have been called since quantity didn't change
+            expect(global.fetch).not.toHaveBeenCalled();
+        });
+    });
+
+    test('updates local state immediately before API call completes', async () => {
+        // Mock a delayed API response
+        global.fetch.mockImplementationOnce(() =>
+            new Promise(resolve => {
+                setTimeout(() => {
+                    resolve({
+                        ok: true,
+                        json: () => Promise.resolve({ ...mockGrocery, quantity: 10 })
+                    });
+                }, 100);
+            })
+        );
+
+        const { rerender } = render(
+            <GroceryDetail
+                grocery={mockGrocery}
+                units={mockUnits}
+                grocerySections={mockGrocerySections}
+            />
+        );
+
+        // Change quantity in input field
+        fireEvent.change(screen.getByTestId('quantity-input'), { target: { value: '10' } });
+
+        // Check that the component updates state immediately, before API call completes
+        await waitFor(() => {
+            expect(screen.getByTestId('quantity-input').value).toBe('10');
+        });
+
+        // API call should still be happening but local state is already updated
+        expect(global.fetch).toHaveBeenCalledWith(
+            `/groceries/${mockGrocery.id}`,
+            expect.objectContaining({
+                method: 'PATCH',
+                body: JSON.stringify({
+                    grocery: { quantity: 10 }
+                })
+            })
+        );
+    });
+
+    test('reverts to original value when API call fails', async () => {
+        console.error = jest.fn(); // Mock console.error
+
+        // Mock fetch to return an unsuccessful response
+        global.fetch.mockImplementationOnce(() =>
+            Promise.resolve({
+                ok: false,
+                text: () => Promise.resolve('Update failed')
+            })
+        );
+
+        render(
+            <GroceryDetail
+                grocery={mockGrocery}
+                units={mockUnits}
+                grocerySections={mockGrocerySections}
+            />
+        );
+
+        // Change quantity in input field - this should trigger the API call
+        fireEvent.change(screen.getByTestId('quantity-input'), { target: { value: '10' } });
+
+        // Wait for API call to fail
+        await waitFor(() => {
+            expect(console.error).toHaveBeenCalledWith('Failed to update quantity:', expect.any(String));
+        });
+
+        // After error handling, value should be reverted to original
+        expect(screen.getByTestId('quantity-input').value).toBe('5');
+    });
+
+    test('handles network error during quantity change', async () => {
+        console.error = jest.fn(); // Mock console.error
+
+        // Mock fetch to throw a network error
+        global.fetch.mockImplementationOnce(() =>
+            Promise.reject(new Error('Network error'))
+        );
+
+        render(
+            <GroceryDetail
+                grocery={mockGrocery}
+                units={mockUnits}
+                grocerySections={mockGrocerySections}
+            />
+        );
+
+        // Change quantity in input field
+        fireEvent.change(screen.getByTestId('quantity-input'), { target: { value: '7.5' } });
+
+        // Verify the error handling
+        await waitFor(() => {
+            expect(console.error).toHaveBeenCalledWith('Error updating quantity:', expect.any(Error));
         });
     });
 

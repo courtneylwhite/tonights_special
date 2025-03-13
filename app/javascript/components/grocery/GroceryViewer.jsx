@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { ChevronUp, ChevronDown, Edit } from 'lucide-react';
 
 /**
@@ -9,8 +9,16 @@ const GroceryViewer = ({
                            borderClass,
                            onEdit,
                            onIncrement,
-                           onDecrement
+                           onDecrement,
+                           onQuantityChange
                        }) => {
+    // State for the quantity input
+    const [quantityInput, setQuantityInput] = useState(grocery.quantity);
+    // State to track if the input is focused
+    const [isInputFocused, setIsInputFocused] = useState(false);
+    // Ref to store the timeout ID for auto-save
+    const autoSaveTimeoutRef = useRef(null);
+
     // Convert Unicode string to emoji
     const unicodeToEmoji = useMemo(() => {
         if (!grocery.emoji) return '❓';
@@ -28,6 +36,73 @@ const GroceryViewer = ({
         if (!grocery.unit) return '';
         return grocery.quantity > 1 ? `${grocery.unit.name}s` : grocery.unit.name;
     }, [grocery.quantity, grocery.unit]);
+
+    // Handler for input change
+    const handleInputChange = (e) => {
+        // Allow only numbers and decimals
+        const value = e.target.value;
+        if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
+            setQuantityInput(value);
+
+            // Clear any existing timeout to avoid multiple saves
+            if (autoSaveTimeoutRef.current) {
+                clearTimeout(autoSaveTimeoutRef.current);
+            }
+
+            // Set a new timeout to save after 800ms of no typing
+            autoSaveTimeoutRef.current = setTimeout(() => {
+                const parsedValue = value === '' ? 0 : parseFloat(value);
+                if (parsedValue !== grocery.quantity) {
+                    onQuantityChange(parsedValue);
+                    // Blur the input field to remove focus after saving
+                    document.activeElement.blur();
+                }
+            }, 800);
+        }
+    };
+
+    // Handler for input blur
+    const handleInputBlur = () => {
+        setIsInputFocused(false);
+
+        // Clear any pending timeout
+        if (autoSaveTimeoutRef.current) {
+            clearTimeout(autoSaveTimeoutRef.current);
+            autoSaveTimeoutRef.current = null;
+        }
+
+        // Save on blur as a fallback
+        const parsedValue = quantityInput === '' ? 0 : parseFloat(quantityInput);
+        if (parsedValue !== grocery.quantity) {
+            onQuantityChange(parsedValue);
+        }
+    };
+
+    // Handler for input focus
+    const handleInputFocus = () => {
+        setIsInputFocused(true);
+    };
+
+    // Handler for keyboard input
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            e.target.blur(); // Trigger the blur event to save
+        }
+    };
+
+    // Update local state when grocery prop changes
+    useEffect(() => {
+        setQuantityInput(grocery.quantity);
+    }, [grocery.quantity]);
+
+    // Clean up timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (autoSaveTimeoutRef.current) {
+                clearTimeout(autoSaveTimeoutRef.current);
+            }
+        };
+    }, []);
 
     return (
         <div className="p-8">
@@ -62,8 +137,18 @@ const GroceryViewer = ({
                             <ChevronDown className="text-amber-400" size={24} />
                         </button>
 
-                        <div className="bg-gray-800 px-6 py-3 rounded-lg border border-gray-700 min-w-[100px] text-center">
-                            <span className="text-2xl font-bold">{Math.round(grocery.quantity)}</span>
+                        <div className="bg-gray-800 px-2 py-1 rounded-lg border border-gray-700 min-w-[100px] text-center">
+                            <input
+                                id="quantity-input"
+                                type="text"
+                                value={quantityInput}
+                                onChange={handleInputChange}
+                                onBlur={handleInputBlur}
+                                onFocus={handleInputFocus}
+                                onKeyDown={handleKeyDown}
+                                className="bg-gray-800 text-2xl font-bold text-center w-full outline-none"
+                                aria-label="Quantity"
+                            />
                         </div>
 
                         <button
