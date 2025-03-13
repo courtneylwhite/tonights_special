@@ -78,11 +78,54 @@ const GroceryDetail = ({ grocery = {}, units = [], grocerySections = [] }) => {
         window.location.href = "/groceries";
     }, []);
 
+    // Handle quantity change (direct input)
+    const handleQuantityChange = useCallback(async (newQuantity) => {
+        try {
+            console.log(`Changing quantity from ${currentGrocery.quantity} to ${newQuantity}`);
+
+            const response = await fetch(`/groceries/${currentGrocery.id}`, {
+                method: 'PATCH',
+                headers: requestHeaders,
+                body: JSON.stringify({
+                    grocery: {
+                        quantity: newQuantity
+                    }
+                })
+            });
+
+            if (response.ok) {
+                // Parse the response JSON
+                const updatedData = await response.json();
+                console.log('Update quantity response:', updatedData);
+
+                // Create a complete grocery object with all the necessary fields
+                const completeGrocery = {
+                    ...currentGrocery, // Keep all current values as a base
+                    ...updatedData,    // Override with any updated fields from the response
+                    // Ensure the nested objects are preserved
+                    quantity: newQuantity, // Explicitly ensure the quantity is updated
+                    unit: updatedData.unit || currentGrocery.unit,
+                    grocery_section: updatedData.grocery_section || currentGrocery.grocery_section
+                };
+
+                setCurrentGrocery(completeGrocery);
+                showFeedback(true);
+            } else {
+                const errorText = await response.text();
+                console.error('Failed to update quantity:', errorText);
+                showFeedback(false);
+            }
+        } catch (error) {
+            console.error('Error updating quantity:', error);
+            showFeedback(false);
+        }
+    }, [currentGrocery, requestHeaders, showFeedback]);
+
     // Handle increment button click
     const handleIncrement = useCallback(async () => {
         try {
             // Calculate the new quantity value, ensuring it's a number
-            const newQuantity = Math.round(Number(currentGrocery.quantity) + 1);
+            const newQuantity = parseFloat(currentGrocery.quantity) + 1;
 
             console.log(`Incrementing from ${currentGrocery.quantity} to ${newQuantity}`);
 
@@ -130,7 +173,7 @@ const GroceryDetail = ({ grocery = {}, units = [], grocerySections = [] }) => {
 
         try {
             // Calculate the new quantity value, ensuring it's a number
-            const newQuantity = Math.round(Number(currentGrocery.quantity) - 1);
+            const newQuantity = parseFloat(currentGrocery.quantity) - 1;
 
             console.log(`Decrementing from ${currentGrocery.quantity} to ${newQuantity}`);
 
@@ -178,7 +221,7 @@ const GroceryDetail = ({ grocery = {}, units = [], grocerySections = [] }) => {
             const formData = {
                 grocery: {
                     name: editedGrocery.name,
-                    quantity: Math.round(editedGrocery.quantity),
+                    quantity: editedGrocery.quantity,
                     unit_id: editedGrocery.unit_id,
                     grocery_section_id: editedGrocery.grocery_section_id,
                     emoji: editedGrocery.emoji
@@ -281,6 +324,7 @@ const GroceryDetail = ({ grocery = {}, units = [], grocerySections = [] }) => {
                         onEdit={handleEditClick}
                         onIncrement={handleIncrement}
                         onDecrement={handleDecrement}
+                        onQuantityChange={handleQuantityChange}
                     />
                 )}
             </div>
