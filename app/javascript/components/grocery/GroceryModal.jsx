@@ -8,12 +8,12 @@ const ErrorAlert = ({ message }) => (
 );
 
 const GroceryModal = ({
-                       isOpen,
-                       onClose,
-                       grocerySections = [],
-                       units = [],
-                       onItemAdded = () => {},
-                   }) => {
+                          isOpen,
+                          onClose,
+                          grocerySections = [],
+                          units = [],
+                          onGroceryAdded = () => {},
+                      }) => {
     const initialFormState = {
         name: '',
         quantity: '',
@@ -82,7 +82,7 @@ const GroceryModal = ({
                 return;
             }
 
-            onItemAdded(data);
+            onGroceryAdded(data);
             onClose();
 
         } catch (error) {

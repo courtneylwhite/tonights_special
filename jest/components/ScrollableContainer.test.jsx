@@ -23,7 +23,7 @@ describe('ScrollableContainer', () => {
         isOpen: true,
         onToggle: jest.fn(),
         handleItemClick: jest.fn(),
-        unicodeToEmoji: (str) => str ? '🍎' : '❓' // Mock function to convert unicode to emoji
+        renderEmoji: (str) => str ? '🍎' : '❓' // Mock function to convert unicode to emoji
     };
 
     beforeEach(() => {
