@@ -19,7 +19,6 @@ const ItemModal = ({
         quantity: '',
         unit_id: '',
         grocery_section_id: '',
-        emoji: 'U+2754',
         new_section_name: ''
     };
 
@@ -48,8 +47,7 @@ const ItemModal = ({
                 grocery: {
                     name: formData.name,
                     quantity: formData.quantity,
-                    unit_id: formData.unit_id,
-                    emoji: formData.emoji
+                    unit_id: formData.unit_id
                 }
             };
 
@@ -248,23 +246,6 @@ const ItemModal = ({
                             </div>
                         </div>
                     )}
-
-                    <div>
-                        <label htmlFor="emoji" className="block text-sm font-medium text-gray-300 mb-1">
-                            Emoji (Unicode)
-                        </label>
-                        <input
-                            type="text"
-                            id="emoji"
-                            name="emoji"
-                            value={formData.emoji}
-                            onChange={handleChange}
-                            placeholder="U+2754"
-                            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-white"
-                            required
-                            disabled={isSubmitting}
-                        />
-                    </div>
 
                     <button
                         type="submit"

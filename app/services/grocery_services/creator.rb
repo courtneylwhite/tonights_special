@@ -1,4 +1,5 @@
-class GroceryCreator
+module GroceryServices
+  class Creator
   attr_reader :user, :grocery_attributes, :section_attributes, :errors, :grocery, :section
 
   def initialize(user, grocery_attributes, section_attributes = nil)
@@ -67,4 +68,5 @@ class GroceryCreator
       nil
     end
   end
+end
 end
