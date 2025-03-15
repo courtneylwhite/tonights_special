@@ -47,7 +47,7 @@ class GroceriesController < ApplicationController
     Rails.logger.info("Received grocery params: #{grocery_params}")
     Rails.logger.info("Received new section params: #{new_section_params}") if params[:new_section].present?
 
-    creator = GroceryCreator.new(
+    creator = ::GroceryServices::Creator.new(
       current_user,
       grocery_params.to_h,
       params[:new_section].present? ? new_section_params.to_h : nil

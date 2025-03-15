@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe GroceryCreator do
+RSpec.describe GroceryServices::Creator do
   let(:user) { create(:user) }
   let(:grocery_section) { create(:grocery_section, user: user) }
   let(:unit) { create(:unit) }
@@ -18,7 +18,7 @@ RSpec.describe GroceryCreator do
       end
 
       it 'creates a grocery item successfully' do
-        creator = GroceryCreator.new(user, grocery_attributes)
+        creator = ::GroceryServices::Creator.new(user, grocery_attributes)
 
         expect { creator.call }.to change(Grocery, :count).by(1)
         expect(creator.grocery.name).to eq('test grocery')
@@ -29,7 +29,7 @@ RSpec.describe GroceryCreator do
       it 'returns false and has errors when grocery creation fails' do
         grocery_attributes[:name] = '' # Should trigger validation error
 
-        creator = GroceryCreator.new(user, grocery_attributes)
+        creator = ::GroceryServices::Creator.new(user, grocery_attributes)
 
         expect(creator.call).to be false
         expect(creator.grocery).to be_nil
@@ -56,7 +56,7 @@ RSpec.describe GroceryCreator do
       end
 
       it 'creates both a section and a grocery' do
-        creator = GroceryCreator.new(user, grocery_attributes, section_attributes)
+        creator = ::GroceryServices::Creator.new(user, grocery_attributes, section_attributes)
 
         expect {
           expect(creator.call).to be true
@@ -68,7 +68,7 @@ RSpec.describe GroceryCreator do
 
       it 'handles section creation without display_order' do
         section_attributes.delete(:display_order)
-        creator = GroceryCreator.new(user, grocery_attributes, section_attributes)
+        creator = ::GroceryServices::Creator.new(user, grocery_attributes, section_attributes)
 
         expect {
           expect(creator.call).to be true
@@ -81,7 +81,7 @@ RSpec.describe GroceryCreator do
       it 'returns false and has errors when section creation fails' do
         section_attributes[:name] = '' # Should trigger validation error
 
-        creator = GroceryCreator.new(user, grocery_attributes, section_attributes)
+        creator = ::GroceryServices::Creator.new(user, grocery_attributes, section_attributes)
 
         expect {
           expect(creator.call).to be false
@@ -93,7 +93,7 @@ RSpec.describe GroceryCreator do
       it 'does not create a grocery if section creation fails' do
         section_attributes[:name] = '' # Should trigger validation error
 
-        creator = GroceryCreator.new(user, grocery_attributes, section_attributes)
+        creator = ::GroceryServices::Creator.new(user, grocery_attributes, section_attributes)
 
         expect {
           creator.call
@@ -122,7 +122,7 @@ RSpec.describe GroceryCreator do
           ActiveModel::Errors.new(Grocery.new).tap { |e| e.add(:base, "Forced failure") }
         )
 
-        creator = GroceryCreator.new(user, grocery_attributes, section_attributes)
+        creator = ::GroceryServices::Creator.new(user, grocery_attributes, section_attributes)
 
         expect {
           creator.call

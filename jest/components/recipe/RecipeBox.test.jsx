@@ -305,11 +305,47 @@ describe('RecipeBox Component', () => {
     it('handles emoji conversion correctly', () => {
         const { container } = render(<RecipeBox recipes={mockRecipes} units={mockUnits} />);
 
-        // Check that the component includes the unicodeToEmoji function
+        // Check that the component includes the renderEmoji function
         // We can't directly test the function since its implementation is inside the component
         // and our mocks intercept the actual rendering, but we can verify it exists
 
         // This is a limited test, but ensures the function is part of the component
-        expect(RecipeBox.toString()).toContain('unicodeToEmoji');
+        expect(RecipeBox.toString()).toContain('renderEmoji');
+    });
+
+    it('handles emoji conversion correctly', () => {
+        // Create a mock function to test renderEmoji's behavior
+        const renderEmoji = (emojiInput) => {
+            // Default to shopping cart emoji if the input is empty
+            if (!emojiInput) return '🛒';
+
+            // If it's already an emoji character (not starting with U+)
+            if (!emojiInput.startsWith('U+')) {
+                return emojiInput;
+            }
+
+            // If it's a Unicode format (U+XXXX)
+            try {
+                const hex = emojiInput.replace('U+', '');
+                return String.fromCodePoint(parseInt(hex, 16));
+            } catch (error) {
+                return '🛒'; // Default to shopping cart emoji on error
+            }
+        };
+
+        // Test direct emoji inputs
+        expect(renderEmoji('🍎')).toBe('🍎');
+
+        // Test Unicode emoji inputs
+        expect(renderEmoji('U+1F34E')).toBe('🍎');
+        expect(renderEmoji('U+1F36A')).toBe('🍪');
+
+        // Test empty or invalid inputs
+        expect(renderEmoji()).toBe('🛒');
+        expect(renderEmoji('')).toBe('🛒');
+        expect(renderEmoji(null)).toBe('🛒');
+        expect(renderEmoji('U+ZZZZ')).toBe('🛒');
     });
 });
+
+

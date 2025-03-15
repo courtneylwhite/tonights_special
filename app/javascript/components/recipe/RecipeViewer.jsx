@@ -134,6 +134,13 @@ const RecipeViewer = ({ recipe, recipeIngredients, borderClass, onEdit, onToggle
 
     // Handle edit button click
     const handleEditClick = useCallback(() => {
+        // Scroll to the top of the page
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+
+        // Call the original onEdit function to switch to edit mode
         onEdit();
     }, [onEdit]);
 

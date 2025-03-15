@@ -19,15 +19,23 @@ const GroceryViewer = ({
     // Ref to store the timeout ID for auto-save
     const autoSaveTimeoutRef = useRef(null);
 
-    // Convert Unicode string to emoji
-    const unicodeToEmoji = useMemo(() => {
-        if (!grocery.emoji) return '❓';
+    // Simplified renderEmoji function for GroceryViewer
+    const renderEmoji = useMemo(() => {
+        // Default to shopping cart emoji if the input is empty
+        if (!grocery.emoji) return '🛒';
+
+        // Case 1: If it's already an emoji character (not starting with U+)
+        if (!grocery.emoji.startsWith('U+')) {
+            return grocery.emoji;
+        }
+
+        // Case 2: If it's a Unicode format (U+XXXX)
         try {
             const hex = grocery.emoji.replace('U+', '');
             return String.fromCodePoint(parseInt(hex, 16));
         } catch (error) {
-            console.error('Error converting unicode to emoji:', error);
-            return '❓';
+            console.error('Error converting emoji:', error);
+            return '🛒'; // Default to shopping cart emoji on error
         }
     }, [grocery.emoji]);
 
@@ -116,7 +124,7 @@ const GroceryViewer = ({
                 {/* Emoji */}
                 <div className="text-center mb-8">
                     <span className="text-8xl inline-block transform hover:scale-110 transition-transform duration-200">
-                        {unicodeToEmoji}
+                        {renderEmoji}
                     </span>
                 </div>
 

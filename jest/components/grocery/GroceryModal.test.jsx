@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
-import ItemModal from '@/components/ItemModal';
+import GroceryModal from '@/components/grocery/GroceryModal';
 
-describe('ItemModal', () => {
+describe('GroceryModal', () => {
     const mockProps = {
         isOpen: true,
         onClose: jest.fn(),
-        onItemAdded: jest.fn(),
+        onGroceryAdded: jest.fn(),
         grocerySections: [
             { id: 1, name: 'Produce' },
             { id: 2, name: 'Dairy' }
@@ -25,12 +25,11 @@ describe('ItemModal', () => {
     });
 
     it('renders form fields when open', () => {
-        render(<ItemModal {...mockProps} />);
+        render(<GroceryModal {...mockProps} />);
         expect(screen.getByLabelText('Item Name')).toBeInTheDocument();
         expect(screen.getByLabelText('Quantity')).toBeInTheDocument();
         expect(screen.getByLabelText('Unit')).toBeInTheDocument();
         expect(screen.getByLabelText('Pantry Section')).toBeInTheDocument();
-        expect(screen.getByLabelText('Emoji (Unicode)')).toBeInTheDocument();
     });
 
     it('handles form submission successfully', async () => {
@@ -41,19 +40,18 @@ describe('ItemModal', () => {
             json: () => Promise.resolve(mockResponse)
         });
 
-        render(<ItemModal {...mockProps} />);
+        render(<GroceryModal {...mockProps} />);
 
         fireEvent.change(screen.getByLabelText('Item Name'), { target: { value: 'Apple' } });
         fireEvent.change(screen.getByLabelText('Quantity'), { target: { value: '5' } });
         fireEvent.change(screen.getByLabelText('Unit'), { target: { value: '1' } });
         fireEvent.change(screen.getByLabelText('Pantry Section'), { target: { value: '1' } });
-        fireEvent.change(screen.getByLabelText('Emoji (Unicode)'), { target: { value: 'U+1F34E' } });
 
         fireEvent.submit(screen.getByRole('button', { name: /create item/i }));
 
         await waitFor(() => {
             expect(global.fetch).toHaveBeenCalledWith('/groceries', expect.any(Object));
-            expect(mockProps.onItemAdded).toHaveBeenCalled();
+            expect(mockProps.onGroceryAdded).toHaveBeenCalled();
             expect(mockProps.onClose).toHaveBeenCalled();
         });
     });
@@ -65,7 +63,7 @@ describe('ItemModal', () => {
             json: () => Promise.resolve({ error: 'Something went wrong' })
         });
 
-        render(<ItemModal {...mockProps} />);
+        render(<GroceryModal {...mockProps} />);
 
         fireEvent.change(screen.getByLabelText('Item Name'), { target: { value: 'Apple' } });
         fireEvent.change(screen.getByLabelText('Quantity'), { target: { value: '5' } });
@@ -73,22 +71,22 @@ describe('ItemModal', () => {
 
         await waitFor(() => {
             expect(global.fetch).toHaveBeenCalled();
-            expect(mockProps.onItemAdded).not.toHaveBeenCalled();
+            expect(mockProps.onGroceryAdded).not.toHaveBeenCalled();
             expect(mockProps.onClose).not.toHaveBeenCalled();
         });
     });
 
     it('closes when close button is clicked', () => {
-        render(<ItemModal {...mockProps} />);
+        render(<GroceryModal {...mockProps} />);
         fireEvent.click(screen.getByRole('button', { name: /x/i }));
         expect(mockProps.onClose).toHaveBeenCalled();
     });
 
     it('resets form state when modal is reopened', () => {
-        const { rerender } = render(<ItemModal {...mockProps} isOpen={false} />);
+        const { rerender } = render(<GroceryModal {...mockProps} isOpen={false} />);
 
         // Reopen the modal
-        rerender(<ItemModal {...mockProps} isOpen={true} />);
+        rerender(<GroceryModal {...mockProps} isOpen={true} />);
 
         // Check that form fields are reset to initial state
         expect(screen.getByLabelText('Item Name')).toHaveValue('');
@@ -96,13 +94,10 @@ describe('ItemModal', () => {
         // Fix for number inputs - can be empty string or zero
         const quantityInput = screen.getByLabelText('Quantity');
         expect(quantityInput.value === '' || quantityInput.value === '0').toBeTruthy();
-
-        // Check emoji field has default value
-        expect(screen.getByLabelText('Emoji (Unicode)')).toHaveValue('U+2754');
     });
 
     describe('Additional Error Handling Tests', () => {
-        const fillFormWithValidData = (container) => {
+        const fillFormWithValidData = () => {
             fireEvent.change(screen.getByLabelText('Item Name'), { target: { value: 'Apple' } });
             fireEvent.change(screen.getByLabelText('Quantity'), { target: { value: '5' } });
             fireEvent.change(screen.getByLabelText('Unit'), { target: { value: '1' } });
@@ -116,7 +111,7 @@ describe('ItemModal', () => {
                 json: () => Promise.resolve({ error: 'Name already exists' })
             });
 
-            render(<ItemModal {...mockProps} />);
+            render(<GroceryModal {...mockProps} />);
 
             fillFormWithValidData();
             fireEvent.submit(screen.getByRole('button', { name: /create item/i }));
@@ -127,7 +122,7 @@ describe('ItemModal', () => {
             });
 
             // Verify other interactions didn't occur
-            expect(mockProps.onItemAdded).not.toHaveBeenCalled();
+            expect(mockProps.onGroceryAdded).not.toHaveBeenCalled();
             expect(mockProps.onClose).not.toHaveBeenCalled();
         });
 
@@ -143,7 +138,7 @@ describe('ItemModal', () => {
                 })
             });
 
-            render(<ItemModal {...mockProps} />);
+            render(<GroceryModal {...mockProps} />);
 
             fillFormWithValidData();
             fireEvent.submit(screen.getByRole('button', { name: /create item/i }));
@@ -154,7 +149,7 @@ describe('ItemModal', () => {
             });
 
             // Verify other interactions didn't occur
-            expect(mockProps.onItemAdded).not.toHaveBeenCalled();
+            expect(mockProps.onGroceryAdded).not.toHaveBeenCalled();
             expect(mockProps.onClose).not.toHaveBeenCalled();
         });
 
@@ -165,7 +160,7 @@ describe('ItemModal', () => {
                 json: () => Promise.resolve({})
             });
 
-            render(<ItemModal {...mockProps} />);
+            render(<GroceryModal {...mockProps} />);
 
             fillFormWithValidData();
             fireEvent.submit(screen.getByRole('button', { name: /create item/i }));
@@ -176,7 +171,7 @@ describe('ItemModal', () => {
             });
 
             // Verify other interactions didn't occur
-            expect(mockProps.onItemAdded).not.toHaveBeenCalled();
+            expect(mockProps.onGroceryAdded).not.toHaveBeenCalled();
             expect(mockProps.onClose).not.toHaveBeenCalled();
         });
 
@@ -184,7 +179,7 @@ describe('ItemModal', () => {
             // Simulate a network error
             global.fetch.mockRejectedValueOnce(new Error('Network failure'));
 
-            render(<ItemModal {...mockProps} />);
+            render(<GroceryModal {...mockProps} />);
 
             fillFormWithValidData();
             fireEvent.submit(screen.getByRole('button', { name: /create item/i }));
@@ -195,7 +190,7 @@ describe('ItemModal', () => {
             });
 
             // Verify other interactions didn't occur
-            expect(mockProps.onItemAdded).not.toHaveBeenCalled();
+            expect(mockProps.onGroceryAdded).not.toHaveBeenCalled();
             expect(mockProps.onClose).not.toHaveBeenCalled();
         });
     });

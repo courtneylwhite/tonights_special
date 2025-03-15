@@ -100,14 +100,14 @@ RSpec.describe GroceriesController, type: :controller do
     }
 
     context 'when the service succeeds' do
-      let(:mock_creator) { instance_double(GroceryCreator, call: true, grocery: Grocery.new, error_messages: '') }
+      let(:mock_creator) { instance_double(::GroceryServices::Creator, call: true, grocery: Grocery.new, error_messages: '') }
 
       before do
-        allow(GroceryCreator).to receive(:new).and_return(mock_creator)
+        allow(::GroceryServices::Creator).to receive(:new).and_return(mock_creator)
       end
 
-      it 'creates a GroceryCreator service with the right params' do
-        expect(GroceryCreator).to receive(:new).with(
+      it 'creates a ::GroceryServices::Creator service with the right params' do
+        expect(::GroceryServices::Creator).to receive(:new).with(
           user,
           hash_including(name: 'New Grocery'),
           nil
@@ -116,8 +116,8 @@ RSpec.describe GroceriesController, type: :controller do
         post :create, params: valid_params
       end
 
-      it 'creates a GroceryCreator with section params when provided' do
-        expect(GroceryCreator).to receive(:new).with(
+      it 'creates a ::GroceryServices::Creator with section params when provided' do
+        expect(::GroceryServices::Creator).to receive(:new).with(
           user,
           hash_including(name: 'New Grocery With Section'),
           hash_including(name: 'New Section')
@@ -135,7 +135,7 @@ RSpec.describe GroceriesController, type: :controller do
     context 'when the service fails' do
       let(:mock_creator) {
         instance_double(
-          GroceryCreator,
+          ::GroceryServices::Creator,
           call: false,
           grocery: nil,
           error_messages: 'Error message'
@@ -143,7 +143,7 @@ RSpec.describe GroceriesController, type: :controller do
       }
 
       before do
-        allow(GroceryCreator).to receive(:new).and_return(mock_creator)
+        allow(::GroceryServices::Creator).to receive(:new).and_return(mock_creator)
       end
 
       it 'returns unprocessable entity with error message' do

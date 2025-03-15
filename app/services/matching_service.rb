@@ -2,7 +2,6 @@ class MatchingService
   class << self
     def match_ingredient_to_grocery(user, name)
       normalized_name = normalize_name(name)
-
       # Matching strategy in order of preference:
       exact_match = exact_match(user, normalized_name)
       return exact_match if exact_match

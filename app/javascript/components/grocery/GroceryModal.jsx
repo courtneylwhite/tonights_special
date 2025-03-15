@@ -7,19 +7,18 @@ const ErrorAlert = ({ message }) => (
     </div>
 );
 
-const ItemModal = ({
-                       isOpen,
-                       onClose,
-                       grocerySections = [],
-                       units = [],
-                       onItemAdded = () => {},
-                   }) => {
+const GroceryModal = ({
+                          isOpen,
+                          onClose,
+                          grocerySections = [],
+                          units = [],
+                          onGroceryAdded = () => {},
+                      }) => {
     const initialFormState = {
         name: '',
         quantity: '',
         unit_id: '',
         grocery_section_id: '',
-        emoji: 'U+2754',
         new_section_name: ''
     };
 
@@ -48,8 +47,7 @@ const ItemModal = ({
                 grocery: {
                     name: formData.name,
                     quantity: formData.quantity,
-                    unit_id: formData.unit_id,
-                    emoji: formData.emoji
+                    unit_id: formData.unit_id
                 }
             };
 
@@ -84,7 +82,7 @@ const ItemModal = ({
                 return;
             }
 
-            onItemAdded(data);
+            onGroceryAdded(data);
             onClose();
 
         } catch (error) {
@@ -249,23 +247,6 @@ const ItemModal = ({
                         </div>
                     )}
 
-                    <div>
-                        <label htmlFor="emoji" className="block text-sm font-medium text-gray-300 mb-1">
-                            Emoji (Unicode)
-                        </label>
-                        <input
-                            type="text"
-                            id="emoji"
-                            name="emoji"
-                            value={formData.emoji}
-                            onChange={handleChange}
-                            placeholder="U+2754"
-                            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-white"
-                            required
-                            disabled={isSubmitting}
-                        />
-                    </div>
-
                     <button
                         type="submit"
                         className="w-full px-6 py-3 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
@@ -279,4 +260,4 @@ const ItemModal = ({
     );
 };
 
-export default ItemModal;
+export default GroceryModal;

@@ -65,6 +65,7 @@ group :development do
   gem "web-console"
   gem "pry"
   gem "pry-rails"
+  gem "pry-byebug"  # Add this line
 end
 
 group :test do
