@@ -38,13 +38,13 @@ jest.mock('@/components/SearchBar', () => {
     };
 });
 
-jest.mock('@/components/GroceryModal', () => {
-    return function MockItemModal({ isOpen, onClose, onItemAdded }) {
+jest.mock('@/components/grocery/GroceryModal', () => {
+    return function MockGroceryModal({ isOpen, onClose, onGroceryAdded }) {
         return isOpen ? (
             <div data-testid="item-modal">
                 <h2>Add New Item</h2>
                 <button data-testid="close-modal" onClick={onClose}>Close</button>
-                <button data-testid="add-item" onClick={onItemAdded}>Add Item</button>
+                <button data-testid="add-item" onClick={onGroceryAdded}>Add Item</button>
             </div>
         ) : null;
     };
@@ -80,7 +80,7 @@ jest.mock('@/components/ScrollableContainer', () => {
                                                 isOpen,
                                                 onToggle,
                                                 handleItemClick,
-                                                unicodeToEmoji
+                                                renderEmoji
                                             }) {
         return (
             <div data-testid={`container-${category}`}>

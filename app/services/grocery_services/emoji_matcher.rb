@@ -51,11 +51,11 @@ module GroceryServices
       private
 
       def load_emoji_mappings
-        yaml_path = Rails.root.join('config', 'grocery_emoji_mappings.yml')
+        yaml_path = Rails.root.join("config", "grocery_emoji_mappings.yml")
         YAML.load_file(yaml_path)
       rescue StandardError => e
         Rails.logger.error "Failed to load emoji mappings: #{e.message}"
-        { "🛒" => ["default"] } # Fallback to a default mapping
+        { "🛒" => [ "default" ] } # Fallback to a default mapping
       end
     end
   end

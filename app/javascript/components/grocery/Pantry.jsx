@@ -8,7 +8,7 @@ import ScrollableContainer from '../ScrollableContainer';
 const Pantry = ({ groceries = {}, units = [] }) => {
     const [groceryData, setGroceryData] = useState(groceries);
     const [filteredGroceryData, setFilteredGroceryData] = useState(groceries);
-    const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+    const [isGroceryModalOpen, setIsGroceryModalOpen] = useState(false);
 
     // Create initial toggle state for containers
     const initialToggleState = Object.keys(groceries || {}).reduce((acc, category) => ({
@@ -29,8 +29,8 @@ const Pantry = ({ groceries = {}, units = [] }) => {
         }
     };
 
-    const handleItemAdded = () => refreshData();
-    const handleAddItem = () => setIsItemModalOpen(true);
+    const handleGroceryAdded = () => refreshData();
+    const handleAddGrocery = () => setIsGroceryModalOpen(true);
     const handleGroceryClick = (groceryId) => {
         window.location.href = `/groceries/${groceryId}`;
     };
@@ -97,7 +97,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                             onFilteredDataChange={setFilteredGroceryData}
                         />
                         <button
-                            onClick={handleAddItem}
+                            onClick={handleAddGrocery}
                             className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
                         >
                             <Plus size={18}/>
@@ -134,11 +134,11 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                 </div>
 
                 <GroceryModal
-                    isOpen={isItemModalOpen}
-                    onClose={() => setIsItemModalOpen(false)}
+                    isOpen={isGroceryModalOpen}
+                    onClose={() => setIsGroceryModalOpen(false)}
                     grocerySections={grocerySections}
                     units={units}
-                    onItemAdded={handleItemAdded}
+                    onGroceryAdded={handleGroceryAdded}
                 />
             </div>
         </turbo-frame>
