@@ -7,7 +7,7 @@ const ErrorAlert = ({ message }) => (
     </div>
 );
 
-const ItemModal = ({
+const GroceryModal = ({
                        isOpen,
                        onClose,
                        grocerySections = [],
@@ -260,4 +260,4 @@ const ItemModal = ({
     );
 };
 
-export default ItemModal;
+export default GroceryModal;

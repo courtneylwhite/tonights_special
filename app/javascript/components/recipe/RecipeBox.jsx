@@ -50,9 +50,23 @@ const Recipes = ({ recipes = {}, units = [] }) => {
         }, {});
 
     const hasRecipes = Object.keys(recipeData || {}).length > 0;
-    const unicodeToEmoji = (unicodeString) => {
-        const hex = unicodeString.replace('U+', '');
-        return String.fromCodePoint(parseInt(hex, 16));
+    const renderEmoji = (emojiInput) => {
+        // Default to shopping cart emoji if the input is empty
+        if (!emojiInput) return '🛒';
+
+        // Case 1: If it's already an emoji character (not starting with U+)
+        if (!emojiInput.startsWith('U+')) {
+            return emojiInput;
+        }
+
+        // Case 2: If it's a Unicode format (U+XXXX)
+        try {
+            const hex = emojiInput.replace('U+', '');
+            return String.fromCodePoint(parseInt(hex, 16));
+        } catch (error) {
+            console.error('Error converting emoji:', error);
+            return '🛒'; // Default to shopping cart emoji on error
+        }
     };
 
     // State to track which containers are open
@@ -110,7 +124,7 @@ const Recipes = ({ recipes = {}, units = [] }) => {
                                     isOpen={containerToggleState[category]}
                                     onToggle={handleContainerToggle}
                                     handleItemClick={handleRecipeClick}
-                                    unicodeToEmoji={unicodeToEmoji}
+                                    renderEmoji={renderEmoji}
                                 />
                             ))}
                         </div>

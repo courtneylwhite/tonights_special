@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Plus } from 'lucide-react';
-import ItemModal from '../ItemModal';
+import GroceryModal from './GroceryModal';
 import SearchBar from '../SearchBar';
 import ToggleButton from '../ToggleButton';
 import ScrollableContainer from '../ScrollableContainer';
@@ -35,7 +35,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
         window.location.href = `/groceries/${groceryId}`;
     };
 
-    // Process the grocery sections for the ItemModal
+    // Process the grocery sections for the GroceryModal
     const grocerySections = Object.entries(groceryData || {}).map(([name, data]) => ({
         id: data.id,
         name: name
@@ -50,9 +50,25 @@ const Pantry = ({ groceries = {}, units = [] }) => {
         }, {});
 
     const hasGroceries = Object.keys(groceryData || {}).length > 0;
-    const unicodeToEmoji = (unicodeString) => {
-        const hex = unicodeString.replace('U+', '');
-        return String.fromCodePoint(parseInt(hex, 16));
+
+    // Define a simple emoji rendering function that will be passed to ScrollableContainer
+    const renderEmoji = (emojiInput) => {
+        // Default to shopping cart emoji if the input is empty
+        if (!emojiInput) return '🛒';
+
+        // Case 1: If it's already an emoji character (not starting with U+)
+        if (!emojiInput.startsWith('U+')) {
+            return emojiInput;
+        }
+
+        // Case 2: If it's a Unicode format (U+XXXX)
+        try {
+            const hex = emojiInput.replace('U+', '');
+            return String.fromCodePoint(parseInt(hex, 16));
+        } catch (error) {
+            console.error('Error converting emoji:', error);
+            return '🛒'; // Default to shopping cart emoji on error
+        }
     };
 
     // State to track which containers are open
@@ -110,14 +126,14 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                                     isOpen={containerToggleState[category]}
                                     onToggle={handleContainerToggle}
                                     handleItemClick={handleGroceryClick}
-                                    unicodeToEmoji={unicodeToEmoji}
+                                    renderEmoji={renderEmoji}
                                 />
                             ))}
                         </div>
                     )}
                 </div>
 
-                <ItemModal
+                <GroceryModal
                     isOpen={isItemModalOpen}
                     onClose={() => setIsItemModalOpen(false)}
                     grocerySections={grocerySections}

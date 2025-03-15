@@ -38,7 +38,7 @@ jest.mock('@/components/SearchBar', () => {
     };
 });
 
-jest.mock('@/components/ItemModal', () => {
+jest.mock('@/components/GroceryModal', () => {
     return function MockItemModal({ isOpen, onClose, onItemAdded }) {
         return isOpen ? (
             <div data-testid="item-modal">
@@ -151,7 +151,7 @@ describe('Pantry Component', () => {
         expect(screen.getByTestId('container-Vegetables')).toBeInTheDocument();
     });
 
-    it('opens the ItemModal when add button is clicked', () => {
+    it('opens the GroceryModal when add button is clicked', () => {
         render(<Pantry groceries={mockGroceries} units={mockUnits} />);
 
         // Find and click the add button
@@ -163,7 +163,7 @@ describe('Pantry Component', () => {
         expect(screen.getByText('Add New Item')).toBeInTheDocument();
     });
 
-    it('closes the ItemModal', () => {
+    it('closes the GroceryModal', () => {
         render(<Pantry groceries={mockGroceries} units={mockUnits} />);
 
         // Open the modal

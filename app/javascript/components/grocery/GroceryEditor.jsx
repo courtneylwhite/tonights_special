@@ -132,16 +132,16 @@ const GroceryEditor = ({
 
                     {/* Emoji */}
                     <div className="flex flex-col">
-                        <label className="text-amber-400 mb-1 font-medium">Emoji (Unicode)</label>
+                        <label className="text-amber-400 mb-1 font-medium">Emoji</label>
                         <input
                             type="text"
                             value={editedGrocery.emoji || ''}
                             onChange={(e) => handleGroceryChange('emoji', e.target.value)}
                             className="px-4 py-2 bg-gray-800 border border-amber-500 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                            placeholder="U+1F34E (for 🍎)"
+                            placeholder="🍎 or U+1F34E"
                         />
                         <span className="text-gray-400 text-xs mt-1">
-                            Tip: You can find emoji codes at <a href="https://emojipedia.org/" className="text-amber-400" target="_blank" rel="noopener noreferrer">Emojipedia</a>
+                            Tip: You can use an emoji directly (🍎) or a Unicode code (U+1F34E)
                         </span>
                     </div>
 

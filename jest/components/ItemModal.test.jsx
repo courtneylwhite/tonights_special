@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
-import ItemModal from '@/components/ItemModal';
+import ItemModal from '@/components/GroceryModal';
 
 describe('ItemModal', () => {
     const mockProps = {
