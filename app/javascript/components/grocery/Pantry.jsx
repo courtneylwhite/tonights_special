@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Plus } from 'lucide-react';
-import ItemModal from '../ItemModal';
+import GroceryModal from './GroceryModal';
 import SearchBar from '../SearchBar';
 import ToggleButton from '../ToggleButton';
 import ScrollableContainer from '../ScrollableContainer';
@@ -8,7 +8,7 @@ import ScrollableContainer from '../ScrollableContainer';
 const Pantry = ({ groceries = {}, units = [] }) => {
     const [groceryData, setGroceryData] = useState(groceries);
     const [filteredGroceryData, setFilteredGroceryData] = useState(groceries);
-    const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+    const [isGroceryModalOpen, setIsGroceryModalOpen] = useState(false);
 
     // Create initial toggle state for containers
     const initialToggleState = Object.keys(groceries || {}).reduce((acc, category) => ({
@@ -29,13 +29,13 @@ const Pantry = ({ groceries = {}, units = [] }) => {
         }
     };
 
-    const handleItemAdded = () => refreshData();
-    const handleAddItem = () => setIsItemModalOpen(true);
+    const handleGroceryAdded = () => refreshData();
+    const handleAddGrocery = () => setIsGroceryModalOpen(true);
     const handleGroceryClick = (groceryId) => {
         window.location.href = `/groceries/${groceryId}`;
     };
 
-    // Process the grocery sections for the ItemModal
+    // Process the grocery sections for the GroceryModal
     const grocerySections = Object.entries(groceryData || {}).map(([name, data]) => ({
         id: data.id,
         name: name
@@ -50,9 +50,25 @@ const Pantry = ({ groceries = {}, units = [] }) => {
         }, {});
 
     const hasGroceries = Object.keys(groceryData || {}).length > 0;
-    const unicodeToEmoji = (unicodeString) => {
-        const hex = unicodeString.replace('U+', '');
-        return String.fromCodePoint(parseInt(hex, 16));
+
+    // Define a simple emoji rendering function that will be passed to ScrollableContainer
+    const renderEmoji = (emojiInput) => {
+        // Default to shopping cart emoji if the input is empty
+        if (!emojiInput) return '🛒';
+
+        // Case 1: If it's already an emoji character (not starting with U+)
+        if (!emojiInput.startsWith('U+')) {
+            return emojiInput;
+        }
+
+        // Case 2: If it's a Unicode format (U+XXXX)
+        try {
+            const hex = emojiInput.replace('U+', '');
+            return String.fromCodePoint(parseInt(hex, 16));
+        } catch (error) {
+            console.error('Error converting emoji:', error);
+            return '🛒'; // Default to shopping cart emoji on error
+        }
     };
 
     // State to track which containers are open
@@ -81,7 +97,7 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                             onFilteredDataChange={setFilteredGroceryData}
                         />
                         <button
-                            onClick={handleAddItem}
+                            onClick={handleAddGrocery}
                             className="flex items-center gap-2 px-6 py-2 bg-amber-500 hover:bg-amber-600 text-black rounded-lg transition-colors duration-200 border border-amber-400 hover:border-amber-300"
                         >
                             <Plus size={18}/>
@@ -110,19 +126,19 @@ const Pantry = ({ groceries = {}, units = [] }) => {
                                     isOpen={containerToggleState[category]}
                                     onToggle={handleContainerToggle}
                                     handleItemClick={handleGroceryClick}
-                                    unicodeToEmoji={unicodeToEmoji}
+                                    renderEmoji={renderEmoji}
                                 />
                             ))}
                         </div>
                     )}
                 </div>
 
-                <ItemModal
-                    isOpen={isItemModalOpen}
-                    onClose={() => setIsItemModalOpen(false)}
+                <GroceryModal
+                    isOpen={isGroceryModalOpen}
+                    onClose={() => setIsGroceryModalOpen(false)}
                     grocerySections={grocerySections}
                     units={units}
-                    onItemAdded={handleItemAdded}
+                    onGroceryAdded={handleGroceryAdded}
                 />
             </div>
         </turbo-frame>

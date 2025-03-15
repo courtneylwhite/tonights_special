@@ -8,7 +8,7 @@ const ScrollableContainer = ({
                                  isOpen,
                                  onToggle,
                                  handleItemClick,
-                                 unicodeToEmoji
+                                 renderEmoji
                              }) => {
     const scrollContainerRef = useRef(null);
     const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -127,7 +127,7 @@ const ScrollableContainer = ({
                                                 {/* Emoji */}
                                                 {item.emoji && (
                                                     <span className="text-xl flex-shrink-0" title={item.emoji}>
-                                                        {unicodeToEmoji(item.emoji)}
+                                                        {renderEmoji(item.emoji)}
                                                     </span>
                                                 )}
 

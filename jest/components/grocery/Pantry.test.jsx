@@ -38,13 +38,13 @@ jest.mock('@/components/SearchBar', () => {
     };
 });
 
-jest.mock('@/components/ItemModal', () => {
-    return function MockItemModal({ isOpen, onClose, onItemAdded }) {
+jest.mock('@/components/grocery/GroceryModal', () => {
+    return function MockGroceryModal({ isOpen, onClose, onGroceryAdded }) {
         return isOpen ? (
             <div data-testid="item-modal">
                 <h2>Add New Item</h2>
                 <button data-testid="close-modal" onClick={onClose}>Close</button>
-                <button data-testid="add-item" onClick={onItemAdded}>Add Item</button>
+                <button data-testid="add-item" onClick={onGroceryAdded}>Add Item</button>
             </div>
         ) : null;
     };
@@ -80,7 +80,7 @@ jest.mock('@/components/ScrollableContainer', () => {
                                                 isOpen,
                                                 onToggle,
                                                 handleItemClick,
-                                                unicodeToEmoji
+                                                renderEmoji
                                             }) {
         return (
             <div data-testid={`container-${category}`}>
@@ -96,6 +96,7 @@ jest.mock('@/components/ScrollableContainer', () => {
                             <div
                                 key={item.id}
                                 data-testid={`item-${item.id}`}
+                                data-emoji={renderEmoji ? renderEmoji(item.emoji) : ''}
                                 onClick={() => handleItemClick(item.id)}
                                 className="cursor-pointer"
                             >
@@ -151,7 +152,7 @@ describe('Pantry Component', () => {
         expect(screen.getByTestId('container-Vegetables')).toBeInTheDocument();
     });
 
-    it('opens the ItemModal when add button is clicked', () => {
+    it('opens the GroceryModal when add button is clicked', () => {
         render(<Pantry groceries={mockGroceries} units={mockUnits} />);
 
         // Find and click the add button
@@ -163,7 +164,7 @@ describe('Pantry Component', () => {
         expect(screen.getByText('Add New Item')).toBeInTheDocument();
     });
 
-    it('closes the ItemModal', () => {
+    it('closes the GroceryModal', () => {
         render(<Pantry groceries={mockGroceries} units={mockUnits} />);
 
         // Open the modal
@@ -258,13 +259,6 @@ describe('Pantry Component', () => {
         // The test can't assert on this directly due to the mock
     });
 
-    // Skip the complex sort test - we'll test this with a unit test of the sort logic
-    it.skip('sorts grocery categories by display_order', () => {
-        // This test is being skipped as it's hard to verify DOM ordering with mocks
-        // We will test the sorting functionality directly
-    });
-
-    // Instead, let's verify the sorting logic directly
     it('correctly sorts groceries by display_order', () => {
         // Test data
         const unsortedGroceries = {
@@ -309,5 +303,107 @@ describe('Pantry Component', () => {
 
         // Cleanup
         consoleSpy.mockRestore();
+    });
+
+    // Adding additional tests for renderEmoji function specifically
+    describe('renderEmoji function', () => {
+        it('renders the component with default props', () => {
+            // This test ensures line 8 (component initialization) is covered
+            const { container } = render(<Pantry />);
+            expect(container).toBeInTheDocument();
+        });
+
+        it('returns default emoji when input is undefined or empty', () => {
+            // Test for lines 57-61
+            const { getByTestId } = render(
+                <Pantry
+                    groceries={{
+                        'Test': {
+                            id: 3,
+                            items: [
+                                { id: 301, name: 'Empty Emoji', quantity: 1, unit: 'piece', emoji: '' },
+                                { id: 302, name: 'Undefined Emoji', quantity: 1, unit: 'piece', emoji: undefined }
+                            ],
+                            display_order: 3
+                        }
+                    }}
+                    units={[]}
+                />
+            );
+
+            const container = getByTestId('container-Test');
+            expect(container).toBeInTheDocument();
+
+            // Both items should be rendered with emoji data-attribute set to default emoji
+            const emptyItem = getByTestId('item-301');
+            const undefinedItem = getByTestId('item-302');
+            expect(emptyItem).toHaveAttribute('data-emoji', '🛒');
+            expect(undefinedItem).toHaveAttribute('data-emoji', '🛒');
+        });
+
+        it('returns the same emoji if it is already an emoji character', () => {
+            // Test for line 65
+            const { getByTestId } = render(
+                <Pantry
+                    groceries={{
+                        'Direct Emoji': {
+                            id: 4,
+                            items: [
+                                { id: 401, name: 'Direct Emoji', quantity: 1, unit: 'piece', emoji: '🍎' }
+                            ],
+                            display_order: 4
+                        }
+                    }}
+                    units={[]}
+                />
+            );
+
+            const directItem = getByTestId('item-401');
+            expect(directItem).toHaveAttribute('data-emoji', '🍎');
+        });
+
+        it('converts Unicode format (U+XXXX) to an emoji', () => {
+            // Test for lines 66-67
+            // This is already being tested with the mock data in the standard render tests
+            // But let's add a specific test for clarity
+            const { getByTestId } = render(
+                <Pantry groceries={mockGroceries} units={[]} />
+            );
+
+            const appleItem = getByTestId('item-101');
+            expect(appleItem).toHaveAttribute('data-emoji', '🍎');
+        });
+
+        it('handles error in emoji conversion and returns default emoji', () => {
+            // Test for lines 69-70
+            const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+            // Create test data with invalid Unicode
+            const { getByTestId } = render(
+                <Pantry
+                    groceries={{
+                        'Invalid': {
+                            id: 5,
+                            items: [
+                                { id: 501, name: 'Invalid Unicode', quantity: 1, unit: 'piece', emoji: 'U+ZZZZ' }
+                            ],
+                            display_order: 5
+                        }
+                    }}
+                    units={[]}
+                />
+            );
+
+            const invalidItem = getByTestId('item-501');
+            expect(invalidItem).toHaveAttribute('data-emoji', '🛒');
+
+            // Verify error was logged
+            expect(consoleSpy).toHaveBeenCalledWith(
+                'Error converting emoji:',
+                expect.any(Error)
+            );
+
+            consoleSpy.mockRestore();
+        });
     });
 });
