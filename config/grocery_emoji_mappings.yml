@@ -1,0 +1,559 @@
+# Grocery Emoji Mappings
+# Format is organized by emoji with arrays of matching terms
+
+# Fruits
+"🍎": # apple
+  - apple
+  - red apple
+  - green apple
+  - honeycrisp
+  - granny smith
+  - fuji
+
+"🍌": # banana
+  - banana
+  - plantain
+
+"🍊": # orange
+  - orange
+  - mandarin
+  - tangerine
+  - clementine
+
+"🍇": # grapes
+  - grape
+  - red grape
+  - green grape
+  - seedless grape
+
+"🍓": # strawberry
+  - strawberry
+  - strawberries
+
+"🫐": # blueberry
+  - blueberry
+  - blueberries
+  - blackberry
+  - blackberries
+  - raspberry
+  - raspberries
+
+"🍍": # pineapple
+  - pineapple
+
+"🥭": # mango
+  - mango
+
+"🍑": # peach
+  - peach
+  - nectarine
+
+"🥝": # kiwi
+  - kiwi
+  - kiwifruit
+
+"🍉": # watermelon
+  - watermelon
+  - melon
+  - cantaloupe
+  - honeydew
+
+"🥥": # coconut
+  - coconut
+  - coconut milk
+  - coconut cream
+  - coconut water
+
+"🍋": # lemon
+  - lemon
+  - lime
+  - citrus
+
+"🍐": # pear
+  - pear
+  - bartlett
+  - anjou
+
+"🥑": # avocado
+  - avocado
+  - guacamole
+
+# Vegetables
+"🥬": # leafy greens
+  - lettuce
+  - spinach
+  - kale
+  - arugula
+  - cabbage
+  - chard
+  - collard
+
+"🥦": # broccoli
+  - broccoli
+  - cauliflower
+  - broccolini
+
+"🍄": # mushroom
+  - mushroom
+  - shiitake
+  - portobello
+  - crimini
+
+"🧅": # onion
+  - onion
+  - shallot
+  - green onion
+  - scallion
+  - leek
+  - chive
+
+"🫑": # bell pepper
+  - bell pepper
+  - capsicum
+  - jalapeno
+  - chili
+  - poblano
+  - habanero
+
+"🥕": # carrot
+  - carrot
+  - parsnip
+
+"🥔": # potato
+  - potato
+  - russet
+  - yukon gold
+  - red potato
+  - fingerling potato
+
+"🧄": # garlic
+  - garlic
+  - garlic clove
+  - garlic powder
+
+"🍅": # tomato
+  - tomato
+  - cherry tomato
+  - roma tomato
+  - beefsteak
+  - ketchup
+
+"🌽": # corn
+  - corn
+  - corn on the cob
+  - sweet corn
+  - popcorn
+
+"🥒": # cucumber
+  - cucumber
+  - pickle
+  - gherkin
+
+"🍠": # sweet potato
+  - sweet potato
+  - yam
+
+"🫒": # olive
+  - olive
+  - black olive
+  - green olive
+  - kalamata
+
+"🥗": # salad
+  - salad
+  - salad mix
+  - spring mix
+  - mesclun
+
+# Nuts & Seeds (using peanut emoji for all nuts as requested)
+"🥜": # peanut/nuts
+  - peanut
+  - almond
+  - cashew
+  - pecan
+  - walnut
+  - pistachio
+  - macadamia
+  - hazelnut
+  - nut
+  - peanut butter
+  - almond butter
+  - cashew butter
+
+"🫘": # beans
+  - bean
+  - black bean
+  - kidney bean
+  - pinto bean
+  - chickpea
+  - lentil
+  - edamame
+
+"🌱": # seeds
+  - seed
+  - sunflower seed
+  - pumpkin seed
+  - chia seed
+  - flax seed
+  - sesame seed
+  - hemp seed
+
+# Dairy
+"🥛": # milk
+  - milk
+  - cream
+  - half and half
+  - oat milk
+  - almond milk
+  - soy milk
+  - rice milk
+  - cashew milk
+
+"🧀": # cheese
+  - cheese
+  - cheddar
+  - mozzarella
+  - parmesan
+  - swiss
+  - brie
+  - feta
+  - gouda
+  - provolone
+  - ricotta
+  - cottage cheese
+  - cream cheese
+  - goat cheese
+  - blue cheese
+
+"🧈": # butter
+  - butter
+  - margarine
+  - ghee
+
+"🥚": # egg
+  - egg
+  - eggs
+  - egg white
+  - egg yolk
+
+"🧃": # juice box
+  - juice box
+  - fruit juice
+  - juice pack
+
+"🫙": # jar
+  - jam
+  - jelly
+  - preserves
+  - marmalade
+
+# Baked Goods
+"🍞": # bread
+  - panko
+  - breadcrumbs
+  - bread
+  - loaf
+  - sourdough
+  - wheat bread
+  - white bread
+  - baguette
+  - roll
+  - pita
+  - naan
+  - tortilla
+  - flatbread
+
+"🥐": # croissant
+  - croissant
+  - pastry
+  - danish
+  - pain au chocolat
+
+"🥯": # bagel
+  - bagel
+  - english muffin
+
+"🧁": # cupcake
+  - cupcake
+  - muffin
+  - cake
+  - brownie
+  - cookie
+  - dessert
+
+"🥨": # pretzel
+  - pretzel
+  - cracker
+  - snack
+
+# Meat & Protein
+"🥩": # meat
+  - steak
+  - beef
+  - ground beef
+  - hamburger
+  - chuck
+  - sirloin
+  - ribeye
+  - brisket
+  - roast
+
+"🍗": # poultry
+  - chicken
+  - turkey
+  - duck
+  - poultry
+  - breast
+  - thigh
+  - wing
+  - drumstick
+  - ground chicken
+  - ground turkey
+
+"🥓": # bacon
+  - bacon
+  - ham
+  - pork
+  - sausage
+  - salami
+  - pepperoni
+  - prosciutto
+  - hot dog
+  - bratwurst
+
+"🦐": # shellfish
+  - shrimp
+  - prawn
+
+"🦀":
+  - crab
+
+"🦞":
+  - lobster
+
+"🐚":
+  - scallop
+  - clam
+  - mussel
+
+"🦪": # oyster
+  - oyster
+
+"🐟": # fish
+  - fish
+  - salmon
+  - tuna steak
+  - tilapia
+  - cod
+  - halibut
+  - trout
+  - bass
+  - catfish
+  - canned tuna
+
+"🍖": # meat on bone
+  - rib
+  - ribs
+  - bone-in
+  - pork chop
+  - lamb chop
+
+# Pantry Items
+"🍚": # rice
+  - rice
+  - white rice
+  - brown rice
+  - jasmine rice
+  - basmati rice
+  - arborio rice
+  - quinoa
+  - couscous
+  - farro
+  - barley
+
+"🍝": # pasta
+  - pasta
+  - spaghetti
+  - linguine
+  - fettuccine
+  - penne
+  - macaroni
+  - noodle
+  - ramen
+  - udon
+  - lasagna
+
+"🧂": # salt/spices
+  - salt
+  - seasoning
+  - herb
+  - oregano
+  - basil
+  - thyme
+  - rosemary
+  - cinnamon
+  - nutmeg
+  - paprika
+  - curry powder
+
+"🌶️": # pepper
+  - pepper
+  - black pepper
+  - white pepper
+  - peppercorn
+  - ground pepper
+  - chilis
+  - chilies
+  - chili powder
+
+"🫗": # oil/condiments
+  - oil
+  - olive oil
+  - vegetable oil
+  - canola oil
+  - coconut oil
+  - vinegar
+  - balsamic
+  - soy sauce
+  - hot sauce
+  - mustard
+  - mayonnaise
+  - mayo
+  - ranch
+  - dressing
+  - bbq sauce
+
+"🥫": # canned goods
+  - can
+  - canned
+  - soup
+  - broth
+  - stock
+  - sauce
+  - paste
+  - tomato sauce
+  - marinara
+  - canned vegetable
+  - canned fruit
+
+"🍯": # honey
+  - honey
+  - syrup
+  - maple syrup
+  - agave
+  - molasses
+
+"🍬": # candy
+  - candy
+  - chocolate
+  - sweet
+  - gum
+
+"🧊": # ice
+  - ice
+  - ice cream
+  - popsicle
+  - frozen vegetable
+  - frozen fruit
+  - frozen meal
+
+"🍕":
+  - pizza
+  - frozen pizza
+
+# Beverages
+"☕️": # coffee
+  - coffee
+  - espresso
+  - latte
+  - cappuccino
+  - coffee beans
+  - coffee grounds
+
+"🍵": # tea
+  - tea
+  - tea bag
+  - green tea
+  - black tea
+  - herbal tea
+  - chai
+
+"🍷": # wine
+  - wine
+  - red wine
+  - white wine
+  - rose
+  - champagne
+  - sparkling wine
+
+"🍺": # beer
+  - beer
+  - ale
+  - lager
+  - stout
+  - hard cider
+  - hard seltzer
+
+"🍹": # cocktail
+  - cocktail
+  - margarita
+  - daquari
+  - liquor
+  - vodka
+  - gin
+  - rum
+  - tequila
+  - whiskey
+  - bourbon
+
+"🥤": # soda
+  - soda
+  - redbull
+  - tonic
+  - pop
+  - soft drink
+  - sparkling water
+  - cola
+  - sprite
+  - ginger ale
+
+"🧋": # bubble tea/smoothie
+  - juice
+  - apple juice
+  - orange juice
+  - grape juice
+  - cranberry juice
+
+# Household Items
+"🧻": # paper products
+  - toilet paper
+  - paper towel
+  - tissue
+  - napkin
+  - paper plate
+  - paper cup
+
+"🧼": # soap
+  - soap
+  - detergent
+  - dish soap
+  - hand soap
+  - shampoo
+  - conditioner
+  - body wash
+  - cleanser
+  - cleaning supply
+
+"🧹": # cleaning supplies
+  - broom
+  - mop
+  - sponge
+  - cleaner
+  - disinfectant
+  - wipes
+  - spray
+  - bleach
+
+# Default
+"🛒": # shopping cart (default)
+  - default
