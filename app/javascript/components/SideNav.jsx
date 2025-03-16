@@ -4,9 +4,30 @@ import { Menu, X, ChefHat, ShoppingCart, Archive, LogOut } from 'lucide-react';
 const SideNav = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [currentPath, setCurrentPath] = useState('');
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
         setCurrentPath(window.location.pathname);
+
+        // Check if user is authenticated
+        // This assumes you have some way to check authentication status
+        // For example, you could check for a specific element that only appears when logged in
+        // Or you can expose a global variable from your Rails app
+        const checkAuthentication = () => {
+            // Option 1: Check for a meta tag that Rails can set
+            const authMeta = document.querySelector('meta[name="user-authenticated"]');
+            if (authMeta && authMeta.content === 'true') {
+                setIsAuthenticated(true);
+                return;
+            }
+
+            // Option 2: Check for a cookie or localStorage item set during login
+            // This is a simplified example - you might need to use a more secure approach
+            const authToken = document.cookie.split('; ').find(row => row.startsWith('_your_app_session='));
+            setIsAuthenticated(!!authToken);
+        };
+
+        checkAuthentication();
     }, []);
 
     const handleSignOut = async (e) => {
@@ -24,6 +45,7 @@ const SideNav = () => {
             });
 
             if (response.ok) {
+                setIsAuthenticated(false);
                 window.location.href = '/';
             }
         } catch (error) {
@@ -31,7 +53,9 @@ const SideNav = () => {
         }
     };
 
-    if (currentPath === '/') return null;
+    // Don't render if not authenticated or if on the homepage or auth pages
+    const authPages = ['/', '/users/sign_in', '/users/sign_up', '/users/password/new', '/users/password/edit'];
+    if (!isAuthenticated || authPages.includes(currentPath)) return null;
 
     return (
         <>
@@ -78,17 +102,6 @@ const SideNav = () => {
                                 <span>Recipes</span>
                             </a>
                         )}
-
-                        {/*{currentPath !== '/grocery_lists' && (*/}
-                        {/*    <a*/}
-                        {/*        href="/grocery_lists"*/}
-                        {/*        data-turbo="false"*/}
-                        {/*        className="flex items-center gap-3 text-white hover:bg-amber-500 hover:text-black p-3 rounded-lg transition-colors duration-200"*/}
-                        {/*    >*/}
-                        {/*        <ShoppingCart size={20}/>*/}
-                        {/*        <span>Grocery Lists</span>*/}
-                        {/*    </a>*/}
-                        {/*)}*/}
 
                         {currentPath !== '/groceries' && (
                             <a
