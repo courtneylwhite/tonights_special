@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, screen, waitFor, act } from '@testing-library/react';
-import RecipeBox from '@/components/recipe/RecipeBox';
+import RecipeBox from '@/components/recipe/RecipeIndex';
 
 // Mock child components
 jest.mock('@/components/SearchBar', () => {
@@ -113,7 +113,7 @@ jest.mock('@/components/ScrollableContainer', () => {
 // Mock fetch
 global.fetch = jest.fn();
 
-describe('RecipeBox Component', () => {
+describe('RecipeIndex Component', () => {
     const mockRecipes = {
         'Desserts': {
             id: 1,

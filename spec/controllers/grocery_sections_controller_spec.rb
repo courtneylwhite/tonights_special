@@ -9,7 +9,7 @@ RSpec.describe GrocerySectionsController, type: :controller do
     context 'with valid parameters' do
       let(:valid_params) {
         {
-          grocery_section: attributes_for(:grocery_section, name: 'New Pantry')
+          grocery_section: attributes_for(:grocery_section, name: 'New GroceryIndex')
         }
       }
 
