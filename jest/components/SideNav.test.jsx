@@ -15,13 +15,24 @@ describe('SideNav', () => {
     const mockLocation = new URL('http://localhost:3000/recipes');
 
     beforeEach(() => {
+        // Mock window.location
         delete window.location;
         window.location = { ...mockLocation };
 
+        // Set up CSRF token
         document.head.innerHTML = '<meta name="csrf-token" content="test-token" />';
+
+        // Mock authentication by adding the meta tag
+        document.head.innerHTML += '<meta name="user-authenticated" content="true" />';
+
+        // Alternative: Mock cookies if you're using that authentication method
+        Object.defineProperty(document, 'cookie', {
+            writable: true,
+            value: '_your_app_session=test-session-token',
+        });
     });
 
-    it('renders hamburger menu button', () => {
+    it('renders hamburger menu button when authenticated', () => {
         render(<SideNav />);
         const menuButton = screen.getByRole('button', { name: 'Open menu' });
         expect(menuButton).toBeInTheDocument();
@@ -62,8 +73,14 @@ describe('SideNav', () => {
         expect(nav).toHaveClass('-translate-x-full');
     });
 
-    it('does not render on home page', () => {
+    it('does not render on home page even when authenticated', () => {
         window.location.pathname = '/';
+        const { container } = render(<SideNav />);
+        expect(container).toBeEmptyDOMElement();
+    });
+
+    it('does not render on sign-in page when authenticated', () => {
+        window.location.pathname = '/users/sign_in';
         const { container } = render(<SideNav />);
         expect(container).toBeEmptyDOMElement();
     });
@@ -76,8 +93,6 @@ describe('SideNav', () => {
         fireEvent.click(menuButton);
 
         expect(screen.queryByText('Recipes')).not.toBeInTheDocument();
-
-        // expect(screen.getByText('Grocery Lists')).toBeInTheDocument();
         expect(screen.getByText('Groceries')).toBeInTheDocument();
         expect(screen.getByText('Sign Out')).toBeInTheDocument();
     });
@@ -129,5 +144,14 @@ describe('SideNav', () => {
         });
 
         consoleSpy.mockRestore();
+    });
+
+    it('renders nothing when not authenticated', () => {
+        // Remove authentication
+        document.head.innerHTML = '<meta name="csrf-token" content="test-token" />';
+        document.cookie = '';
+
+        const { container } = render(<SideNav />);
+        expect(container).toBeEmptyDOMElement();
     });
 });
