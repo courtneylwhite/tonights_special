@@ -11,7 +11,7 @@
         margin: 0;
     }
 
-    /* Heading styles from Pantry component with specific sizes */
+    /* Heading styles from GroceryIndex component with specific sizes */
     h1, h2, h3, h4, h5, h6 {
         font-family: serif;
         font-style: italic;

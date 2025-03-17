@@ -1,5 +1,5 @@
 <div data-turbo="false">
-  <%= react_component("Pantry", {
+  <%= react_component("GroceryIndex", {
     groceries: @grouped_groceries.as_json,
     units: @units.map { |unit| { id: unit.id, name: unit.name } },
     key: Time.current.to_i

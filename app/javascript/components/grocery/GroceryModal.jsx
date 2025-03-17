@@ -196,7 +196,7 @@ const GroceryModal = ({
                     {!isAddingSectionMode ? (
                         <div>
                             <label htmlFor="grocery_section_id" className="block text-sm font-medium text-gray-300 mb-1">
-                                Pantry Section
+                                Grocery Section
                             </label>
                             <select
                                 id="grocery_section_id"

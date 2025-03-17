@@ -54,7 +54,13 @@ class GroceriesController < ApplicationController
     )
 
     if creator.call
-      render json: creator.grocery, status: :created
+      # Include grocery section name in the response
+      grocery_with_section = creator.grocery.as_json
+      grocery_with_section["grocery_section"] = {
+        name: creator.grocery.grocery_section&.name
+      }
+
+      render json: grocery_with_section, status: :created
     else
       Rails.logger.warn("Creation failed: #{creator.error_messages}")
       render json: {

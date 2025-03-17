@@ -29,7 +29,7 @@ describe('GroceryModal', () => {
         expect(screen.getByLabelText('Item Name')).toBeInTheDocument();
         expect(screen.getByLabelText('Quantity')).toBeInTheDocument();
         expect(screen.getByLabelText('Unit')).toBeInTheDocument();
-        expect(screen.getByLabelText('Pantry Section')).toBeInTheDocument();
+        expect(screen.getByLabelText('Grocery Section')).toBeInTheDocument();
     });
 
     it('handles form submission successfully', async () => {
@@ -45,7 +45,7 @@ describe('GroceryModal', () => {
         fireEvent.change(screen.getByLabelText('Item Name'), { target: { value: 'Apple' } });
         fireEvent.change(screen.getByLabelText('Quantity'), { target: { value: '5' } });
         fireEvent.change(screen.getByLabelText('Unit'), { target: { value: '1' } });
-        fireEvent.change(screen.getByLabelText('Pantry Section'), { target: { value: '1' } });
+        fireEvent.change(screen.getByLabelText('Grocery Section'), { target: { value: '1' } });
 
         fireEvent.submit(screen.getByRole('button', { name: /create item/i }));
 
@@ -101,7 +101,7 @@ describe('GroceryModal', () => {
             fireEvent.change(screen.getByLabelText('Item Name'), { target: { value: 'Apple' } });
             fireEvent.change(screen.getByLabelText('Quantity'), { target: { value: '5' } });
             fireEvent.change(screen.getByLabelText('Unit'), { target: { value: '1' } });
-            fireEvent.change(screen.getByLabelText('Pantry Section'), { target: { value: '1' } });
+            fireEvent.change(screen.getByLabelText('Grocery Section'), { target: { value: '1' } });
         };
 
         it('displays error when server returns specific error message', async () => {
