@@ -1,14 +1,14 @@
 # config/initializers/sidekiq.rb
 
 # For Sidekiq 8.0.1 compatibility
-redis_url = ENV['REDIS_URL'] || 'redis://localhost:6379/0'
+redis_url = ENV["REDIS_URL"] || "redis://localhost:6379/0"
 
 Sidekiq.configure_server do |config|
   config.redis = {
     url: redis_url,
     network_timeout: 5,
     pool_timeout: 5,
-    size: ENV.fetch('SIDEKIQ_CONCURRENCY', 5).to_i + 2 # Proper parameter is 'size', not 'pool_size'
+    size: ENV.fetch("SIDEKIQ_CONCURRENCY", 5).to_i + 2 # Proper parameter is 'size', not 'pool_size'
   }
 
   # Error handlers

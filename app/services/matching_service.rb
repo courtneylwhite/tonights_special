@@ -48,11 +48,11 @@ class MatchingService
       singular = name.gsub(/ies$/, "y").gsub(/es$/, "").gsub(/s$/, "")
       plural = if name.end_with?("y")
                  name.chomp("y") + "ies"
-               elsif name.end_with?("ch", "sh", "ss", "x", "z")
+      elsif name.end_with?("ch", "sh", "ss", "x", "z")
                  name + "es"
-               else
+      else
                  name + "s"
-               end
+      end
 
       user.groceries.where("LOWER(name) = ? OR LOWER(name) = ?", singular, plural).first
     end
