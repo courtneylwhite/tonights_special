@@ -3,7 +3,8 @@ require 'rails_helper'
 
 RSpec.describe Users::RegistrationsController, type: :controller do
   before do
-    @request.env["devise.mapping"] = Devise.mappings[:user]
+    # IMPORTANT: Use request rather than @request
+    request.env["devise.mapping"] = Devise.mappings[:user]
   end
 
   describe 'POST #create' do

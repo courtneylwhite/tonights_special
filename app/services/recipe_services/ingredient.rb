@@ -70,12 +70,6 @@ module RecipeServices
       end
     end
 
-    # This method is no longer used directly, but kept for reference
-    def match_with_grocery(ingredient)
-      grocery = MatchingService.match_ingredient_to_grocery(user, ingredient.name)
-      ingredient.update(grocery_id: grocery.id) if grocery
-    end
-
     def find_unit_for_ingredient(ingredient_data)
       if ingredient_data[:unit_id].present?
         unit = Unit.find_by(id: ingredient_data[:unit_id])

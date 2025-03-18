@@ -237,8 +237,8 @@ RSpec.describe RecipeServices::Updater, type: :service do
         allow(ingredient_service).to receive(:create_ingredients).and_return({
                                                                                success: true,
                                                                                ingredients: [
-                                                                                 double('RecipeIngredient', name: 'eggs', quantity: 2),
-                                                                                 double('RecipeIngredient', name: 'milk', quantity: 1)
+                                                                                 double('RecipeIngredient', id: 101, name: 'eggs', quantity: 2),
+                                                                                 double('RecipeIngredient', id: 102, name: 'milk', quantity: 1)
                                                                                ]
                                                                              })
 
@@ -261,9 +261,11 @@ RSpec.describe RecipeServices::Updater, type: :service do
 
       context 'when ingredient creation fails' do
         it 'returns warnings but still succeeds when errors are minor' do
+          # Return an empty ingredients array but with success: false
           allow(ingredient_service).to receive(:create_ingredients).and_return({
                                                                                  success: false,
-                                                                                 errors: [ 'Unit not found, using default' ]
+                                                                                 ingredients: [],
+                                                                                 errors: [ 'Unit not found, using default' ] # This is a minor error
                                                                                })
 
           result = described_class.new(
@@ -275,10 +277,11 @@ RSpec.describe RecipeServices::Updater, type: :service do
             new_ingredients_attributes
           ).update
 
-          # Since errors don't contain "Error creating ingredient", we still succeed
+          # Since errors don't contain "Error creating ingredient", we should still succeed
           expect(result[:success]).to be true
           expect(result[:warnings].first).to include("Some ingredients could not be created")
         end
+
 
         it 'returns failure and error messages for major errors' do
           allow(ingredient_service).to receive(:create_ingredients).and_return({
@@ -329,7 +332,7 @@ RSpec.describe RecipeServices::Updater, type: :service do
           double('IngredientService').tap do |service|
             allow(service).to receive(:create_ingredients).and_return({
                                                                         success: true,
-                                                                        ingredients: [ double('RecipeIngredient', name: 'vanilla extract') ]
+                                                                        ingredients: [ double('RecipeIngredient', id: 201, name: 'vanilla extract') ]
                                                                       })
           end
         )

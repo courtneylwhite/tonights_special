@@ -155,19 +155,25 @@ module RecipeServices
         ingredients_data
       ).create_ingredients
 
-      # Handle any errors - match the exact wording expected by tests
+      # Handle any errors
       unless ingredient_result[:success]
         @warnings << "Some ingredients could not be created: #{ingredient_result[:errors].join(', ')}"
 
-        # If there are significant errors that should trigger a rollback
-        if ingredient_result[:errors].any? { |e| e.include?("Error creating ingredient") }
+        # Only consider it a failure if there's a specific type of error
+        has_major_error = ingredient_result[:errors].any? { |e| e.include?("Error creating ingredient") }
+
+        if has_major_error
           @errors += ingredient_result[:errors]
           raise StandardError, "Error creating ingredients"
         end
       end
 
-      # Return the IDs of created ingredients
-      ingredient_result[:ingredients].map(&:id)
+      # Return the IDs of created ingredients (or an empty array if there are none)
+      if ingredient_result[:ingredients]&.any?
+        ingredient_result[:ingredients].map(&:id)
+      else
+        []
+      end
     end
   end
 end
