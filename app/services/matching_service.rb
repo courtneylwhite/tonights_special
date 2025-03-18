@@ -29,11 +29,6 @@ class MatchingService
       }
     end
 
-    def batch_match_ingredients(recipe_id)
-      # This method now simply enqueues a job instead of doing the work directly
-      ::RecipeBatchMatchingJob.perform_async(recipe_id)
-    end
-
     private
 
     def normalize_name(name)

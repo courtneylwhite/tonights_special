@@ -31,7 +31,6 @@ module GroceryServices
         end
       end
 
-      # Enqueue background job for matching after successful transaction
       if result && @grocery
         ::GroceryMatchingJob.perform_async(@grocery.id)
       end
