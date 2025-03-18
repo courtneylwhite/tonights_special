@@ -34,6 +34,11 @@ module RecipeServices
         end
       end
 
+      # After all ingredients are created, enqueue matching jobs
+      created_ingredients.each do |ingredient|
+        ::IngredientMatchingJob.perform_async(ingredient.id, user.id)
+      end
+
       if errors.empty?
         { success: true, ingredients: created_ingredients }
       else
@@ -59,18 +64,13 @@ module RecipeServices
         ingredient_attributes[:size] = ingredient_data[:size] if ingredient_data[:size].present?
         ingredient = recipe.recipe_ingredients.create!(ingredient_attributes)
 
-        begin
-          match_with_grocery(ingredient)
-        rescue => e
-          Rails.logger.error("Error matching grocery for #{ingredient.name}: #{e.message}")
-        end
-
         { success: true, ingredient: ingredient }
       rescue => e
         { success: false, errors: [ "Error creating ingredient #{ingredient_data[:name]}: #{e.message}" ] }
       end
     end
 
+    # This method is no longer used directly, but kept for reference
     def match_with_grocery(ingredient)
       grocery = MatchingService.match_ingredient_to_grocery(user, ingredient.name)
       ingredient.update(grocery_id: grocery.id) if grocery

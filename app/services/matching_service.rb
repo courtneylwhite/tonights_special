@@ -30,13 +30,8 @@ class MatchingService
     end
 
     def batch_match_ingredients(recipe_id)
-      recipe = Recipe.find(recipe_id)
-      user_id = recipe.user_id
-
-      recipe.recipe_ingredients.where(grocery_id: nil).each do |ingredient|
-        grocery = match_ingredient_to_grocery(User.find(user_id), ingredient.name)
-        ingredient.update(grocery_id: grocery.id) if grocery
-      end
+      # This method now simply enqueues a job instead of doing the work directly
+      ::RecipeBatchMatchingJob.perform_async(recipe_id)
     end
 
     private
@@ -53,11 +48,11 @@ class MatchingService
       singular = name.gsub(/ies$/, "y").gsub(/es$/, "").gsub(/s$/, "")
       plural = if name.end_with?("y")
                  name.chomp("y") + "ies"
-      elsif name.end_with?("ch", "sh", "ss", "x", "z")
+               elsif name.end_with?("ch", "sh", "ss", "x", "z")
                  name + "es"
-      else
+               else
                  name + "s"
-      end
+               end
 
       user.groceries.where("LOWER(name) = ? OR LOWER(name) = ?", singular, plural).first
     end
