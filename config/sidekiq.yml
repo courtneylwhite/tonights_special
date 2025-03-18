@@ -1,0 +1,15 @@
+# config/sidekiq.yml
+---
+:concurrency: 5
+:timeout: 30
+:queues:
+  - [matching, 2]
+  - [default, 1]
+
+:max_retries: 5
+:retry_intervals:
+  - 15
+  - 60
+  - 300
+  - 1800
+  - 3600
