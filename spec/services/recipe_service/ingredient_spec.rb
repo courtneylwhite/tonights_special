@@ -37,16 +37,39 @@ RSpec.describe RecipeServices::Ingredient do
       end
 
       it 'associates ingredients with existing groceries when available' do
-        service = described_class.new(recipe, user, ingredients_data)
-        result = service.create_ingredients
+        # Switch to inline mode to process jobs immediately
+        Sidekiq::Testing.inline! do
+          # Mock the MatchingService to return the expected groceries
+          # This simulates what would happen in the job
+          expect(MatchingService).to receive(:match_ingredient_to_grocery)
+                                       .with(user, 'flour')
+                                       .and_return(flour)
 
-        flour_ingredient = RecipeIngredient.find_by(name: 'flour')
-        sugar_ingredient = RecipeIngredient.find_by(name: 'sugar')
-        eggs_ingredient = RecipeIngredient.find_by(name: 'eggs')
+          expect(MatchingService).to receive(:match_ingredient_to_grocery)
+                                       .with(user, 'sugar')
+                                       .and_return(sugar)
 
-        expect(flour_ingredient.grocery).to eq(flour)
-        expect(sugar_ingredient.grocery).to eq(sugar)
-        expect(eggs_ingredient.grocery).to be_nil # No matching grocery
+          expect(MatchingService).to receive(:match_ingredient_to_grocery)
+                                       .with(user, 'eggs')
+                                       .and_return(nil)
+
+          service = described_class.new(recipe, user, ingredients_data)
+          result = service.create_ingredients
+
+          # Since we're in inline mode, jobs are processed immediately
+          # so the associations should be set after create_ingredients returns
+
+          flour_ingredient = RecipeIngredient.find_by(name: 'flour')
+          sugar_ingredient = RecipeIngredient.find_by(name: 'sugar')
+          eggs_ingredient = RecipeIngredient.find_by(name: 'eggs')
+
+          expect(flour_ingredient.grocery).to eq(flour)
+          expect(sugar_ingredient.grocery).to eq(sugar)
+          expect(eggs_ingredient.grocery).to be_nil # No matching grocery
+        end
+
+        # Reset back to fake mode
+        Sidekiq::Testing.fake!
       end
 
       it 'sets the correct quantities and units' do
@@ -296,17 +319,18 @@ RSpec.describe RecipeServices::Ingredient do
         { name: 'flour', quantity: 2, unit_name: 'cup' }
       ]
 
-      # Simulate an error in the MatchingService
-      expect(MatchingService).to receive(:match_ingredient_to_grocery).and_raise(StandardError.new("Database error"))
+      # Allow the job to be enqueued but it won't run in the test
+      # (using fake Sidekiq testing mode)
+      expect(IngredientMatchingJob).to receive(:perform_async).once
 
       service = described_class.new(recipe, user, ingredients_data)
       result = service.create_ingredients
 
-      # The ingredient should still be created, just without a grocery association
+      # The test is verifying that even if the background job fails later,
+      # the initial ingredient creation succeeds
       expect(result[:success]).to be true
       flour_ingredient = RecipeIngredient.find_by(name: 'flour')
       expect(flour_ingredient).not_to be_nil
-      expect(flour_ingredient.grocery_id).to be_nil
     end
 
     it 'handles non-numeric quantities' do

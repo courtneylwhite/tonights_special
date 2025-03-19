@@ -3,7 +3,9 @@ require 'rails_helper'
 
 RSpec.describe Users::SessionsController, type: :controller do
   before(:each) do
-    @request.env['devise.mapping'] = Devise.mappings[:user]
+    # This is critical - must set the right format and mapping
+    request.env["devise.mapping"] = Devise.mappings[:user]
+    @request.env["devise.mapping"] = Devise.mappings[:user]
   end
 
   describe 'POST #create' do
@@ -12,7 +14,10 @@ RSpec.describe Users::SessionsController, type: :controller do
 
     context 'with valid credentials' do
       before do
+        # Make sure the Devise mapping is explicitly set here too
+        @request.env["devise.mapping"] = Devise.mappings[:user]
         @request.env["HTTP_ACCEPT"] = "text/html"
+
 
         # Setup warden with more permissive stubs
         warden = double(Warden::Proxy)

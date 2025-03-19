@@ -54,3 +54,6 @@ EOL
 
 # Ignore coverage files
 coverage/
+
+# Ignore test output files
+/spec/examples.txt

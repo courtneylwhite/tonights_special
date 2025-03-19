@@ -31,6 +31,10 @@ module GroceryServices
         end
       end
 
+      if result && @grocery
+        ::GroceryMatchingJob.perform_async(@grocery.id)
+      end
+
       result
     end
 
@@ -61,7 +65,6 @@ module GroceryServices
       grocery = user.groceries.build(grocery_attributes)
 
       if grocery.save
-        MatchingService.match_grocery_to_ingredients(grocery)
         grocery
       else
         @errors += grocery.errors.full_messages

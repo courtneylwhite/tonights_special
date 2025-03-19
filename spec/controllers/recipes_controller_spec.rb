@@ -14,18 +14,22 @@ RSpec.describe RecipesController, type: :controller do
     )
   end
 
-  let(:grocery) { create(:grocery, name: "TestGrocery-#{SecureRandom.hex(4)}") }
+  let(:grocery) { create(:grocery, name: "TestGrocery-#{SecureRandom.hex(4)}", user: user) }
   let(:recipe) { create(:recipe, user: user, recipe_category: recipe_category) }
   let(:recipe_ingredient) do
     create(:recipe_ingredient,
            recipe: recipe,
            grocery: grocery,
            unit: unit,
-           name: "Test Ingredient #{SecureRandom.hex(4)}" # Add required name
+           name: "Test Ingredient #{SecureRandom.hex(4)}"
     )
   end
 
+  # Sign in the user before each test
   before do
+    # Setup the devise mapping before signing in - this is critical
+    @request.env["devise.mapping"] = Devise.mappings[:user]
+    request.env["devise.mapping"] = Devise.mappings[:user]
     sign_in user
   end
 

@@ -29,16 +29,6 @@ class MatchingService
       }
     end
 
-    def batch_match_ingredients(recipe_id)
-      recipe = Recipe.find(recipe_id)
-      user_id = recipe.user_id
-
-      recipe.recipe_ingredients.where(grocery_id: nil).each do |ingredient|
-        grocery = match_ingredient_to_grocery(User.find(user_id), ingredient.name)
-        ingredient.update(grocery_id: grocery.id) if grocery
-      end
-    end
-
     private
 
     def normalize_name(name)

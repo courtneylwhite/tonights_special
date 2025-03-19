@@ -17,13 +17,15 @@ module RecipeServices
 
     def update
       success = false
+      updated_ingredients = []
 
       ActiveRecord::Base.transaction do
         begin
           update_recipe
           delete_removed_ingredients if @deleted_ingredient_ids.present?
-          update_recipe_ingredients if @ingredients_attributes.present?
-          create_new_ingredients if @new_ingredients_attributes.present?
+          updated_ingredients = update_recipe_ingredients if @ingredients_attributes.present?
+          new_ingredients = create_new_ingredients if @new_ingredients_attributes.present?
+          updated_ingredients += new_ingredients if new_ingredients.is_a?(Array)
 
           success = true
         rescue StandardError => e
@@ -31,6 +33,13 @@ module RecipeServices
           @errors << "Failed to update recipe: #{e.message}"
 
           raise ActiveRecord::Rollback
+        end
+      end
+
+      # After successful transaction, enqueue matching jobs for updated ingredients
+      if success && updated_ingredients.any?
+        updated_ingredients.compact.each do |ingredient_id|
+          ::IngredientMatchingJob.perform_async(ingredient_id, @user.id)
         end
       end
 
@@ -77,6 +86,8 @@ module RecipeServices
     end
 
     def update_recipe_ingredients
+      updated_ingredient_ids = []
+
       @ingredients_attributes.each do |ingredient_attr|
         next unless ingredient_attr[:id].present?
 
@@ -97,18 +108,8 @@ module RecipeServices
           new_name = ingredient_attr[:name].present? ? ingredient_attr[:name].downcase : ""
           update_attrs[:name] = new_name
 
-          # If the name has changed, run the matching service to update the grocery_id
-          # Only try if we can access name on the ingredient (for tests)
-          begin
-            if ingredient.respond_to?(:name) && new_name.downcase != ingredient.name.downcase
-              # Try to find matching grocery using MatchingService
-              matching_grocery = MatchingService.match_ingredient_to_grocery(@user, new_name)
-              update_attrs[:grocery_id] = matching_grocery.id if matching_grocery
-            end
-          rescue => e
-            # Log the error but don't fail the update
-            Rails.logger.error("Error matching grocery for ingredient: #{e.message}")
-          end
+          # Name has changed, we'll do matching asynchronously
+          needs_matching = ingredient.respond_to?(:name) && new_name.downcase != ingredient.name.downcase
         end
 
         if ingredient_attr.key?(:preparation)
@@ -125,11 +126,16 @@ module RecipeServices
           @errors += ingredient.errors.full_messages
           raise StandardError, "Ingredient validation failed"
         end
+
+        # Add this ingredient ID to the list of updated ingredients
+        updated_ingredient_ids << ingredient.id
       end
+
+      updated_ingredient_ids
     end
 
     def create_new_ingredients
-      return if @new_ingredients_attributes.empty?
+      return [] if @new_ingredients_attributes.empty?
 
       # Convert the new ingredient attributes to the format expected by RecipeServices::Ingredient
       ingredients_data = @new_ingredients_attributes.map do |ingredient_attr|
@@ -149,15 +155,24 @@ module RecipeServices
         ingredients_data
       ).create_ingredients
 
-      # Handle any errors - match the exact wording expected by tests
+      # Handle any errors
       unless ingredient_result[:success]
         @warnings << "Some ingredients could not be created: #{ingredient_result[:errors].join(', ')}"
 
-        # If there are significant errors that should trigger a rollback
-        if ingredient_result[:errors].any? { |e| e.include?("Error creating ingredient") }
+        # Only consider it a failure if there's a specific type of error
+        has_major_error = ingredient_result[:errors].any? { |e| e.include?("Error creating ingredient") }
+
+        if has_major_error
           @errors += ingredient_result[:errors]
           raise StandardError, "Error creating ingredients"
         end
+      end
+
+      # Return the IDs of created ingredients (or an empty array if there are none)
+      if ingredient_result[:ingredients]&.any?
+        ingredient_result[:ingredients].map(&:id)
+      else
+        []
       end
     end
   end
