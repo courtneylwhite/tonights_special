@@ -1,4 +1,4 @@
-require 'redis-client'
+require "redis-client"
 
 # Fetch Redis URL from environment, with a local fallback
 redis_url = ENV["REDIS_URL"] || "redis://localhost:6379/0"
