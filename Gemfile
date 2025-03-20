@@ -72,4 +72,5 @@ group :test do
   gem "rails-controller-testing"
   gem "shoulda-matchers", "~> 6.4"
   gem "simplecov", require: false
+  gem 'database_cleaner-active_record'
 end
