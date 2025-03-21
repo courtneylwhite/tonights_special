@@ -108,12 +108,11 @@ module RecipeServices
 
     def create_new_unit(unit_name)
       category = UtilityService.determine_unit_category(unit_name)
-      abbreviation = unit_name.length > 3 ? unit_name[0..2] : unit_name
 
       Unit.create!(
         name: unit_name,
         category: category,
-        abbreviation: abbreviation.strip
+        abbreviation: unit_name
       )
     rescue => e
       Rails.logger.error("Error creating new unit '#{unit_name}': #{e.message}")
