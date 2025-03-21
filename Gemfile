@@ -20,7 +20,7 @@ gem "cssbundling-rails"
 gem "jbuilder"
 gem "sidekiq", "~> 8.0.1"
 gem "redis", "~> 5.0"
-gem "redis-client", "~> 0.23.2"
+gem "redis-client", "~> 0.24.0"
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 
