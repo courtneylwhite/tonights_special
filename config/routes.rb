@@ -41,4 +41,6 @@ Rails.application.routes.draw do
       post :bulk_update
     end
   end
+
+  mount ActionMailbox::Engine => "/rails/action_mailbox"
 end
