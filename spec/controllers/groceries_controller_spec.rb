@@ -16,7 +16,7 @@ RSpec.describe GroceriesController, type: :controller do
   }
 
   before do
-    sign_in user
+    login(user)
   end
 
   # Original tests from the previous spec file
@@ -389,6 +389,44 @@ RSpec.describe GroceriesController, type: :controller do
 
         expect(response).to have_http_status(:internal_server_error)
         expect(JSON.parse(response.body)['error']).to eq('An unexpected error occurred')
+      end
+    end
+
+    describe 'POST #create with duplicate validation' do
+      it 'allows creating a grocery with the same name for a different user' do
+        # Create a grocery for the first user
+        first_grocery = create(:grocery,
+                               name: 'duplicate apple',
+                               user: user,
+                               grocery_section: grocery_section,
+                               unit: unit
+        )
+
+        # Create another user and their associated objects
+        other_user = create(:user)
+        other_grocery_section = create(:grocery_section, user: other_user)
+        other_unit = create(:unit)
+
+        # Prepare duplicate attributes for other user
+        duplicate_attributes = {
+          grocery: {
+            name: 'Duplicate Apple',
+            quantity: 3,
+            unit_id: other_unit.id,
+            grocery_section_id: other_grocery_section.id
+          }
+        }
+
+        # Sign out current user and log in other user using our helper
+        sign_out user
+        login(other_user)
+
+        # Try to create the duplicate for other user
+        expect {
+          post :create, params: duplicate_attributes
+        }.to change(Grocery, :count).by(1)
+
+        expect(response).to have_http_status(:created)
       end
     end
 

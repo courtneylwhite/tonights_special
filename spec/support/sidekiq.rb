@@ -1,5 +1,7 @@
 require 'sidekiq/testing'
 
+Sidekiq.logger.level = Logger::ERROR
+
 # Helper methods for Sidekiq testing
 module SidekiqHelpers
   # Process all pending jobs

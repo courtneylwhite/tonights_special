@@ -76,9 +76,6 @@ RSpec.describe "Recipes Integration", type: :request do
         expect(recipe.instructions).to eq("Blend ingredients together")
         expect(recipe.recipe_ingredients.count).to eq(3)
 
-        # Debug information
-        puts "Actual ingredient names: #{recipe.recipe_ingredients.pluck(:name).inspect}"
-
         # Find ingredients by name
         apple_ingredient = recipe.recipe_ingredients.find { |ri| ri.name.include?(@apple_name) }
         milk_ingredient = recipe.recipe_ingredients.find { |ri| ri.name.include?(@milk_name) }
@@ -237,8 +234,6 @@ RSpec.describe "Recipes Integration", type: :request do
       recipe = Recipe.find(json_response["recipe"]["id"])
 
       ingredients = recipe.recipe_ingredients
-
-      puts "Complex recipe ingredients: #{ingredients.pluck(:name).inspect}"
 
       apple_ingredient = ingredients.find { |ri| ri.name.include?(@apple_name) }
       milk_ingredient = ingredients.find { |ri| ri.name.include?(@milk_name) }
