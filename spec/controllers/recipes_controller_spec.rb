@@ -25,12 +25,8 @@ RSpec.describe RecipesController, type: :controller do
     )
   end
 
-  # Sign in the user before each test
   before do
-    # Setup the devise mapping before signing in - this is critical
-    @request.env["devise.mapping"] = Devise.mappings[:user]
-    request.env["devise.mapping"] = Devise.mappings[:user]
-    sign_in user
+    login(user)
   end
 
   describe "GET #index" do

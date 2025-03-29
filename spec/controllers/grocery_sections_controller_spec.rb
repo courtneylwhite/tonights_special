@@ -4,10 +4,7 @@ RSpec.describe GrocerySectionsController, type: :controller do
   let(:user) { create(:user) }
 
   before do
-    # Setup the devise mapping before signing in - this is critical
-    @request.env["devise.mapping"] = Devise.mappings[:user]
-    request.env["devise.mapping"] = Devise.mappings[:user]
-    sign_in user
+    login(user)
   end
 
   describe 'POST #create' do

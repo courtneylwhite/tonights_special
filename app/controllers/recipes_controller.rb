@@ -43,7 +43,7 @@ class RecipesController < ApplicationController
                                     recipe_ingredients: [ :grocery, :unit ])
                           .find(params[:id])
 
-    @units = Unit.all.order(:category, :name)
+    @units = Unit.all.order(name: :asc)
     @recipe_categories = current_user.recipe_categories.order(display_order: :asc)
     @recipe_ingredients = @recipe.recipe_ingredients.map do |ri|
       {
