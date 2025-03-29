@@ -8,7 +8,7 @@ class GroceriesController < ApplicationController
     @groceries = current_user.groceries.includes(:grocery_section, :unit)
     @grocery_sections = current_user.grocery_sections.order(display_order: :asc)
     @grouped_groceries = GroceryPresenter.grouped_groceries(@groceries, @grocery_sections)
-    @units = Unit.all
+    @units = Unit.all.order(name: :asc)
 
     respond_to do |format|
       format.html # This will render your index.html.erb
@@ -19,7 +19,7 @@ class GroceriesController < ApplicationController
   def show
     @grocery = current_user.groceries.includes(:unit, :grocery_section).find(params[:id])
     @grocery_sections = current_user.grocery_sections.order(display_order: :asc)
-    @units = Unit.all
+    @units = Unit.all.order(name: :asc)
 
     @grocery_data = @grocery.as_json(include: {
       unit: { only: [ :id, :name ] },
