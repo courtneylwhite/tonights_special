@@ -21,6 +21,10 @@ module TonightsSpecial
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use ActionDispatch::Session::CookieStore
 
+    config.action_mailbox.routing = {
+      "receipts@trytonightsspecial.com" => "receipts"
+    }
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files
