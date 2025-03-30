@@ -7,7 +7,6 @@ RSpec.describe Users::SessionsController, type: :controller do
 
     context 'with valid credentials' do
       it 'signs in the user and redirects to groceries path' do
-        # Use a real sign-in instead of stubbing Warden
         post :create, params: {
           user: {
             email: user.email,

@@ -46,6 +46,15 @@ RSpec.configure do |config|
     Warden.test_reset!
   end
 
+  # Automatically set up Devise mappings for controller tests
+  config.before(:each, type: :controller) do
+    # Check if the controller is in the Users namespace
+    if defined?(controller) && controller.present? && controller.class.name.start_with?('Users::')
+      # Set up Devise mapping
+      @request.env["devise.mapping"] = Devise.mappings[:user]
+    end
+  end
+
   # Filter lines from Rails gems in backtraces
   config.filter_rails_from_backtrace!
   # Uncomment to filter specific gems from backtraces

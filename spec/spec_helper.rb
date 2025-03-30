@@ -33,4 +33,22 @@ RSpec.configure do |config|
 
   # Disable RSpec exposing methods globally on `Module` and `main`
   config.disable_monkey_patching!
+
+  # Add metadata to Devise controller specs to help with debugging
+  config.define_derived_metadata(file_path: %r{/spec/controllers/users/}) do |metadata|
+    metadata[:devise_controller] = true
+  end
+
+  # Debugging for Devise controller specs
+  config.after(:each, devise_controller: true) do |example|
+    if example.exception
+      puts "\n*** Devise Controller Spec Failed ***"
+      puts "Controller: #{controller.class.name}"
+      puts "Action: #{example.metadata[:description]}"
+      puts "Request env: #{request.env['devise.mapping'] ? 'Has devise.mapping' : 'MISSING devise.mapping!'}"
+      puts "Response status: #{response.status}"
+      puts "Response body sample: #{response.body[0..100]}..."
+      puts "*******************************\n"
+    end
+  end
 end
